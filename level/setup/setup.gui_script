@@ -16,7 +16,7 @@ function init( self )
 
 	local callsign = callsigns[ math.random( 1, #callsigns ) ]
 	self.txtfield = self.form:addTextField( "callsign", 200, 508, 400, 40, 
-		function() end, 
+	function() callsign = self.txtfield.value end, 
 		callsign
 	)
 

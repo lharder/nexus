@@ -24,7 +24,7 @@ function display( self )
 				end, 
 				callsign 
 			)
-			-- checkbox:check( true )
+			checkbox:check( true )
 		end
 	end
 end
