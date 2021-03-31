@@ -22,21 +22,6 @@ function ArrayList:slice( i, j )
 	return ls
 end
 
-function ArrayList:remove( value )
-	-- messes up the order! 
-	-- Is fast, however...
-	local arr_size = #self
-	local i = 1
-	while i <= arr_size do
-		if self[ i ] == value then
-			self[ i ] = self[ arr_size ]
-			self[ arr_size ] = nil
-			arr_size = arr_size - 1
-		else
-			i = i + 1
-		end
-	end
-end
 
 function ArrayList:length()
 	return #self

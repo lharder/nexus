@@ -25,7 +25,7 @@ local function updateRemote( self, dt )
 
 	if 	lua.approximates( self.pos.x, self.targetPos.x, 2 ) and
 		lua.approximates( self.pos.y, self.targetPos.y, 2 ) then
-		pprint( self.gid .. " reached pos" )
+		-- pprint( self.gid .. " reached pos" )
 		self.targetPos = nil
 		self.dir.x = 0
 		self.dir.y = 0
@@ -46,8 +46,10 @@ local function updateManual( self, dt )
 	go.set_position( self.pos )
 
 	if( self.isLocalHero ) then 
+		-- Distance covered before a new position is transmitted 
+		-- to the other clients: depends on go's speed!
 		self.dist = math.abs( vmath.length( self.pos - self.oldPos ) )
-		if self.dist >= 2 then
+		if self.dist >= 1 then
 			local cmd = Commands.newSetPlayerPos( self.gid, self.pos )
 			GAME.client:sendToOtherClients( cmd )
 		end
@@ -59,11 +61,19 @@ end
 local function parse( self, message )
 	if message.meta.type == Commands.SET_PLAYER_POS then
 		if message.attrs.pos then 
-			pprint( "Setting player POS for " .. self.gid )
-
+			-- Target's position is probably outdated when received here 
+			-- already. To compensate, assume that target has continued to 
+			-- move in the same direction: calcluate direction and add a
+			-- custom factor depending on the network latency
 			self.targetPos = message.attrs.pos
 			self.dir = vmath.normalize( self.targetPos - self.pos )
 			self.targetPos = self.targetPos + self.dir * self.speed * 0,06
+
+			-- Honestly: not completely understood. When moving into position
+			-- diagonally, the remote object is slower than the original.
+			-- Apparently, the movement is "up" then "right", not "up right"
+			-- most of the times because of interpolation. Compensate by 
+			-- higher speed (diagonal = 1.4 steps length instead of 2)
 			if self.dir.x == 0 or self.dir.y == 0 then
 				self.speed = self.origSpeed
 			else
@@ -114,6 +124,7 @@ end
 function on_message( self, message_id, message, sender )
 	if message_id == MSG_ON_FIRST_TICK then 
 		-- get my global id, does not work on init()
+		-- cannot pass in string params on factory.create...
 		self.gid = GAME.client.registry:getGlobalId( go.get_id() )
 
 	elseif message_id == GAME.MSG_EXEC_CMD then 
