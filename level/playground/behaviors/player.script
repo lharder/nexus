@@ -23,8 +23,8 @@ local function updateRemote( self, dt )
 	self.pos.y = self.pos.y + self.dir.y * self.speed * dt
 	go.set_position( self.pos )
 
-	if 	lua.approximates( self.pos.x, self.targetPos.x, 3 ) and
-	lua.approximates( self.pos.y, self.targetPos.y, 3 ) then
+	if 	lua.approximates( self.pos.x, self.targetPos.x, 2 ) and
+		lua.approximates( self.pos.y, self.targetPos.y, 2 ) then
 		pprint( self.gid .. " reached pos" )
 		self.targetPos = nil
 		self.dir.x = 0
@@ -46,7 +46,8 @@ local function updateManual( self, dt )
 	go.set_position( self.pos )
 
 	if( self.isLocalHero ) then 
-		if math.abs( vmath.length( self.pos - self.oldPos ) ) > 2 then
+		self.dist = math.abs( vmath.length( self.pos - self.oldPos ) )
+		if self.dist >= 2 then
 			local cmd = Commands.newSetPlayerPos( self.gid, self.pos )
 			GAME.client:sendToOtherClients( cmd )
 		end
