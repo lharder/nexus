@@ -1,0 +1,30 @@
+local callsigns = {}
+
+callsigns[  1 ] = "Maverick"
+callsigns[  2 ] = "Joker"
+callsigns[  3 ] = "Ace"
+callsigns[  4 ] = "Paladin"
+callsigns[  5 ] = "Thunder"
+callsigns[  6 ] = "Striker"
+callsigns[  7 ] = "Iceman"
+callsigns[  8 ] = "Avenger"
+callsigns[  9 ] = "Striker"
+callsigns[ 10 ] = "Hunter"
+callsigns[ 11 ] = "Marksman"
+callsigns[ 12 ] = "Gambler"
+callsigns[ 13 ] = "Dragon"
+callsigns[ 14 ] = "Tigershark"
+callsigns[ 15 ] = "Sovereign"
+callsigns[ 16 ] = "Sentinel"
+callsigns[ 17 ] = "Apache"
+callsigns[ 18 ] = "Hurricane"
+callsigns[ 19 ] = "Hawkeye"
+callsigns[ 20 ] = "Eagle"
+callsigns[ 21 ] = "Torch"
+callsigns[ 22 ] = "Intruder"
+callsigns[ 23 ] = "Scoundrel"
+callsigns[ 24 ] = "Rogue"
+callsigns[ 25 ] = "Banshee"
+
+
+return callsigns

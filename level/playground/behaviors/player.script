@@ -1,0 +1,107 @@
+local Events = require( "level.playground.events" )
+local Commands = require( "level.playground.commands" )
+local lua = require( "deflibs.lualib" )
+
+go.property( "speed", 0 )
+go.property( "isLocalHero", false )
+
+
+local MSG_ON_FIRST_TICK = hash( "firsttick" )
+
+local LEFT = hash( "left" )
+local RIGHT = hash( "right" )
+local UP = hash( "up" )
+local DOWN = hash( "down" )
+
+
+local function parse( self, message )
+	if message.meta.type == Commands.SET_PLAYER_POS then
+		if message.attrs.pos then 
+			pprint( "Setting player POS for " .. self.gid )
+			
+			self.targetPos = message.attrs.pos
+			self.dir = vmath.normalize( self.targetPos - self.pos )
+			self.targetPos = self.targetPos + self.dir * self.speed * 0,06
+		end
+	end
+end
+
+
+function init( self )
+	self.dir = vmath.vector3()
+
+	msg.post( ".", MSG_ON_FIRST_TICK )
+end
+
+
+function on_input( self, action_id, action )
+	if action_id == LEFT then
+		if action.pressed then self.dir.x = -1 end
+		if action.released then self.dir.x = 0 end
+	end
+	if action_id == RIGHT then
+		if action.pressed then self.dir.x =  1 end
+		if action.released then self.dir.x = 0 end
+	end
+	if action_id == UP then
+		if action.pressed then self.dir.y = 1 end
+		if action.released then self.dir.y = 0 end
+	end
+	if action_id == DOWN then
+		if action.pressed then self.dir.y = -1 end
+		if action.released then self.dir.y = 0 end
+	end
+end
+
+
+function update( self, dt )
+	if self.targetPos == nil then
+		-- no target selected (by a remote player), so it is this
+		-- gameobject that must react to input and transmit positions
+		self.pos = go.get_position()
+		self.oldPos = go.get_position()
+		
+		self.pos = go.get_position()
+		self.pos.x = self.pos.x + self.dir.x * self.speed * dt
+		self.pos.y = self.pos.y + self.dir.y * self.speed * dt
+		go.set_position( self.pos )
+
+		if( self.isLocalHero ) then 
+			if math.abs( vmath.length( self.pos - self.oldPos ) ) > 3 then
+				local cmd = Commands.newSetPlayerPos( self.gid, self.pos )
+				GAME.client:sendToOtherClients( cmd )
+			end
+		end
+
+	else
+		-- Move towards a target in a straight line. Target is
+		-- provided by remote player, this is only a drone gameobject
+		self.pos = go.get_position()
+		self.dir = vmath.normalize( self.targetPos - self.pos )
+		self.pos.x = self.pos.x + self.dir.x * self.speed * dt
+		self.pos.y = self.pos.y + self.dir.y * self.speed * dt
+		go.set_position( self.pos )
+
+		if 	lua.approximates( self.pos.x, self.targetPos.x, 3 ) and
+			lua.approximates( self.pos.y, self.targetPos.y, 3 ) then
+				pprint( self.gid .. " reached pos" )
+				self.targetPos = nil
+				self.dir.x = 0
+				self.dir.y = 0
+		end
+	end
+end
+
+
+function on_message( self, message_id, message, sender )
+	if message_id == MSG_ON_FIRST_TICK then 
+		-- get my global id, does not work on init()
+		self.gid = GAME.client.registry:getGlobalId( go.get_id() )
+
+	elseif message_id == GAME.MSG_EXEC_CMD then 
+		parse( self, message )
+	end
+end
+
+
+

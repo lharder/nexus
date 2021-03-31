@@ -1,0 +1,61 @@
+local lua = require( "deflibs.lualib" )
+local Commands = require( "level.playground.commands" )
+local Events = require( "level.playground.events" )
+
+go.property( "targetPos", vmath.vector3() )
+go.property( "speed", 0 )
+
+
+local function parse( self, message )
+	if message.meta.type == Commands.MOVE_TO then
+		self.targetPos = message.attrs.pos
+	end
+end
+
+
+function init( self )
+	self.nextSendTime = socket.gettime()
+	
+	-- beware: go is created at this point: the registry does not know about it yet
+	-- So, at this point no globalID is available yet! Takes one tick!
+	-- Does NOT work: self.gid = GAME.client.registry:getGlobalId( go.get_id() )
+end
+
+
+function on_message( self, message_id, message, sender )
+	if message_id == GAME.MSG_EXEC_CMD then 
+		parse( self, message )
+	end
+end
+
+
+function update( self, dt )
+	if self.targetPos ~= nil then
+		-- Move towards target in a straight line
+		self.pos = go.get_position()
+		self.dir = vmath.normalize( self.targetPos - self.pos )
+		self.pos.x = self.pos.x + self.dir.x * self.speed * dt
+		self.pos.y = self.pos.y + self.dir.y * self.speed * dt
+		go.set_position( self.pos )
+
+		-- target reached? Then inform server (and receive a new one from there)
+		if 	lua.approximates( self.pos.x, self.targetPos.x, 4 ) and
+			lua.approximates( self.pos.y, self.targetPos.y, 4 ) and 
+			socket.gettime() > self.nextSendTime then 
+
+			if self.gid == nil then 
+				self.gid = GAME.client.registry:getGlobalId( go.get_id() )
+			end
+
+			-- send "position reached" to server
+			local evt = Events.newPositionReached( self.gid, self.pos )
+			-- allow for 1/2 sec to receive an answer before transmitting again
+			self.nextSendTime = socket.gettime() + .5
+			GAME.client:sendToServer( evt )
+
+			self.targetPos = nil
+		end
+		
+	end
+end
+
