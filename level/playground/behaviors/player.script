@@ -46,7 +46,7 @@ local function updateManual( self, dt )
 	go.set_position( self.pos )
 
 	if( self.isLocalHero ) then 
-		if math.abs( vmath.length( self.pos - self.oldPos ) ) > 3 then
+		if math.abs( vmath.length( self.pos - self.oldPos ) ) > 2 then
 			local cmd = Commands.newSetPlayerPos( self.gid, self.pos )
 			GAME.client:sendToOtherClients( cmd )
 		end
@@ -59,10 +59,15 @@ local function parse( self, message )
 	if message.meta.type == Commands.SET_PLAYER_POS then
 		if message.attrs.pos then 
 			pprint( "Setting player POS for " .. self.gid )
-			
+
 			self.targetPos = message.attrs.pos
 			self.dir = vmath.normalize( self.targetPos - self.pos )
 			self.targetPos = self.targetPos + self.dir * self.speed * 0,06
+			if self.dir.x == 0 or self.dir.y == 0 then
+				self.speed = self.origSpeed
+			else
+				self.speed = self.origSpeed * 1.4
+			end
 		end
 	end
 end
@@ -70,7 +75,8 @@ end
 
 function init( self )
 	self.dir = vmath.vector3()
-
+	self.origSpeed = self.speed
+	
 	msg.post( ".", MSG_ON_FIRST_TICK )
 end
 
