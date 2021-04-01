@@ -54,7 +54,7 @@ function Server:update( dt )
 			self.nextSendTime = self.now + SEND_INTERVAL
 			-- send out everything in the queue
 			for _, evt in ipairs( self.queue ) do
-				-- pprint( "Server " .. GAME.meHost.ip .. " sending:  " .. getCmdEvtName( evt ) .. " to " .. evt:getIP() )
+				-- pprint( "Server " .. GAME.meHost.ip .. " sending:  " .. Event.getName( evt ) .. " to " .. evt:getIP() )
 				self.srv.send( evt:serialize(), evt:getIP(), GAME.CLIENT_PORT )
 				self.queue = {}
 			end

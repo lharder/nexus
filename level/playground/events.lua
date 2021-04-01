@@ -83,7 +83,7 @@ end
 function Events.getName( evt )
 	-- no need to send these strings over the
 	-- wire, but useful for debugging....
-	return( Event.names[ evt:getType() ] )
+	return( Events.names[ evt:getType() ] )
 end
 
 return Events

@@ -22,24 +22,24 @@ function Client.new()
 	
 	this.indexOfTypes = {}
 
-	local cmd 
+	local evt 
 	local url
 	local id
 	this.srv = udp.create( function( data, ip, port )
 		assert( data, "Payload must be available in request!" )
 		
-		cmd = Envelope.deserialize( data )
-		-- pprint( "Client " .. GAME.meHost.ip .. " received: " .. Event.getName( cmd ) .. " from " .. ip ) 
+		evt = Envelope.deserialize( data )
+		pprint( "Client " .. GAME.meHost.ip .. " received: " .. Event.getName( evt ) .. " from " .. ip ) 
 
-		url = cmd:getUrl()
+		url = evt:getUrl()
 		-- if no absolute url is available, it must be a global id: 
 		-- replace globalId with local url
 		if url:find( ":/", 1, true ) == nil then 
 			id = GAME.client.registry:getClientId( url )
-			cmd:setUrl( msg.url( nil, id, nil ) )
+			evt:setUrl( msg.url( nil, id, nil ) )
 		end
 		
-		msg.post( cmd:getUrl(), GAME.MSG_EXEC_CMD, cmd:toTable() )
+		msg.post( evt:getUrl(), GAME.MSG_EXEC_CMD, evt:toTable() )
 			
 	end, GAME.CLIENT_PORT )
 

@@ -2,10 +2,10 @@ local RobotBehavior = {}
 local Events = require( "level.playground.events" )
 
 
-local function getNewTargetCmd( self )
+local function getNewTargetEvt( self )
 	local pos = vmath.vector3( math.random( 100, 1000 ), math.random( 50, 600 ), .5 )
-	local cmd = Events.newMoveTo( self.gid, pos )
-	return cmd
+	local evt = Events.newMoveTo( self.gid, pos )
+	return evt
 end
 
 
@@ -15,7 +15,7 @@ function RobotBehavior.new( gid )
 
 	
 	function this:init( key )
-		GAME.server:sendToClients( getNewTargetCmd( self ) )
+		GAME.server:sendToClients( getNewTargetEvt( self ) )
 	end
 	
 
@@ -25,7 +25,7 @@ function RobotBehavior.new( gid )
 
 	function this:onmessage( evt, ip, port )
 		-- pprint( evt:getUrl() )
-		GAME.server:sendToClients( getNewTargetCmd( this ) )
+		GAME.server:sendToClients( getNewTargetEvt( this ) )
 	end
 
 	

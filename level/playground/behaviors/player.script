@@ -50,7 +50,7 @@ local function updateManual( self, dt )
 		self.dist = math.abs( vmath.length( self.pos - self.oldPos ) )
 		if self.dist >= 1 then
 			local evt = Events.newSetPlayerPos( self.gid, self.pos )
-			GAME.client:sendToOtherClients( cmd )
+			GAME.client:sendToOtherClients( evt )
 		end
 	end
 end
