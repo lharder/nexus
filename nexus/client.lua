@@ -29,7 +29,7 @@ function Client.new()
 		assert( data, "Payload must be available in request!" )
 		
 		evt = Envelope.deserialize( data )
-		pprint( "Client " .. GAME.meHost.ip .. " received: " .. Event.getName( evt ) .. " from " .. ip ) 
+		-- pprint( "Client " .. GAME.meHost.ip .. " received: " .. Events.getName( evt ) .. " from " .. ip ) 
 
 		url = evt:getUrl()
 		-- if no absolute url is available, it must be a global id: 
@@ -113,9 +113,6 @@ function Client:update()
 		-- pprint( "Queue: " .. #self.queue )
 		for _, evt in ipairs( self.queue ) do
 			-- pprint( "Client " .. GAME.meHost.ip .. " sending:  " .. Event.getName( evt ) .. " to " .. evt:getIP() .. ":" .. evt:getPort() )
-			if evt:getPort() == nil then
-				pprint(  "oops")
-			end
 			self.srv.send( evt:serialize(), evt:getIP(), evt:getPort() )
 			self.queue = {}
 			self.indexOfTypes = {}

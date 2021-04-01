@@ -28,12 +28,12 @@ function Server.new()
 		
 		-- incoming event from one of the clients
 		local evt = Envelope.deserialize( data )
-		pprint( "Server " .. GAME.meHost.ip .. " received: " .. Events.getName( evt ) )
+		-- pprint( "Server " .. GAME.meHost.ip .. " received: " .. Events.getName( evt ) )
 		
 		-- events contain the gid of the gameobject emitting this event as url
 		local gid = evt:getUrl()
 		if this.personalities[ gid ] then 
-			pprint( GAME.meHost.ip .. ".onmessage( " .. Events.getName( evt ) .. " ) ) to " .. gid .. " from " .. ip )
+			-- pprint( GAME.meHost.ip .. ".onmessage( " .. Events.getName( evt ) .. " ) ) to " .. gid .. " from " .. ip )
 			this.personalities[ gid ]:getActiveBehavior():onmessage( evt, ip, port )
 		end
 	end, GAME.SERVER_PORT )
