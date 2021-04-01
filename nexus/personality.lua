@@ -14,7 +14,7 @@ function Personality.new( gid )
 end 
 
 
-function Personality:put( behavior, key )
+function Personality:put( key, behavior )
 	assert( behavior, "Please provide an object to handle behavior events!" )
 	assert( behavior.init, "Your behavior object must provide an 'init()' method!" )
 	assert( behavior.update, "Your behavior object must provide an 'update()' method!" )

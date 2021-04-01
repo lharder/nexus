@@ -23,7 +23,7 @@ function Behaviors:put( gid, behavior, key )
 		self.personalities[ gid ] = Personality.new( gid )
 	end
 
-	self.personalities[ gid ]:put( behavior, key )
+	self.personalities[ gid ]:put( key, behavior )
 end
 
 

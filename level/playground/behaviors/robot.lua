@@ -1,10 +1,10 @@
 local RobotBehavior = {}
-local Commands = require( "level.playground.commands" )
+local Events = require( "level.playground.events" )
 
 
 local function getNewTargetCmd( self )
 	local pos = vmath.vector3( math.random( 100, 1000 ), math.random( 50, 600 ), .5 )
-	local cmd = Commands.newMoveTo( self.gid, pos )
+	local cmd = Events.newMoveTo( self.gid, pos )
 	return cmd
 end
 

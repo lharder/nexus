@@ -1,5 +1,4 @@
 local Events = require( "level.playground.events" )
-local Commands = require( "level.playground.commands" )
 local lua = require( "deflibs.lualib" )
 
 go.property( "speed", 0 )
@@ -50,7 +49,7 @@ local function updateManual( self, dt )
 		-- to the other clients: depends on go's speed!
 		self.dist = math.abs( vmath.length( self.pos - self.oldPos ) )
 		if self.dist >= 1 then
-			local cmd = Commands.newSetPlayerPos( self.gid, self.pos )
+			local evt = Events.newSetPlayerPos( self.gid, self.pos )
 			GAME.client:sendToOtherClients( cmd )
 		end
 	end
@@ -59,7 +58,7 @@ end
 
 
 local function parse( self, message )
-	if message.meta.type == Commands.SET_PLAYER_POS then
+	if message.meta.type == Events.SET_PLAYER_POS then
 		if message.attrs.pos then 
 			-- Target's position is probably outdated when received here 
 			-- already. To compensate, assume that target has continued to 

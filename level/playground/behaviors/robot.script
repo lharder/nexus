@@ -1,5 +1,4 @@
 local lua = require( "deflibs.lualib" )
-local Commands = require( "level.playground.commands" )
 local Events = require( "level.playground.events" )
 
 go.property( "targetPos", vmath.vector3() )
@@ -7,7 +6,7 @@ go.property( "speed", 0 )
 
 
 local function parse( self, message )
-	if message.meta.type == Commands.MOVE_TO then
+	if message.meta.type == Events.MOVE_TO then
 		self.targetPos = message.attrs.pos
 	end
 end

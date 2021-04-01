@@ -10,27 +10,6 @@ GAME = Game.new( "MultiPlayerGame" )
 -------------------------------------
 
 
-
--- DEBUG ONLY ----------------------------------------
-local Events = require( "level.playground.events" )
-local Commands = require( "level.playground.commands" )
-function getCmdEvtName( env )
-	local t = env:getType() 
-
-	if t == Commands.CREATE_PLAYER then return "Command.CREATE_PLAYER" end
-	if t == Commands.CREATE_ROBOT then return "Command.CREATE_ROBOT" end
-	if t == Commands.MOVE_TO then return "Command.MOVE_TO" end
-	if t == Commands.SET_PLAYER_DIR then return "Command.SET_PLAYER_DIR" end
-	if t == Commands.SET_PLAYER_POS then return "Command.SET_PLAYER_POS" end
-
-	if t == Events.POSITION_REACHED then return "Event.POSITION_REACHED" end
-	if t == Events.USER_DIR_CHANGED then return "Event.USER_DIR_CHANGED" end
-
-	return "unknown"
-end
-------------------------------------------------------
-
-
 function init( self )
 	lua.randomize()
 	msg.post( "main:/screenmaster", "load", { level = "setup" } ) 

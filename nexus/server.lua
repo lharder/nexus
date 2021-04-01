@@ -3,12 +3,9 @@ local Envelope = require( "nexus.envelope" )
 local Personality = require( "nexus.personality" )
 local lua = require( "deflibs.lualib" )
 local Events = require( "level.playground.events" )
-local Commands = require( "level.playground.commands" )
 
 
 local SEND_INTERVAL = 1 / 20
-
-local now 
 
 
 local Server = {}
@@ -18,7 +15,7 @@ function Server.new()
 	local this = {}
 	setmetatable( this, Server )
 
-	-- queue of commands to send
+	-- queue of events to send
 	this.queue = {}
 	this.nextSendTime = socket.gettime()
 
@@ -31,12 +28,12 @@ function Server.new()
 		
 		-- incoming event from one of the clients
 		local evt = Envelope.deserialize( data )
-		-- pprint( "Server " .. GAME.meHost.ip .. " received: " .. getCmdEvtName( evt ) )
+		pprint( "Server " .. GAME.meHost.ip .. " received: " .. Events.getName( evt ) )
 		
 		-- events contain the gid of the gameobject emitting this event as url
 		local gid = evt:getUrl()
 		if this.personalities[ gid ] then 
-			-- pprint( GAME.meHost.ip .. ".onmessage( " .. getCmdEvtName( evt ) .. " ) ) to " .. gid .. " from " .. ip )
+			pprint( GAME.meHost.ip .. ".onmessage( " .. Events.getName( evt ) .. " ) ) to " .. gid .. " from " .. ip )
 			this.personalities[ gid ]:getActiveBehavior():onmessage( evt, ip, port )
 		end
 	end, GAME.SERVER_PORT )
@@ -50,17 +47,15 @@ function Server:update( dt )
 		-- listen to incoming network packets
 		self.srv.update()
 
-		-- send out commands in regular intervals
-		now = socket.gettime()
-		-- pprint( "tick" )
-		if now >= self.nextSendTime then
-			-- pprint( "tick - send" )
+		-- send out events in regular intervals
+		self.now = socket.gettime()
+		if self.now >= self.nextSendTime then
 			-- reset clock
-			self.nextSendTime = now + SEND_INTERVAL
+			self.nextSendTime = self.now + SEND_INTERVAL
 			-- send out everything in the queue
-			for _, cmd in ipairs( self.queue ) do
-				-- pprint( "Server " .. GAME.meHost.ip .. " sending:  " .. getCmdEvtName( cmd ) .. " to " .. cmd.meta:get( "ip" ) )
-				self.srv.send( cmd:serialize(), cmd.meta:get( "ip" ), GAME.CLIENT_PORT )
+			for _, evt in ipairs( self.queue ) do
+				-- pprint( "Server " .. GAME.meHost.ip .. " sending:  " .. getCmdEvtName( evt ) .. " to " .. evt:getIP() )
+				self.srv.send( evt:serialize(), evt:getIP(), GAME.CLIENT_PORT )
 				self.queue = {}
 			end
 		end
@@ -82,13 +77,13 @@ function Server:send( ip, env, port )
 	-- important: must make an independent copy to be stored
 	-- in the queue! Otherwise undesired changes afterwards possible!
 	env = env:deepCopy()
-	env.meta:putString( "ip", ip )
-	env.meta:putString( "port", port )
+	env:setIP( ip )
+	env:setPort( port )
 	table.insert( self.queue, env )
 end
 
 
--- send the same command to all clients
+-- send the same events to all clients
 function Server:sendToClients( env )
 	for i, callsign in pairs( GAME.match.proposal ) do
 		local host = GAME.hosts:get( callsign )
@@ -124,7 +119,7 @@ function Server:putBehavior( gid, behavior, key )
 	end
 
 	if key == nil then key = "default" end
-	self.personalities[ gid ]:put( behavior, key )
+	self.personalities[ gid ]:put( key, behavior )
 
 	-- automatically activate behavior if this is the first/only
 	if lua.length( self.personalities[ gid ].behaviors  ) == 1 then

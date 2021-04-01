@@ -4,7 +4,6 @@ local udp = require( "defnet.udp" )
 local Beacon = require( "nexus.beacon" )
 local Server = require( "nexus.server" )
 local Client = require( "nexus.client" )
-local Nexus = require( "nexus.nexus" )
 
 
 local function lastOctet( ipv4 )
@@ -16,18 +15,23 @@ local function lastOctet( ipv4 )
 end
 
 
-local function selectServerHost()
+local function selectServerHost( fixedIp )
 	local srv 
 	local max = 0
 	for _, callsign in ipairs( GAME.hosts:keys() ) do
 		local host = GAME:getHost( callsign )
-		local oct = lastOctet( host.ip )
-		-- fixed ip: remove! ----
-		if oct == 24 then return host end
-		-------------------------
-		if oct > max then 
-			srv = host
-			max = oct
+		if fixedIp then
+			-- select the host with a given ip
+			if host.ip == fixedIp then return host end
+
+		else
+			-- no fixed id is provided, use arbitrary algorithm:
+			-- host with highest last octet of ip becomes server
+			local oct = lastOctet( host.ip )
+			if oct > max then 
+				srv = host
+				max = oct
+			end
 		end
 	end
 	return srv
@@ -123,6 +127,28 @@ function Game.new( name )
 end
 
 
+-- returns ip address of the localhost
+function Game.getLocalhostIP()
+	local ip = nil
+	local ifaddrs = sys.get_ifaddrs()
+	for _,interface in ipairs(ifaddrs) do
+		if interface.name == "en0" then
+			local adr = interface.address
+			if adr ~= nil then
+				local cntDots = adr:cntSubstr( "%." )
+				if cntDots == 3 then 
+					ip = adr
+				end
+			end
+		end
+	end
+	-- there may be no network interface available!
+	if ip == nil then ip = "127.0.0.1" end
+
+	return ip
+end
+
+
 function Game:broadcast( callsign, callbackOnFound )
 	self.callsign = callsign
 	
@@ -201,12 +227,14 @@ function Game:start()
 		self.beacon = nil
 	end
 
-	-- host with the highest last octet number becomes 
-	-- the gameserver: arbitrary, but unanimous
-	self.srvHost = selectServerHost()	
+	-- declare one host to be the game server, no matter which.
+	-- But the decision must be unanimous among all hosts!
+	-- Implementation: either a fixed ip to be provided at will
+	-- or the one with the highest last octet number gets selected
+	self.srvHost = selectServerHost( "192.168.178.24" )	
 
 	-- which host am I?
-	self.meHost = self:getHostByIp( Nexus.getLocalhostIP() )
+	self.meHost = self:getHostByIp( Game.getLocalhostIP() )
 
 	-- check if this host is the (only) game server?
 	if self:isServer() then

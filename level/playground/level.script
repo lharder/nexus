@@ -1,4 +1,4 @@
-local Commands = require( "level.playground.commands" )
+local Events = require( "level.playground.events" )
 local Server = require( "nexus.server" )
 local Robot = require( "level.playground.behaviors.robot" )
 local Player = require( "level.playground.behaviors.player" )
@@ -25,9 +25,9 @@ local function createRobot( factoryUrl, pos, speed, txtCaption )
 end
 
 
--- client reacts to incoming server commands
+-- client reacts to incoming server events
 local function parse( message )
-	if message.meta.type == Commands.CREATE_PLAYER then
+	if message.meta.type == Events.CREATE_PLAYER then
 		local id = createPlayer( 
 			message.attrs.factory, 
 			message.attrs.pos, 
@@ -37,7 +37,7 @@ local function parse( message )
 		)
 		GAME.client.registry:set( message.attrs.gid, id )
 		
-	elseif message.meta.type == Commands.CREATE_ROBOT then
+	elseif message.meta.type == Events.CREATE_ROBOT then
 		local id = createRobot( 
 			message.attrs.factory, 
 			message.attrs.pos, 
@@ -55,7 +55,7 @@ function init( self )
 	-- create serverside objects to run the game
 	if GAME:isServer() then
 		
-		timer.delay( 1, false, function() 
+		timer.delay( .5, false, function() 
 			pprint( "Create level objects!" )
 
 			-- one player for each playing host
@@ -73,18 +73,18 @@ function init( self )
 
 				-- create one local hero on every game host / client ------------
 				-- who receives and transmits input from his player to all other hosts 
-				local cmdLocalHero = Commands.newCreatePlayer( 
+				local evtLocalHero = Events.newCreatePlayer( 
 					callsign, vmath.vector3( pos.x, pos.y, .5 ), speed, callsign, true 
 				)
 				local host = GAME.hosts:get( callsign )
-				GAME.server:send( host.ip, cmdLocalHero )
+				GAME.server:send( host.ip, evtLocalHero )
 
 				-- for all other hosts, this hero is only a drone to 
 				-- be controlled by somebody somewhere else
-				local cmdRemoteHero = Commands.newCreatePlayer( 
+				local evtRemoteHero = Events.newCreatePlayer( 
 					callsign, vmath.vector3( pos.x, pos.y, .5 ), speed, callsign, false 
 				)
-				GAME.server:sendToClientsExcept( host.ip, cmdRemoteHero )
+				GAME.server:sendToClientsExcept( host.ip, evtRemoteHero )
 
 				-- now setup serverside control of each player --------------
 				local player = Player.new( callsign )
@@ -98,8 +98,8 @@ function init( self )
 			local name = sprintf( "TX-%d", math.random( 10, 99 ) )
 			local speed = 150
 			local pos = startPositions[ j ]
-			local cmd = Commands.newCreateRobot( gid, vmath.vector3( pos.x, pos.y, .5 ), speed, name )
-			GAME.server:sendToClients( cmd )
+			local evt = Events.newCreateRobot( gid, vmath.vector3( pos.x, pos.y, .5 ), speed, name )
+			GAME.server:sendToClients( evt )
 
 			local robot = Robot.new( gid )
 			GAME.server:putBehavior( gid, robot )	
@@ -111,7 +111,7 @@ end
 
 
 function on_message( self, message_id, message, sender )
-	-- receive and react to serverside commands
+	-- receive and react to serverside events
 	if message_id == GAME.MSG_EXEC_CMD then
 		parse( message )
 	end

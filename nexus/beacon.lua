@@ -1,5 +1,4 @@
 local p2pLib = require( "defnet.p2p_discovery" )
-local nexus = require( "nexus.nexus" )
 local Host = require( "nexus.host" )
 
 local SEARCH_PORT = 9997

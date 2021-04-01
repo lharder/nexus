@@ -1,7 +1,6 @@
 local udp = require "defnet.udp"
 local Envelope = require( "nexus.envelope" )
 local Registry = require( "nexus.registry" )
-local Commands = require( "level.playground.commands" )
 local Events = require( "level.playground.events" )
 
 
@@ -15,7 +14,7 @@ function Client.new()
 	local this = {}
 	setmetatable( this, Client )
 
-	-- queue of commands to send
+	-- queue of events to send
 	this.queue = {}
 	this.nextSendTime = socket.gettime()
 
@@ -30,7 +29,7 @@ function Client.new()
 		assert( data, "Payload must be available in request!" )
 		
 		cmd = Envelope.deserialize( data )
-		-- pprint( "Client " .. GAME.meHost.ip .. " received: " .. getCmdEvtName( cmd ) .. " from " .. ip ) 
+		-- pprint( "Client " .. GAME.meHost.ip .. " received: " .. Event.getName( cmd ) .. " from " .. ip ) 
 
 		url = cmd:getUrl()
 		-- if no absolute url is available, it must be a global id: 
@@ -57,14 +56,14 @@ function Client:send( ip, env, port )
 	-- important: must make an independent copy to be stored
 	-- in the queue! Otherwise undesired changes afterwards possible!
 	env = env:deepCopy()
-	env.meta:putString( "ip", ip )
-	env.meta:putString( "port", port )
+	env:setIP( ip )
+	env:setPort( port )
 
 	-- redundant information should be sent once per batch only,
 	-- e.g. multiple position data of gameobjects. Allow for 
 	-- keeping track of all envelopes for the next batch sending
 	-- and send only one of that type per batch if flag is set
-	if env.meta:get( "latestOnly" ) then 
+	if env:getLatestOnly() then 
 		-- for "latestOnly"-envelope-types, remember its position 
 		-- in array and if another shows up, replace the first
 		local index = self.indexOfTypes[ env:getType() ]
@@ -113,8 +112,11 @@ function Client:update()
 		-- send out everything in the queue
 		-- pprint( "Queue: " .. #self.queue )
 		for _, evt in ipairs( self.queue ) do
- 			-- pprint( "Client " .. GAME.meHost.ip .. " sending:  " .. getCmdEvtName( evt ) .. " to " .. evt.meta:get( "ip" ) .. ":" .. evt.meta:get( "port" ) )
-			self.srv.send( evt:serialize(), evt.meta:get( "ip" ), evt.meta:get( "port" ) )
+			-- pprint( "Client " .. GAME.meHost.ip .. " sending:  " .. Event.getName( evt ) .. " to " .. evt:getIP() .. ":" .. evt:getPort() )
+			if evt:getPort() == nil then
+				pprint(  "oops")
+			end
+			self.srv.send( evt:serialize(), evt:getIP(), evt:getPort() )
 			self.queue = {}
 			self.indexOfTypes = {}
 		end

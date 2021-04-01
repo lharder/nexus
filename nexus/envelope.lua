@@ -34,6 +34,7 @@ function Envelope:serialize()
 end
 
 
+-- Meta data for reliable internal handling ------
 function Envelope:setUrl( url )
 	return self.meta:putString( "url", url )
 end
@@ -42,11 +43,44 @@ function Envelope:getUrl( )
 	return self.meta:get( "url" )
 end
 
+
+function Envelope:setIP( ip )
+	return self.meta:putString( "ip", ip )
+end
+
+function Envelope:getIP()
+	return self.meta:get( "ip" )
+end
+
+
+function Envelope:setPort( port )
+	return self.meta:putNumber( "port", port )
+end
+
+function Envelope:getPort()
+	return self.meta:get( "port" )
+end
+
+
 function Envelope:getType( )
 	return self.meta:get( "type" )
 end
 
+function Envelope:setType( type )
+	return self.meta:putNumber( "type", type )
+end
 
+
+function Envelope:getLatestOnly( )
+	return self.meta:get( "latestOnly" )
+end
+
+function Envelope:setLatestOnly( isLatestOnly )
+	return self.meta:setBool( "latestOnly", isLatestOnly )
+end
+
+
+-- Custom defined attributes -------------------
 function Envelope:putNumber( key, value )
 	self.attrs:putNumber( key, value )
 end
