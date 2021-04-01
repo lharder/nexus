@@ -24,8 +24,7 @@ function RobotBehavior.new( gid )
 
 
 	function this:onmessage( evt, ip, port )
-		-- pprint( evt:getUrl() )
-		GAME.server:sendToClients( getNewTargetEvt( this ) )
+		GAME.server:sendToClients( getNewTargetEvt( self ) )
 	end
 
 	

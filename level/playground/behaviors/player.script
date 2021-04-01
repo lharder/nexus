@@ -49,7 +49,7 @@ local function updateManual( self, dt )
 		-- to the other clients: depends on go's speed!
 		self.dist = math.abs( vmath.length( self.pos - self.oldPos ) )
 		if self.dist >= 1 then
-			local evt = Events.newSetPlayerPos( self.gid, self.pos )
+			local evt = Events.newMoveTo( self.gid, self.pos )
 			GAME.client:sendToOtherClients( evt )
 		end
 	end
@@ -58,7 +58,7 @@ end
 
 
 local function parse( self, message )
-	if message.meta.type == Events.SET_PLAYER_POS then
+	if message.meta.type == Events.MOVE_TO then
 		if message.attrs.pos then 
 			-- Target's position is probably outdated when received here 
 			-- already. To compensate, assume that target has continued to 

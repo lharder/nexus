@@ -7,7 +7,6 @@ Events.CREATE_ROBOT			= 2
 Events.MOVE_TO 				= 3
 Events.SET_PLAYER_POS  		= 4
 Events.POSITION_REACHED 	= 5
-Events.USER_DIR_CHANGED		= 6
 
 Events.names = {}
 Events.names[ 1 ] = "CREATE_PLAYER"
@@ -15,7 +14,6 @@ Events.names[ 2 ] = "CREATE_ROBOT"
 Events.names[ 3 ] = "MOVE_TO"
 Events.names[ 4 ] = "SET_PLAYER_POS"
 Events.names[ 5 ] = "POSITION_REACHED"
-Events.names[ 6 ] = "USER_DIR_CHANGED"
 
 
 function Events.newCreatePlayer( gid, pos, speed, name, isLocalHero )
@@ -47,7 +45,7 @@ function Events.newMoveTo( gid, pos )
 	return env
 end
 
-
+--[[
 function Events.newSetPlayerPos( gid, pos )
 	-- Very many positioning events get sent: make sure only
 	-- the latest / a single one gets sent with every batch
@@ -55,18 +53,11 @@ function Events.newSetPlayerPos( gid, pos )
 	env:putVector3( "pos", pos )
 	return env
 end
-
+--]]
 
 function Events.newPositionReached( gid, pos )
 	local env = Envelope.new( Events.POSITION_REACHED, gid )
 	env:putVector3( "pos", pos )
-	return env
-end
-
-
-function Events.newUserDirChanged( gid, dir )
-	local env = Envelope.new( Events.USER_DIR_CHANGED, gid )
-	env:putVector3( "dir", dir )
 	return env
 end
 
