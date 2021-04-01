@@ -1,7 +1,6 @@
 local Events = require( "level.playground.events" )
 local Server = require( "nexus.server" )
 local Robot = require( "level.playground.behaviors.robot" )
-local Player = require( "level.playground.behaviors.player" )
 local lua = require( "deflibs.lualib" )
 
 
@@ -12,8 +11,7 @@ local function createPlayer( factoryUrl, pos, speed, txtCaption, isLocalHero )
 	})
 	label.set_text( msg.url( nil, id, "caption" ), txtCaption )
 	label.set_text( msg.url( nil, id, "type" ), "Player" )
-	-- important: user input only from the one per host / right client!
-	if isLocalHero then msg.post( id, "acquire_input_focus" ) end
+	
 	return id
 end
 
@@ -86,10 +84,6 @@ function init( self )
 				)
 				GAME.server:sendToClientsExcept( host.ip, evtRemoteHero )
 
-				-- now setup serverside control of each player --------------
-				local player = Player.new( callsign )
-				GAME.server:putBehavior( callsign, player )	
-				
 				j = i + 1
 			end
 

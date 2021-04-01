@@ -86,6 +86,9 @@ end
 function init( self )
 	self.dir = vmath.vector3()
 	self.origSpeed = self.speed
+
+	-- important: user input only from the one per host / right client!
+	if self.isLocalHero then msg.post( ".", "acquire_input_focus" ) end
 	
 	msg.post( ".", MSG_ON_FIRST_TICK )
 end
