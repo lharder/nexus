@@ -5,19 +5,17 @@ local Events = {}
 Events.CREATE_PLAYER 		= 1
 Events.CREATE_ROBOT			= 2
 Events.MOVE_TO 				= 3
-Events.SET_PLAYER_DIR 		= 4
-Events.SET_PLAYER_POS  		= 5
-Events.POSITION_REACHED 	= 6
-Events.USER_DIR_CHANGED		= 7
+Events.SET_PLAYER_POS  		= 4
+Events.POSITION_REACHED 	= 5
+Events.USER_DIR_CHANGED		= 6
 
 Events.names = {}
 Events.names[ 1 ] = "CREATE_PLAYER"
 Events.names[ 2 ] = "CREATE_ROBOT"
 Events.names[ 3 ] = "MOVE_TO"
-Events.names[ 4 ] = "SET_PLAYER_DIR"
-Events.names[ 5 ] = "SET_PLAYER_POS"
-Events.names[ 6 ] = "POSITION_REACHED"
-Events.names[ 7 ] = "USER_DIR_CHANGED"
+Events.names[ 4 ] = "SET_PLAYER_POS"
+Events.names[ 5 ] = "POSITION_REACHED"
+Events.names[ 6 ] = "USER_DIR_CHANGED"
 
 
 function Events.newCreatePlayer( gid, pos, speed, name, isLocalHero )
@@ -46,13 +44,6 @@ end
 function Events.newMoveTo( gid, pos )
 	local env = Envelope.new( Events.MOVE_TO, gid, false )
 	env:putVector3( "pos", pos )
-	return env
-end
-
-
-function Events.newSetPlayerDir( gid, dir )
-	local env = Envelope.new( Events.SET_PLAYER_DIR, gid, false )
-	env:putVector3( "dir", dir )
 	return env
 end
 

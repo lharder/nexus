@@ -16,11 +16,13 @@ function PlayerBehavior.new( gid )
 
 
 	function this:onmessage( evt, ip, port )
+		--[[
 		if evt:getType() == Events.USER_DIR_CHANGED then 
 			GAME.server:sendToClientsExcept( ip,   
 				Events.newSetPlayerDir( evt:getUrl(), evt:get( "dir" ) )
 			)
 		end
+		--]]
 	end
 
 	
