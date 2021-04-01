@@ -16,30 +16,45 @@ https://github.com/britzl/defold-input/archive/master.zip
 ## Example project
 nexus comes with a simple example of multiple gameobjects on different hosts interacting with other. 
 
+## Game architecture
+nexus is a framework for peer-to-peer-like games, but from its architecture, it uses a client-to-server approach: on every host, nexus runs a game client and on one of the hosts, there is an additional game server instance. For the developer, it is important to understand the role of each.
+
+
+
+
 ## 1. Game setup and discovery of peers
 
-**game = Game.new( "MultiPlayerGame" )**
+```
+GAME = Game.new( "MultiPlayerGame" )
+```
 
 You start by instantiating a nexus game object. You provide a gameID that gets transmitted to recognize the same application on other hosts currently looking for peers.
 
-To discover other players, the GAME object broadcasts a UDP message on the network and listens to likeminded players from other ip addresses:
+To discover other players, the GAME object broadcasts a UDP message on the network and listens to likeminded players from other ip addresses: 
+```
+GAME:broadcast( "callsign", function( host )
+  ...
+end )
+```
+The broadcast method expects a callsign as parameter to identify the player. It must be unique and it is up to the players / the game application to make sure there is no conflict. Every time a host is discovered, nexus calls the callback method and provides a host object representing the new peer:
 
-**game:broadcast( "callsign", function( host )**</br>
-  ...</br>
-**end )**
-
-The broadcast methods expects a callsign to identify the player. It must be unique and it is up to the players / the game application to make sure there is no conflict. Every time a host is discovered, nexus calls the callback method and provides a host object representing the new peer:
-
-<code>
-
+```
 host.ip
-
 host.port
-
 host.callsign
+```
+It is up to the application to decide when it stops searching for more hosts / potential co-players. 
 
-</code>
+A setup of players to play a round of the game together is considered to be a match. In order to agree on a match, all hosts involved must transmit the same suggestion of callsigns to all other involved hosts. nexus takes care of the internal communication, every host must propose their desired combination to their peers. Once all hosts have transmitted matching proposals, nexus calls a function you provide:
 
+```
+local match = GAME:newMatch( "Maverick", "Iceman", "Goose" )
+match:propose( function() 
+  pprint( "All selected players confirmed, let's rock!!!" )
+end )
+
+```
+As soon as a match has been agreed on, you start the game itself and initiate the communication between the different hosts. On every host, a game client is initiated and on one of the hosts, nexus runs a game server as well. 
 
 
 
