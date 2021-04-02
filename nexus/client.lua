@@ -10,10 +10,12 @@ local SEND_INTERVAL = 1 / 20
 local Client = {}
 Client.__index = Client
 
-function Client.new()
+function Client.new( game )
 	local this = {}
 	setmetatable( this, Client )
 
+	this.game = game
+	
 	-- queue of events to send
 	this.queue = {}
 	this.nextSendTime = socket.gettime()
@@ -29,19 +31,19 @@ function Client.new()
 		assert( data, "Payload must be available in request!" )
 		
 		evt = Envelope.deserialize( data )
-		-- pprint( "Client " .. GAME.meHost.ip .. " received: " .. Events.getName( evt ) .. " from " .. ip ) 
+		-- pprint( "Client " .. self.game.meHost.ip .. " received: " .. Events.getName( evt ) .. " from " .. ip ) 
 
 		url = evt:getUrl()
 		-- if no absolute url is available, it must be a global id: 
 		-- replace globalId with local url
 		if url:find( ":/", 1, true ) == nil then 
-			id = GAME.client.registry:getClientId( url )
+			id = game.client.registry:getClientId( url )
 			evt:setUrl( msg.url( nil, id, nil ) )
 		end
 		
-		msg.post( evt:getUrl(), GAME.MSG_EXEC_CMD, evt:toTable() )
+		msg.post( evt:getUrl(), game.MSG_EXEC_CMD, evt:toTable() )
 			
-	end, GAME.CLIENT_PORT )
+	end, game.CLIENT_PORT )
 
 	return this
 end
@@ -51,7 +53,7 @@ function Client:send( ip, env, port )
 	if ip == nil or env == nil then return end
 
 	-- by default, clients always send to the server
-	if port == nil then port = GAME.SERVER_PORT end
+	if port == nil then port = self.game.SERVER_PORT end
 
 	-- important: must make an independent copy to be stored
 	-- in the queue! Otherwise undesired changes afterwards possible!
@@ -86,17 +88,17 @@ end
 
 -- send the same envelope directly to all other clients
 function Client:sendToOtherClients( env )
-	for i, callsign in pairs( GAME.match.proposal ) do
-		local host = GAME.hosts:get( callsign )
-		if host.ip ~= GAME.meHost.ip then 
-			self:send( host.ip, env, GAME.CLIENT_PORT ) 
+	for i, callsign in pairs( self.game.match.proposal ) do
+		local host = self.game.hosts:get( callsign )
+		if host.ip ~= self.game.meHost.ip then 
+			self:send( host.ip, env, self.game.CLIENT_PORT ) 
 		end
 	end
 end
 
 
 function Client:sendToServer( env )
-	self:send( GAME:getServerHost().ip, env, GAME.SERVER_PORT )
+	self:send( self.game:getServerHost().ip, env, self.game.SERVER_PORT )
 end
 
 
@@ -112,7 +114,7 @@ function Client:update()
 		-- send out everything in the queue
 		-- pprint( "Queue: " .. #self.queue )
 		for _, evt in ipairs( self.queue ) do
-			-- pprint( "Client " .. GAME.meHost.ip .. " sending:  " .. Event.getName( evt ) .. " to " .. evt:getIP() .. ":" .. evt:getPort() )
+			-- pprint( "Client " .. self.game.meHost.ip .. " sending:  " .. Event.getName( evt ) .. " to " .. evt:getIP() .. ":" .. evt:getPort() )
 			self.srv.send( evt:serialize(), evt:getIP(), evt:getPort() )
 			self.queue = {}
 			self.indexOfTypes = {}

@@ -15,11 +15,11 @@ local function lastOctet( ipv4 )
 end
 
 
-local function selectServerHost( fixedIp )
+local function selectServerHost( game, fixedIp )
 	local srv 
 	local max = 0
-	for _, callsign in ipairs( GAME.hosts:keys() ) do
-		local host = GAME:getHost( callsign )
+	for _, callsign in ipairs( game.hosts:keys() ) do
+		local host = game:getHost( callsign )
 		if fixedIp then
 			-- select the host with a given ip
 			if host.ip == fixedIp then return host end
@@ -57,6 +57,8 @@ function Match.new( ... )
 	local this = {}
 	setmetatable( this, Match )
 
+	-- self.game: gets injected from the outside
+	
 	-- list of callsigns containing my desired game peers
 	this.proposal = {...} 
 
@@ -67,7 +69,7 @@ function Match.new( ... )
 end
 
 
-function Match:propose( agreedHandler )
+function Match:propose( agreedHandler, counterProposalHandler )
 	self.game.negotiator = udp.create( function( data, ip, port )
 		if data == nil then return end
 
@@ -88,6 +90,11 @@ function Match:propose( agreedHandler )
 				-- callback application handler when all agreed
 				if agreedHandler then agreedHandler() end
 			end
+
+		else
+			-- a host has sent a differing proposal
+			-- allow the game to react but continue 
+			if counterProposalHandler then counterProposalHandler( callsigns ) end
 		end
 	end, self.game.CLIENT_PORT )
 
@@ -131,7 +138,7 @@ end
 function Game.getLocalhostIP()
 	local ip = nil
 	local ifaddrs = sys.get_ifaddrs()
-	for _,interface in ipairs(ifaddrs) do
+	for _,interface in ipairs( ifaddrs ) do
 		if interface.name == "en0" then
 			local adr = interface.address
 			if adr ~= nil then
@@ -231,7 +238,7 @@ function Game:start()
 	-- But the decision must be unanimous among all hosts!
 	-- Implementation: either a fixed ip to be provided at will
 	-- or the one with the highest last octet number gets selected
-	self.srvHost = selectServerHost( "192.168.178.24" )	
+	self.srvHost = selectServerHost( self, "192.168.178.24" )	
 
 	-- which host am I?
 	self.meHost = self:getHostByIp( Game.getLocalhostIP() )
@@ -239,12 +246,12 @@ function Game:start()
 	-- check if this host is the (only) game server?
 	if self:isServer() then
 		if self.server then self.server:destroy() end
-		self.server = Server.new()
+		self.server = Server.new( self )
 	end
 
 	-- every host is a game client
 	if self.client then self.client:destroy() end
-	self.client = Client.new()	
+	self.client = Client.new( self )	
 end
 
 

@@ -11,7 +11,6 @@ local function createPlayer( factoryUrl, pos, speed, txtCaption, isLocalHero )
 	})
 	label.set_text( msg.url( nil, id, "caption" ), txtCaption )
 	label.set_text( msg.url( nil, id, "type" ), "Player" )
-	
 	return id
 end
 

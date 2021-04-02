@@ -11,10 +11,12 @@ local SEND_INTERVAL = 1 / 20
 local Server = {}
 Server.__index = Server
 
-function Server.new()
+function Server.new( game )
 	local this = {}
 	setmetatable( this, Server )
 
+	this.game = game
+	
 	-- queue of events to send
 	this.queue = {}
 	this.nextSendTime = socket.gettime()
@@ -28,15 +30,15 @@ function Server.new()
 		
 		-- incoming event from one of the clients
 		local evt = Envelope.deserialize( data )
-		-- pprint( "Server " .. GAME.meHost.ip .. " received: " .. Events.getName( evt ) )
+		-- pprint( "Server " .. self.game.meHost.ip .. " received: " .. Events.getName( evt ) )
 		
 		-- events contain the gid of the gameobject emitting this event as url
 		local gid = evt:getUrl()
 		if this.personalities[ gid ] then 
-			-- pprint( GAME.meHost.ip .. ".onmessage( " .. Events.getName( evt ) .. " ) ) to " .. gid .. " from " .. ip )
+			-- pprint( self.game.meHost.ip .. ".onmessage( " .. Events.getName( evt ) .. " ) ) to " .. gid .. " from " .. ip )
 			this.personalities[ gid ]:getActiveBehavior():onmessage( evt, ip, port )
 		end
-	end, GAME.SERVER_PORT )
+	end, game.SERVER_PORT )
 	
 	return this
 end
@@ -54,8 +56,8 @@ function Server:update( dt )
 			self.nextSendTime = self.now + SEND_INTERVAL
 			-- send out everything in the queue
 			for _, evt in ipairs( self.queue ) do
-				-- pprint( "Server " .. GAME.meHost.ip .. " sending:  " .. Event.getName( evt ) .. " to " .. evt:getIP() )
-				self.srv.send( evt:serialize(), evt:getIP(), GAME.CLIENT_PORT )
+				-- pprint( "Server " .. self.game.meHost.ip .. " sending:  " .. Event.getName( evt ) .. " to " .. evt:getIP() )
+				self.srv.send( evt:serialize(), evt:getIP(), self.game.CLIENT_PORT )
 				self.queue = {}
 			end
 		end
@@ -72,7 +74,7 @@ function Server:send( ip, env, port )
 	if ip == nil or env == nil then return end
 
 	-- by default, server always sends to clients
-	if port == nil then port = GAME.CLIENT_PORT end
+	if port == nil then port = self.game.CLIENT_PORT end
 	
 	-- important: must make an independent copy to be stored
 	-- in the queue! Otherwise undesired changes afterwards possible!
@@ -85,9 +87,9 @@ end
 
 -- send the same events to all clients
 function Server:sendToClients( env )
-	for i, callsign in pairs( GAME.match.proposal ) do
-		local host = GAME.hosts:get( callsign )
-		self:send( host.ip, env, GAME.CLIENT_PORT )
+	for i, callsign in pairs( self.game.match.proposal ) do
+		local host = self.game.hosts:get( callsign )
+		self:send( host.ip, env, self.game.CLIENT_PORT )
 	end
 end
 
@@ -96,9 +98,9 @@ end
 -- typically used for propagating info from one client 
 -- to all others via the server
 function Server:sendToClientsExcept( ip, env )
-	for i, callsign in pairs( GAME.match.proposal ) do
-		local host = GAME.hosts:get( callsign )
-		if ip ~= host.ip then self:send( host.ip, env, GAME.CLIENT_PORT ) end
+	for i, callsign in pairs( self.game.match.proposal ) do
+		local host = self.game.hosts:get( callsign )
+		if ip ~= host.ip then self:send( host.ip, env, self.game.CLIENT_PORT ) end
 	end
 end
 
@@ -114,7 +116,7 @@ end
 -- the personality object is internal only, user provides behaviors
 -- if there is only a single behavior, no key is needed ("default")
 function Server:putBehavior( gid, behavior, key )
-	if self.personalities[ gid ] == nil then 
+	if 	self.personalities[ gid ] == nil then 
 		self.personalities[ gid ] = Personality.new( gid )
 	end
 

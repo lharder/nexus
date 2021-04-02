@@ -36,7 +36,7 @@ end
 function Personality:activate( key )
 	if key == nil then return end
 	
-	self.behaviors[ self.active ]:final( self.active )
+	self.behaviors[ self.active ]:final( key )
 
 	self.active = key
 	if self.behaviors[ self.active ] then 
@@ -51,7 +51,7 @@ end
 
 
 function Personality:update()
-	self.behaviors[ self.active ]:update( self.active )
+	self.behaviors[ self.active ]:update()
 end
 
 
