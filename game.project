@@ -1,6 +1,6 @@
 [project]
 title = nexus
-dependencies = https://github.com/lharder/defgui/archive/master.zip,https://github.com/britzl/defold-input/archive/master.zip,https://github.com/lharder/screenmaster/archive/master.zip,https://github.com/britzl/defold-luasocket/archive/master.zip,https://github.com/britzl/defnet/archive/master.zip,https://github.com/lharder/deflibs/archive/main.zip,https://github.com/lharder/defgui/archive/master.zip
+dependencies = https://github.com/lharder/defgui/archive/master.zip,https://github.com/britzl/defold-input/archive/master.zip,https://github.com/lharder/screenmaster/archive/master.zip,https://github.com/britzl/defold-luasocket/archive/master.zip,https://github.com/britzl/defnet/archive/master.zip,https://github.com/lharder/deflibs/archive/main.zip
 
 [bootstrap]
 main_collection = /main/main.collectionc
@@ -45,5 +45,5 @@ gravity_y = -1000.0
 scale = 0.01
 
 [library]
-include_dirs = 
+include_dirs = nexus
 
