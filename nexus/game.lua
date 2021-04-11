@@ -227,7 +227,7 @@ function Game:getServerHost()
 end
 
 
-function Game:start()
+function Game:start( ipForServer )
 	-- stop and destroy beacon
 	if self.beacon then 
 		self.beacon:destroy() 
@@ -238,7 +238,7 @@ function Game:start()
 	-- But the decision must be unanimous among all hosts!
 	-- Implementation: either a fixed ip to be provided at will
 	-- or the one with the highest last octet number gets selected
-	self.srvHost = selectServerHost( self, "192.168.178.24" )	
+	self.srvHost = selectServerHost( self, ipForServer )	
 
 	-- which host am I?
 	self.meHost = self:getHostByIp( Game.getLocalhostIP() )
