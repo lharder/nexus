@@ -20,9 +20,9 @@ local function selectServerHost( game, fixedIp )
 	local max = 0
 	for _, callsign in ipairs( game.hosts:keys() ) do
 		local host = game:getHost( callsign )
-		if fixedIp then
+		if host.ip == fixedIp then 
 			-- select the host with a given ip
-			if host.ip == fixedIp then return host end
+			return host 
 
 		else
 			-- no fixed id is provided, use arbitrary algorithm:
