@@ -45,7 +45,7 @@ function TypeValuePair.new( type, value, separator )
 
 	function this:serializeValue()
 		if this.type == "n" then 
-			return string.format( "%d", this.value )
+			return string.format( "%f", this.value )
 			
 		elseif this.type == "s" then 
 			return string.format( "%s", this.value )
@@ -57,7 +57,7 @@ function TypeValuePair.new( type, value, separator )
 
 		elseif this.type == "v" then 
 			return string.format( 
-				"%d%s%d%s%d", 
+				"%f%s%f%s%f", 
 				this.value.x, separator, 
 				this.value.y, separator, 
 				this.value.z 
@@ -65,7 +65,7 @@ function TypeValuePair.new( type, value, separator )
 
 		elseif this.type == "q" then 
 			return string.format( 
-				"%d%s%d%s%d%s%d", 
+				"%f%s%f%s%f%s%f", 
 				this.value.x, separator, 
 				this.value.y, separator, 
 				this.value.z, separator,  

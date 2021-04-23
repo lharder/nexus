@@ -243,6 +243,7 @@ end
 
 ```lua
 function init( self )
+	-- if needed, pass in preferred ip to be the server
 	GAME:start()
 
 	-- create serverside objects to run the game
