@@ -4,9 +4,6 @@ local Registry = require( "nexus.registry" )
 local Events = require( "level.playground.events" )
 
 
-local SEND_INTERVAL = 1 / 20
-
-
 local Client = {}
 Client.__index = Client
 
@@ -110,7 +107,7 @@ function Client:update()
 	now = socket.gettime()
 	if now >= self.nextSendTime then
 		-- reset clock
-		self.nextSendTime = now + SEND_INTERVAL
+		self.nextSendTime = now + self.game.SEND_INTERVAL
 		-- send out everything in the queue
 		-- pprint( "Queue: " .. #self.queue )
 		for _, evt in ipairs( self.queue ) do

@@ -44,6 +44,7 @@ Game.__index = Game
 
 Game.SERVER_PORT = 9999
 Game.CLIENT_PORT = 9998
+Game.SEND_INTERVAL = 1 / 10
 
 Game.MSG_EXEC_CMD 	= hash( "execCmd" )
 
@@ -227,18 +228,22 @@ function Game:getServerHost()
 end
 
 
-function Game:start( ipForServer )
+function Game:start( ipForServer, msgPerSec )
 	-- stop and destroy beacon
 	if self.beacon then 
 		self.beacon:destroy() 
 		self.beacon = nil
 	end
 
+	-- sending interval per second
+	if msgPerSec then self.SEND_INTERVAL = 1 / msgPerSec end
+
 	-- declare one host to be the game server, no matter which.
 	-- But the decision must be unanimous among all hosts!
 	-- Implementation: either a fixed ip to be provided at will
 	-- or the one with the highest last octet number gets selected
 	self.srvHost = selectServerHost( self, ipForServer )	
+	pprint( "Server is " .. self.srvHost )
 
 	-- which host am I?
 	self.meHost = self:getHostByIp( Game.getLocalhostIP() )

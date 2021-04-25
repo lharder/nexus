@@ -5,8 +5,6 @@ local lua = require( "deflibs.lualib" )
 local Events = require( "level.playground.events" )
 
 
-local SEND_INTERVAL = 1 / 20
-
 
 local Server = {}
 Server.__index = Server
@@ -53,7 +51,7 @@ function Server:update( dt )
 		self.now = socket.gettime()
 		if self.now >= self.nextSendTime then
 			-- reset clock
-			self.nextSendTime = self.now + SEND_INTERVAL
+			self.nextSendTime = self.now + self.game.SEND_INTERVAL
 			-- send out everything in the queue
 			for _, evt in ipairs( self.queue ) do
 				-- pprint( "Server " .. self.game.meHost.ip .. " sending:  " .. Event.getName( evt ) .. " to " .. evt:getIP() )

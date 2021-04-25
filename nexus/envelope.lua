@@ -125,8 +125,7 @@ end
 
 
 function Envelope.deserialize( serialized )
-	assert( serialized ~= "", "You must provide a serialized envelope string!" )
-	assert( serialized, "You must provide a serialized envelope string!" )
+	assert( string.len( serialized ) > 0, "You must provide a serialized envelope string!" )
 	
 	local env = Defmap.deserialize( serialized, "|||" )
 	local serializedMeta = env:get( "meta" )
