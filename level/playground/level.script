@@ -4,6 +4,13 @@ local Robot = require( "level.playground.behaviors.robot" )
 local lua = require( "deflibs.lualib" )
 
 
+
+local function createVirtualCtrl( self ) 
+	msg.post( "vcontroller", "register_analog", { id = "stick", radius = 80 } )
+	msg.post( "vcontroller", "register_button", { id = "button" } )
+end
+
+
 local function createPlayer( factoryUrl, pos, speed, txtCaption, isLocalHero )
 	local id = factory.create( 
 		factoryUrl, pos, nil, { 
@@ -66,7 +73,7 @@ function init( self )
 			for i, callsign in pairs( GAME.match.proposal ) do
 				if i > #startPositions then i = 1 end
 				local pos = startPositions[ i ]
-				local speed = 100
+				local speed = 150
 
 				-- create one local hero on every game host / client ------------
 				-- who receives and transmits input from his player to all other hosts 
@@ -98,8 +105,9 @@ function init( self )
 			GAME.server:putBehavior( gid, robot )	
 
 		end )
-		
 	end
+
+	createVirtualCtrl()
 end
 
 

@@ -1,11 +1,14 @@
 local Events = require( "level.playground.events" )
 local lua = require( "deflibs.lualib" )
+local vcontroller = require( "in.onscreen" )
 
 go.property( "speed", 0 )
 go.property( "isLocalHero", false )
 
 
 local MSG_ON_FIRST_TICK = hash( "firsttick" )
+local MSG_STICK 		= hash( "stick" )
+local MSG_BUTTON 		= hash( "button" )
 
 local LEFT = hash( "left" )
 local RIGHT = hash( "right" )
@@ -56,6 +59,26 @@ local function updateManual( self, dt )
 end
 
 
+local function vcontrol( self, action )
+	if action.id == MSG_STICK then
+		if action.released then
+			-- keep direction, stop moving
+			self.speed = 0
+		else
+			-- move in the desired direction
+			if( math.abs( action.x ) > 0 ) or ( math.abs( action.y ) > 0 ) then 
+				self.speed = self.maxSpeed
+				self.dir.x = action.x
+				self.dir.y = action.y	
+			end
+		end		
+		
+	elseif action.id == MSG_BUTTON then
+		if action.pressed then self.buttons[ action.id ] = true end	
+		if action.released then self.buttons[ action.id ] = false end	
+	end
+end
+
 
 local function parse( self, message )
 	if message.meta.type == Events.MOVE_TO then
@@ -74,9 +97,9 @@ local function parse( self, message )
 			-- most of the times because of interpolation. Compensate by 
 			-- higher speed (diagonal = 1.4 steps length instead of 2)
 			if self.dir.x == 0 or self.dir.y == 0 then
-				self.speed = self.origSpeed
+				self.speed = self.maxSpeed
 			else
-				self.speed = self.origSpeed * 1.4
+				self.speed = self.maxSpeed * 1.4
 			end
 		end
 	end
@@ -85,32 +108,20 @@ end
 
 function init( self )
 	self.dir = vmath.vector3()
-	self.origSpeed = self.speed
+	self.maxSpeed = self.speed
 
 	-- important: user input only from the one per host / right client!
-	if self.isLocalHero then msg.post( ".", "acquire_input_focus" ) end
+	if self.isLocalHero then 
+		-- listen to keyboard 
+		msg.post( ".", "acquire_input_focus" ) 
+
+		-- set me up as listener for virtual touch controller
+		msg.post( "vcontroller", "register" )
+		-- state of virtual buttons: pressed/not?
+		self.buttons = {}
+	end
 	
 	msg.post( ".", MSG_ON_FIRST_TICK )
-end
-
-
-function on_input( self, action_id, action )
-	if action_id == LEFT then
-		if action.pressed then self.dir.x = -1 end
-		if action.released then self.dir.x = 0 end
-	end
-	if action_id == RIGHT then
-		if action.pressed then self.dir.x =  1 end
-		if action.released then self.dir.x = 0 end
-	end
-	if action_id == UP then
-		if action.pressed then self.dir.y = 1 end
-		if action.released then self.dir.y = 0 end
-	end
-	if action_id == DOWN then
-		if action.pressed then self.dir.y = -1 end
-		if action.released then self.dir.y = 0 end
-	end
 end
 
 
@@ -128,6 +139,9 @@ function on_message( self, message_id, message, sender )
 		-- get my global id, does not work on init()
 		-- cannot pass in string params on factory.create...
 		self.gid = GAME.client.registry:getGlobalId( go.get_id() )
+
+	elseif message_id == vcontroller.ANALOG then 
+		vcontrol( self, message )
 
 	elseif message_id == GAME.MSG_EXEC_CMD then 
 		parse( self, message )
