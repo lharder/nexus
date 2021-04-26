@@ -243,10 +243,11 @@ function Game:start( ipForServer, msgPerSec )
 	-- Implementation: either a fixed ip to be provided at will
 	-- or the one with the highest last octet number gets selected
 	self.srvHost = selectServerHost( self, ipForServer )	
-	pprint( "Server is " .. self.srvHost )
+	pprint( "Server IP is " .. self.srvHost.ip )
 
 	-- which host am I?
 	self.meHost = self:getHostByIp( Game.getLocalhostIP() )
+	pprint( "This host is " .. self.meHost.ip )
 
 	-- check if this host is the (only) game server?
 	if self:isServer() then

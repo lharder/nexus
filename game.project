@@ -23,10 +23,10 @@ app_icon_114x114 = /assets/app_icons/icon_114.png
 app_icon_72x72 = /assets/app_icons/icon_72.png
 app_icon_144x144 = /assets/app_icons/icon_144.png
 app_icon_167x167 = /assets/app_icons/icon_167.png
-bundle_identifier = com.example.todo
+bundle_identifier = de.worktimes.nexus2
 
 [osx]
-bundle_identifier = com.example.todo
+bundle_identifier = de.worktimes.nexus2
 
 [android]
 app_icon_36x36 = /assets/app_icons/icon_36.png
