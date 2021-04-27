@@ -51,7 +51,7 @@ local function updateManual( self, dt )
 		-- Distance covered before a new position is transmitted 
 		-- to the other clients: depends on go's speed!
 		self.dist = math.abs( vmath.length( self.pos - self.oldPos ) )
-		if self.dist >= 1 then
+		if self.dist >= .5 then
 			local evt = Events.newMoveTo( self.gid, self.pos )
 			GAME.client:sendToOtherClients( evt )
 		end
@@ -89,7 +89,7 @@ local function parse( self, message )
 			-- custom factor depending on the network latency
 			self.targetPos = message.attrs.pos
 			self.dir = vmath.normalize( self.targetPos - self.pos )
-			self.targetPos = self.targetPos + self.dir * self.speed * 0,06
+			self.targetPos = self.targetPos + self.dir * self.speed * 0.06
 
 			-- Honestly: not completely understood. When moving into position
 			-- diagonally, the remote object is slower than the original.
