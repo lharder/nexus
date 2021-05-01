@@ -40,6 +40,11 @@ local function parse( message )
 			message.attrs.isLocalHero 
 		)
 		GAME.client.registry:set( message.attrs.gid, id )
+
+		-- sync the local hero to other clients directly
+		if message.attrs.isLocalHero then 
+			GAME:sync( message.attrs.gid ) 
+		end
 		
 	elseif message.meta.type == Events.CREATE_ROBOT then
 		local id = createRobot( 
@@ -54,7 +59,8 @@ end
 
 
 function init( self )
-	GAME:start( "192.168.178.24", 10 )
+	-- GAME:start( "192.168.178.24", 10 )
+	GAME:start( nil, 12 )
 
 	-- create serverside objects to run the game
 	if GAME:isServer() then
@@ -73,7 +79,7 @@ function init( self )
 			for i, callsign in pairs( GAME.match.proposal ) do
 				if i > #startPositions then i = 1 end
 				local pos = startPositions[ i ]
-				local speed = 100
+				local speed = 60
 
 				-- create one local hero on every game host / client ------------
 				-- who receives and transmits input from his player to all other hosts 
@@ -96,7 +102,7 @@ function init( self )
 			-- one robot 
 			local gid = "robotA"
 			local name = sprintf( "TX-%d", math.random( 10, 99 ) )
-			local speed = 150
+			local speed = 100
 			local pos = startPositions[ j ]
 			local evt = Events.newCreateRobot( gid, vmath.vector3( pos.x, pos.y, .5 ), speed, name )
 			GAME.server:sendToClients( evt )

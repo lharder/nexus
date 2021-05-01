@@ -3,6 +3,8 @@ local Envelope = require( "nexus.envelope" )
 local Registry = require( "nexus.registry" )
 local Events = require( "level.playground.events" )
 
+local EVENT_TYPE_SYNC = -1
+
 
 local Client = {}
 Client.__index = Client
@@ -16,7 +18,8 @@ function Client.new( game )
 	-- queue of events to send
 	this.queue = {}
 	this.nextSendTime = socket.gettime()
-
+	this.syncObjs = {}
+	
 	this.registry = Registry.new()
 	
 	this.indexOfTypes = {}
@@ -30,15 +33,39 @@ function Client.new( game )
 		evt = Envelope.deserialize( data )
 		-- pprint( "Client " .. self.game.meHost.ip .. " received: " .. Events.getName( evt ) .. " from " .. ip ) 
 
-		url = evt:getUrl()
-		-- if no absolute url is available, it must be a global id: 
-		-- replace globalId with local url
-		if url:find( ":/", 1, true ) == nil then 
-			id = game.client.registry:getClientId( url )
-			evt:setUrl( msg.url( nil, id, nil ) )
+		if evt:getType() == EVENT_TYPE_SYNC then
+			-- nexus sync events for gameobjects
+			-- pprint( "receive sync" )
+			local i = 1
+			local key
+			local gid
+			local cid
+			local pos
+			repeat
+				key = i .. "gid"
+				gid = evt:get( key )
+				if gid then 
+					cid = this.registry:getClientId( gid )
+					if cid then
+						pos = evt:get( i .. "pos" )
+						if pos then go.set_position( pos, cid ) end
+					end
+				end
+				i = i + 1
+			until gid == nil
+	
+		else
+			-- custom game events
+			url = evt:getUrl()
+			-- if no absolute url is available, it must be a global id: 
+			-- replace globalId with local url
+			if url:find( ":/", 1, true ) == nil then 
+				id = game.client.registry:getClientId( url )
+				evt:setUrl( msg.url( nil, id, nil ) )
+			end
+			
+			msg.post( evt:getUrl(), game.MSG_EXEC_CMD, evt:toTable() )
 		end
-		
-		msg.post( evt:getUrl(), game.MSG_EXEC_CMD, evt:toTable() )
 			
 	end, game.CLIENT_PORT )
 
@@ -108,6 +135,28 @@ function Client:update()
 	if now >= self.nextSendTime then
 		-- reset clock
 		self.nextSendTime = now + self.game.SEND_INTERVAL
+
+		-- send auto synced objects' data in a single event
+		if #self.syncObjs > 0 then
+			-- send out properties of auto-synced objects 
+			-- in a single common event
+			local syncEnv = Envelope.new( EVENT_TYPE_SYNC, "sync" )
+			for i, gid in ipairs( self.syncObjs ) do
+				local cid = self.registry:getClientId( gid )
+				if cid then
+					syncEnv:putString( i .. "gid", gid )
+					syncEnv:putVector3( i .. "pos", go.get_position( cid ) )
+				end
+			end
+			-- send to other clients immediately (not via queue)
+			for i, callsign in pairs( self.game.match.proposal ) do
+				local host = self.game.hosts:get( callsign )
+				if host.ip ~= self.game.meHost.ip then 
+					self.srv.send( syncEnv:serialize(), host.ip, self.game.CLIENT_PORT ) 
+				end
+			end
+		end
+		
 		-- send out everything in the queue
 		-- pprint( "Queue: " .. #self.queue )
 		for _, evt in ipairs( self.queue ) do
@@ -122,6 +171,11 @@ end
 
 function Client:destroy()
 	if self.srv then self.srv.destroy() end
+end
+
+
+function Client:sync( gid )
+	table.insert( self.syncObjs, gid )
 end
 
 

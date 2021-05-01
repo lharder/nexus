@@ -235,6 +235,12 @@ function Game:start( ipForServer, msgPerSec )
 		self.beacon = nil
 	end
 
+	-- stop and destroy negotiator
+	if self.negotiator then 
+		self.negotiator:destroy() 
+		self.negotiator = nil
+	end
+
 	-- sending interval per second
 	if msgPerSec then self.SEND_INTERVAL = 1 / msgPerSec end
 
@@ -260,6 +266,10 @@ function Game:start( ipForServer, msgPerSec )
 	self.client = Client.new( self )	
 end
 
+
+function Game:sync( gid )
+	self.client:sync( gid )
+end
 
 
 return Game
