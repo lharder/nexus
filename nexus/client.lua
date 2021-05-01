@@ -139,22 +139,27 @@ function Client:update()
 
 		-- send auto synced objects' data in a single event
 		if #self.syncObjs > 0 then
+			local hasData = false
+			
 			-- send out properties of auto-synced objects 
 			-- in a single common event
 			local syncEnv = Envelope.new( EVENT_TYPE_SYNC, "sync" )
 			for i, gid in ipairs( self.syncObjs ) do
 				local cid = self.registry:getClientId( gid )
 				if cid then
+					hasData = true
 					syncEnv:putString( i .. "gid", gid )
 					syncEnv:putVector3( i .. "pos", go.get_position( cid ) )
 					syncEnv:putQuat( i .. "rot", go.get_rotation( cid ) )
 				end
 			end
 			-- send to other clients immediately (not via queue)
-			for i, callsign in pairs( self.game.match.proposal ) do
-				local host = self.game.hosts:get( callsign )
-				if host.ip ~= self.game.meHost.ip then 
-					self.srv.send( syncEnv:serialize(), host.ip, self.game.CLIENT_PORT ) 
+			if hasData then 
+				for i, callsign in pairs( self.game.match.proposal ) do
+					local host = self.game.hosts:get( callsign )
+					if host.ip ~= self.game.meHost.ip then 
+						self.srv.send( syncEnv:serialize(), host.ip, self.game.CLIENT_PORT ) 
+					end
 				end
 			end
 		end
