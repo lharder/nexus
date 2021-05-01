@@ -60,7 +60,7 @@ end
 
 function init( self )
 	-- GAME:start( "192.168.178.24", 10 )
-	GAME:start( nil, 12 )
+	GAME:start( nil, 30 )
 
 	-- create serverside objects to run the game
 	if GAME:isServer() then
@@ -79,7 +79,7 @@ function init( self )
 			for i, callsign in pairs( GAME.match.proposal ) do
 				if i > #startPositions then i = 1 end
 				local pos = startPositions[ i ]
-				local speed = 60
+				local speed = 100
 
 				-- create one local hero on every game host / client ------------
 				-- who receives and transmits input from his player to all other hosts 

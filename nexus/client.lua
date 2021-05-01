@@ -37,18 +37,19 @@ function Client.new( game )
 			-- nexus sync events for gameobjects
 			-- pprint( "receive sync" )
 			local i = 1
-			local key
 			local gid
 			local cid
 			local pos
 			repeat
-				key = i .. "gid"
-				gid = evt:get( key )
+				gid = evt:get( i .. "gid" )
 				if gid then 
 					cid = this.registry:getClientId( gid )
 					if cid then
 						pos = evt:get( i .. "pos" )
 						if pos then go.set_position( pos, cid ) end
+						
+						rot = evt:get( i .. "rot" )
+						if rot then go.set_rotation( rot, cid ) end
 					end
 				end
 				i = i + 1
@@ -146,6 +147,7 @@ function Client:update()
 				if cid then
 					syncEnv:putString( i .. "gid", gid )
 					syncEnv:putVector3( i .. "pos", go.get_position( cid ) )
+					syncEnv:putQuat( i .. "rot", go.get_rotation( cid ) )
 				end
 			end
 			-- send to other clients immediately (not via queue)
