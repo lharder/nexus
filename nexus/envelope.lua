@@ -132,7 +132,7 @@ function Envelope.deserialize( serialized )
 	local serializedAttrs = map:get( "attrs" )
 
 	local meta = Defmap.deserialize( serializedMeta, "||" )
-	local attrs = Defmap.deserialize( serializedAttrs, "||" ) 
+	local attrs = Defmap.deserialize( serializedAttrs, "||" ) or Defmap.new( "||" )
 
 	local env = Envelope.new( 
 		meta:get( "type" ), meta:get( "url" ), meta:get( "latestOnly" ) 
