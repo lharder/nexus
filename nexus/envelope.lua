@@ -11,12 +11,12 @@ function Envelope.new( type, url, latestOnly )
 	assert( type, "Type of envelope required!" )
 	assert( url, "Url for envelope processing required!" )
 	if latestOnly == nil then latestOnly = false end
-	
+
 	this.meta = Defmap.new( "||" )
 	this.meta:putString( "url", url )
 	this.meta:putNumber( "type", type )  
 	this.meta:putBool( "latestOnly", latestOnly )  
-	
+
 	this.attrs = Defmap.new( "||" )
 
 	return this
@@ -24,12 +24,12 @@ end
 
 
 function Envelope:serialize()
-	local env = Defmap.new( "|||" )
+	local env = Defmap.new( "##" )
 	local strMeta = self.meta:serialize()
 	local strAttrs = self.attrs:serialize()
 	env:putString( "meta", strMeta )
 	env:putString( "attrs", strAttrs )
-	
+
 	return env:serialize()
 end
 
@@ -126,14 +126,14 @@ end
 
 function Envelope.deserialize( serialized )
 	assert( string.len( serialized ) > 0, "You must provide a serialized envelope string!" )
-	
-	local env = Defmap.deserialize( serialized, "|||" )
-	local serializedMeta = env:get( "meta" )
-	local serializedAttrs = env:get( "attrs" )
-	
+
+	local map = Defmap.deserialize( serialized, "##" )
+	local serializedMeta = map:get( "meta" )
+	local serializedAttrs = map:get( "attrs" )
+
 	local meta = Defmap.deserialize( serializedMeta, "||" )
-	local attrs = Defmap.deserialize( serializedAttrs, "||" )
-	
+	local attrs = Defmap.deserialize( serializedAttrs, "||" ) 
+
 	local env = Envelope.new( 
 		meta:get( "type" ), meta:get( "url" ), meta:get( "latestOnly" ) 
 	)
