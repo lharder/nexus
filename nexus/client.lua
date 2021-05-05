@@ -14,28 +14,26 @@ function Client.new( game )
 	setmetatable( this, Client )
 
 	this.game = game
-	
+
 	-- queue of events to send
 	this.queue = {}
 	this.nextSendTime = socket.gettime()
 	this.syncObjs = {}
-	
+
 	this.registry = Registry.new()
-	
+
 	this.indexOfTypes = {}
 
-	local evt 
-	local url
-	local id
 	this.srv = udp.create( function( data, ip, port )
 		assert( data, "Payload must be available in request!" )
-		
-		evt = Envelope.deserialize( data )
+
+		local url
+		local id
+		local evt = Envelope.deserialize( data )
 		-- pprint( "Client " .. self.game.meHost.ip .. " received: " .. Events.getName( evt ) .. " from " .. ip ) 
 
 		if evt:getType() == EVENT_TYPE_SYNC then
 			-- nexus sync events for gameobjects
-			-- pprint( "receive sync" )
 			local i = 1
 			local gid
 			local cid
@@ -47,14 +45,14 @@ function Client.new( game )
 					if cid then
 						pos = evt:get( i .. "pos" )
 						if pos then go.set_position( pos, cid ) end
-						
+
 						rot = evt:get( i .. "rot" )
 						if rot then go.set_rotation( rot, cid ) end
 					end
 				end
 				i = i + 1
 			until gid == nil
-	
+
 		else
 			-- custom game events
 			url = evt:getUrl()
@@ -64,10 +62,10 @@ function Client.new( game )
 				id = game.client.registry:getClientId( url )
 				evt:setUrl( msg.url( nil, id, nil ) )
 			end
-			
+
 			msg.post( evt:getUrl(), game.MSG_EXEC_CMD, evt:toTable() )
 		end
-			
+
 	end, game.CLIENT_PORT )
 
 	return this
@@ -107,7 +105,7 @@ function Client:send( ip, env, port )
 		-- any amount of same type envelopes can be sent
 		table.insert( self.queue, env )
 	end
-	
+
 end
 
 
@@ -140,7 +138,7 @@ function Client:update()
 		-- send auto synced objects' data in a single event
 		if #self.syncObjs > 0 then
 			local hasData = false
-			
+
 			-- send out properties of auto-synced objects 
 			-- in a single common event
 			local syncEnv = Envelope.new( EVENT_TYPE_SYNC, "sync" )
@@ -151,6 +149,9 @@ function Client:update()
 					syncEnv:putString( i .. "gid", gid )
 					syncEnv:putVector3( i .. "pos", go.get_position( cid ) )
 					syncEnv:putQuat( i .. "rot", go.get_rotation( cid ) )
+				else
+					-- object no longer exists, stop sync automatically
+					table.remove( self.syncObjs, i )
 				end
 			end
 			-- send to other clients immediately (not via queue)
@@ -163,7 +164,7 @@ function Client:update()
 				end
 			end
 		end
-		
+
 		-- send out everything in the queue
 		-- pprint( "Queue: " .. #self.queue )
 		for _, evt in ipairs( self.queue ) do
