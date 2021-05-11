@@ -42,9 +42,11 @@ end
 local Game = {}
 Game.__index = Game
 
-Game.SERVER_PORT = 9999
-Game.CLIENT_PORT = 9998
-Game.SEND_INTERVAL = 1 / 30
+Game.SERVER_PORT 	= 9999
+Game.CLIENT_PORT 	= 9998
+Game.SEARCH_PORT 	= 9997
+Game.SYNC_PORT 		= 9996
+Game.SEND_INTERVAL 	= 1 / 15
 
 Game.MSG_EXEC_CMD 	= hash( "execCmd" )
 

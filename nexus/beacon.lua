@@ -1,9 +1,6 @@
 local p2pLib = require( "defnet.p2p_discovery" )
 local Host = require( "nexus.host" )
 
-local SEARCH_PORT = 9997
-
-
 local Beacon = {}
 Beacon.__index = Beacon
 
@@ -17,11 +14,11 @@ function Beacon.new( game, callsign, onHostFound )
 
 	-- send out my beacon to other peers in the network
 	local msg = game.name .. callsign
-	this.sender = p2pLib.create( SEARCH_PORT )
+	this.sender = p2pLib.create( game.SEARCH_PORT )
 	this.sender.broadcast( msg )
 
 	-- listen to incoming peer messages on that same port 
-	this.listener = p2pLib.create( SEARCH_PORT )
+	this.listener = p2pLib.create( game.SEARCH_PORT )
 
 	-- message coming in contains the remote user's callsign
 	this.listener.listen( game.name, function( ip, port, message )

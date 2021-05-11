@@ -1,9 +1,30 @@
 local udp = require "defnet.udp"
 local Envelope = require( "nexus.envelope" )
+local Syncset = require( "nexus.syncset" )
 local Registry = require( "nexus.registry" )
 local Events = require( "level.playground.events" )
 
 local EVENT_TYPE_SYNC = -1
+local MSG_EXEC_CMD 	= hash( "execCmd" )
+
+
+local function syncHandler( data, ip, port )
+	-- nexus sync events for gameobjects
+	local evt = Syncset.deserialize( data )
+
+	gid = evt:getGlobalId()
+	if gid then 
+		cid = this.registry:getClientId( gid )
+		if cid then
+			pos = evt:getPosition()
+			if pos then go.set_position( pos, cid ) end
+
+			rot = evt:getRotation()
+			if rot then go.set_rotation( rot, cid ) end
+		end
+	end
+end
+
 
 
 local Client = {}
@@ -19,53 +40,23 @@ function Client.new( game )
 	this.queue = {}
 	this.nextSendTime = socket.gettime()
 	this.syncObjs = {}
-
 	this.registry = Registry.new()
-
 	this.indexOfTypes = {}
 
+	this.syncer = udp.create( syncHandler, game.SYNC_PORT )
+	
 	this.srv = udp.create( function( data, ip, port )
-		assert( data, "Payload must be available in request!" )
-
-		local url
-		local id
 		local evt = Envelope.deserialize( data )
-		-- pprint( "Client " .. self.game.meHost.ip .. " received: " .. Events.getName( evt ) .. " from " .. ip ) 
 
-		if evt:getType() == EVENT_TYPE_SYNC then
-			-- nexus sync events for gameobjects
-			local i = 1
-			local gid
-			local cid
-			local pos
-			repeat
-				gid = evt:get( i .. "gid" )
-				if gid then 
-					cid = this.registry:getClientId( gid )
-					if cid then
-						pos = evt:get( i .. "pos" )
-						if pos then go.set_position( pos, cid ) end
-
-						rot = evt:get( i .. "rot" )
-						if rot then go.set_rotation( rot, cid ) end
-					end
-				end
-				i = i + 1
-			until gid == nil
-
-		else
-			-- custom game events
-			url = evt:getUrl()
-			-- if no absolute url is available, it must be a global id: 
-			-- replace globalId with local url
-			if url:find( ":/", 1, true ) == nil then 
-				id = game.client.registry:getClientId( url )
-				evt:setUrl( msg.url( nil, id, nil ) )
-			end
-
-			msg.post( evt:getUrl(), game.MSG_EXEC_CMD, evt:toTable() )
+		-- custom game events
+		local url = evt:getUrl()
+		-- if no absolute url is available, it must be a global id: 
+		-- replace globalId with local url
+		if url:find( ":/", 1, true ) == nil then 
+			evt:setUrl( msg.url( nil, game.client.registry:getClientId( url ), nil ) )
 		end
 
+		msg.post( evt:getUrl(), game.MSG_EXEC_CMD, evt:toTable() )
 	end, game.CLIENT_PORT )
 
 	return this
@@ -128,6 +119,7 @@ end
 function Client:update()
 	-- listen to incoming network packets
 	if self.srv then self.srv.update( self ) end
+	if self.syncer then self.syncer.update( self ) end
 
 	-- send out events waiting in queue in fixed interval
 	now = socket.gettime()
@@ -137,29 +129,22 @@ function Client:update()
 
 		-- send auto synced objects' data in a single event
 		if #self.syncObjs > 0 then
-			local hasData = false
-
 			-- send out properties of auto-synced objects 
-			-- in a single common event
-			local syncEnv = Envelope.new( EVENT_TYPE_SYNC, "sync" )
 			for i, gid in ipairs( self.syncObjs ) do
 				local cid = self.registry:getClientId( gid )
 				if cid then
-					hasData = true
-					syncEnv:putString( i .. "gid", gid )
-					syncEnv:putVector3( i .. "pos", go.get_position( cid ) )
-					syncEnv:putQuat( i .. "rot", go.get_rotation( cid ) )
+					local syncset = Syncset.new( gid )
+					syncset:setPosition( go.get_position( cid ) )
+					syncset:setRotation( go.get_rotation( cid ) )
 				else
 					-- object no longer exists, stop sync automatically
 					table.remove( self.syncObjs, i )
 				end
-			end
-			-- send to other clients immediately (not via queue)
-			if hasData then 
+
 				for i, callsign in pairs( self.game.match.proposal ) do
 					local host = self.game.hosts:get( callsign )
 					if host.ip ~= self.game.meHost.ip then 
-						self.srv.send( syncEnv:serialize(), host.ip, self.game.CLIENT_PORT ) 
+						self.srv.send( syncset:serialize(), host.ip, self.game.SYNC_PORT ) 
 					end
 				end
 			end
@@ -179,6 +164,7 @@ end
 
 function Client:destroy()
 	if self.srv then self.srv.destroy() end
+	if self.syncer then self.syncer.destroy() end
 end
 
 
