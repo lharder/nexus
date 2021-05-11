@@ -8,24 +8,6 @@ local EVENT_TYPE_SYNC = -1
 local MSG_EXEC_CMD 	= hash( "execCmd" )
 
 
-local function syncHandler( data, ip, port )
-	-- nexus sync events for gameobjects
-	local evt = Syncset.deserialize( data )
-
-	gid = evt:getGlobalId()
-	if gid then 
-		cid = this.registry:getClientId( gid )
-		if cid then
-			pos = evt:getPosition()
-			if pos then go.set_position( pos, cid ) end
-
-			rot = evt:getRotation()
-			if rot then go.set_rotation( rot, cid ) end
-		end
-	end
-end
-
-
 
 local Client = {}
 Client.__index = Client
@@ -43,8 +25,25 @@ function Client.new( game )
 	this.registry = Registry.new()
 	this.indexOfTypes = {}
 
-	this.syncer = udp.create( syncHandler, game.SYNC_PORT )
-	
+	-- server for auto sync gameobject states
+	this.syncer = udp.create( function( data, ip, port )
+		-- nexus sync events for gameobjects
+		local evt = Syncset.deserialize( data )
+
+		gid = evt:getGlobalId()
+		if gid then 
+			cid = this.registry:getClientId( gid )
+			if cid then
+				pos = evt:getPosition()
+				if pos then go.set_position( pos, cid ) end
+
+				rot = evt:getRotation()
+				if rot then go.set_rotation( rot, cid ) end
+			end
+		end
+	end, game.SYNC_PORT )
+
+	-- server for regular communications
 	this.srv = udp.create( function( data, ip, port )
 		local evt = Envelope.deserialize( data )
 
@@ -136,16 +135,16 @@ function Client:update()
 					local syncset = Syncset.new( gid )
 					syncset:setPosition( go.get_position( cid ) )
 					syncset:setRotation( go.get_rotation( cid ) )
+
+					for i, callsign in pairs( self.game.match.proposal ) do
+						local host = self.game.hosts:get( callsign )
+						if host.ip ~= self.game.meHost.ip then 
+							self.srv.send( syncset:serialize(), host.ip, self.game.SYNC_PORT ) 
+						end
+					end
 				else
 					-- object no longer exists, stop sync automatically
 					table.remove( self.syncObjs, i )
-				end
-
-				for i, callsign in pairs( self.game.match.proposal ) do
-					local host = self.game.hosts:get( callsign )
-					if host.ip ~= self.game.meHost.ip then 
-						self.srv.send( syncset:serialize(), host.ip, self.game.SYNC_PORT ) 
-					end
 				end
 			end
 		end
