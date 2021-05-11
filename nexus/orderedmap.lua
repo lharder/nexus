@@ -1,9 +1,9 @@
-local Map = {}
-Map.__index = Map
+local OrderedMap = {}
+OrderedMap.__index = OrderedMap
 
-function Map.new()
+function OrderedMap.new()
 	local this = {}
-	setmetatable( this, Map )
+	setmetatable( this, OrderedMap )
 
 	this.keyValues = {}
 	this.orderedKeys = {}
@@ -11,28 +11,28 @@ function Map.new()
 	return this
 end
 
-function Map:put( key, value )
+function OrderedMap:put( key, value )
 	table.insert( self.orderedKeys, key )
 	self.keyValues[ key ] = value
 end	
 
-function Map:get( key )
+function OrderedMap:get( key )
 	return self.keyValues[ key ]
 end
 
-function Map:has( key )
+function OrderedMap:has( key )
 	return self.keyValues[ key ] ~= nil
 end
 
-function Map:size()
+function OrderedMap:size()
 	return #self.orderedKeys
 end
 
-function Map:keys()
+function OrderedMap:keys()
 	return self.orderedKeys
 end
 
-function Map:contains( value )
+function OrderedMap:contains( value )
 	local res = false
 	local k
 	for _, key in ipairs( self:keys() ) do
@@ -46,5 +46,5 @@ function Map:contains( value )
 end
 
 
-return Map
+return OrderedMap
 

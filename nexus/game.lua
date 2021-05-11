@@ -1,5 +1,5 @@
 local lua = require( "deflibs.lualib" )
-local Map = require( "nexus.map" )
+local OrderedMap = require( "nexus.orderedmap" )
 local udp = require( "defnet.udp" )
 local Beacon = require( "nexus.beacon" )
 local Server = require( "nexus.server" )
@@ -128,7 +128,7 @@ function Game.new( name )
 	setmetatable( this, Game )
 
 	this.name = name
-	this.hosts = Map.new()
+	this.hosts = OrderedMap.new()
 	this.callbacks = {}
 	
 	return this

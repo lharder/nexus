@@ -1,5 +1,4 @@
 require( "deflibs.defold" )
-local Map = require( "nexus.map" )
 
 local Game = require( "nexus.game" )
 local lua = require( "deflibs.lualib" )
@@ -13,5 +12,67 @@ GAME = Game.new( "MultiPlayerGame" )
 function init( self )
 	lua.randomize()
 	msg.post( "main:/screenmaster", "load", { level = "setup" } ) 
+
+	--[[
+	local pos = vmath.vector3( 100, 200, 0 )
+	local rot = go.get_rotation()
+
+	local sync = Syncset.new( "playerA" )
+	sync:setPosition( pos )
+	sync:setRotation( rot )
+	
+	local defmap = Defmap.new( "||" )
+	defmap:putString( "gid", "playerA" )
+	defmap:putVector3( "pos", pos )
+	defmap:putQuat( "rot", rot )
+
+	local foo = Serializable.new()
+	foo:putString( "bar", "Hello" )
+	foo:putNumber( "baz", 123 )
+	
+	local ser = Serializable.new()
+	ser:putString( "gid", "playerA" )
+	ser:putVector3( "pos", pos )
+	ser:putQuat( "rot", rot ) 
+	-- ser:putSerializable( "foo", foo )
+
+	local obj
+	local MIO = 1000000
+	local MIO2 = 2 * MIO
+
+	
+	------------------
+	local now = socket.gettime()
+	for i = 1, MIO2, 1 do
+		obj = Defmap.deserialize( defmap:serialize() )
+	end
+	local defmapTime = socket.gettime() - now
+	pprint( "Defmap: " .. defmapTime.. " sec" )
+
+	------------------
+	now = socket.gettime()
+	for i = 1, MIO2, 1 do
+		obj = Syncset.deserialize( sync:serialize() )
+	end
+	local syncTime = socket.gettime() - now
+	pprint( "Syncset: " .. syncTime .. " sec" )
+
+	------------------
+
+	now = socket.gettime()
+	for i = 1, MIO2, 1 do
+		obj = Serializable.deserialize( ser:serialize() )
+	end
+	local syncTime = socket.gettime() - now
+	pprint( "Serializable: " .. syncTime .. " sec" )
+	
+
+	--[[
+	pprint( ser:serialize() )
+	obj = Serializable.deserialize( ser:serialize() )
+	pprint( obj:get( "pos" ) )
+	pprint( obj:get( "foo" ) )
+	--]]
+	
 end
 
