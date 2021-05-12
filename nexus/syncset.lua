@@ -1,6 +1,31 @@
-require( "deflibs.lualib" )
+local stringsub   	= string.sub
+local stringfind  	= string.find
+local sprintf 		= string.format
 
 
+local function stringsplit( txt, delim )
+	local t = {} 
+	local wordStart = 1
+	local delimStart, delimEnd 
+	local i = 1
+	while true  do
+		delimStart, delimEnd = stringfind( txt, delim, wordStart, true )
+		if delimStart == nil then 
+			if wordStart <= #txt then 
+				t[ i ] = stringsub( txt, wordStart )
+			end 
+			break
+		end
+		t[ i ] = stringsub( txt, wordStart, delimStart - 1 )
+		wordStart = delimEnd + 1
+
+		i = i + 1
+	end 
+	return t
+end
+
+
+-- Syncset --------------
 local Syncset = {}
 Syncset.__index = Syncset
 
@@ -49,7 +74,7 @@ end
 
 
 function Syncset.deserialize( serialized )
-	local parts = serialized:split( "|" )
+	local parts = stringsplit( serialized, "|" )
 	if #parts == 8 then 
 		local sync = Syncset.new( parts[ 1 ] )
 		sync.pos = vmath.vector3( tonumber( parts[ 2 ] ), tonumber( parts[ 3 ] ), tonumber( parts[ 4 ] ) ) 

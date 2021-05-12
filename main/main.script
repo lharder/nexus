@@ -17,7 +17,7 @@ function init( self )
 	lua.randomize()
 	msg.post( "main:/screenmaster", "load", { level = "setup" } ) 
 
-	--[[
+	
 	local pos = vmath.vector3( 100, 200, 0 )
 	local rot = go.get_rotation()
 
@@ -29,11 +29,6 @@ function init( self )
 	foo:putString( "bar", "Hello" )
 	foo:putNumber( "baz", 123 )
 	
-	local serOLD = SerializableOLD.new()
-	serOLD:putString( "gid", "playerA" )
-	serOLD:putVector3( "pos", pos )
-	serOLD:putQuat( "rot", rot ) 
-
 	local ser = Serializable.new()
 	ser:putString( "gid", "playerA" )
 	ser:putVector3( "pos", pos )
@@ -43,7 +38,7 @@ function init( self )
 	local obj
 	local MIO = 1000000
 
-	
+	--[[
 	------------------
 	now = socket.gettime()
 	for i = 1, MIO, 1 do
@@ -51,14 +46,6 @@ function init( self )
 	end
 	local syncTime = socket.gettime() - now
 	pprint( "Syncset: " .. syncTime .. " sec" )
-
-	------------------
-	now = socket.gettime()
-	for i = 1, MIO, 1 do
-		obj = SerializableOLD.deserialize( serOLD:serialize() )
-	end
-	local syncTime = socket.gettime() - now
-	pprint( "SerializableOLD: " .. syncTime .. " sec" )
 
 	------------------
 	now = socket.gettime()
