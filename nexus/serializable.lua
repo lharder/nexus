@@ -4,6 +4,13 @@ require( "deflibs.lualib" )
 local Serializable = {}
 Serializable.__index = Serializable
 
+-- performance improvement
+local pairs       = pairs
+local stringbyte  = string.byte
+local stringchar  = string.char
+local stringsub   = string.sub
+local tableconcat = table.concat
+
 
 -- TypeValuePair -----------------------
 local TypeValuePair = {}
@@ -16,34 +23,34 @@ function TypeValuePair.new( type, value )
 	function this:serialize()
 		if this.type == "n" then 
 			local tmp = tostring( this.value )
-			return "n" .. string.char( #tmp ) .. tmp
+			return "n" .. stringchar( #tmp ) .. tmp
 
 		elseif this.type == "s" then 
-			return "s" .. string.char( #this.value ) .. this.value 
+			return "s" .. stringchar( #this.value ) .. this.value 
 
 		elseif this.type == "b" then 
 			if this.value then 
-				return "b" .. string.char( 1 ) .. "1" 
+				return "b" .. stringchar( 1 ) .. "1" 
 			else 
-				return "b" .. string.char( 1 ) .. "0" 
+				return "b" .. stringchar( 1 ) .. "0" 
 			end
 			
 		elseif this.type == "v" then 
 			local tx = tostring( this.value.x )
 			local ty = tostring( this.value.y )
 			local tz = tostring( this.value.z )
-			return "v" .. string.char( #tx ) .. tx .. string.char( #ty ) .. ty .. string.char( #tz ) .. tz 
+			return "v" .. stringchar( #tx ) .. tx .. stringchar( #ty ) .. ty .. stringchar( #tz ) .. tz 
 			
 		elseif this.type == "q" then 
 			local tx = tostring( this.value.x )
 			local ty = tostring( this.value.y )
 			local tz = tostring( this.value.z )
 			local tw = tostring( this.value.w )
-			return "q" .. string.char( #tx ) .. tx .. string.char( #ty ) .. ty .. string.char( #tz ) .. tz .. string.char( #tw ) .. tw
+			return "q" .. stringchar( #tx ) .. tx .. stringchar( #ty ) .. ty .. stringchar( #tz ) .. tz .. stringchar( #tw ) .. tw
 
 		elseif this.type == "x" then 
 			local ts = this.value:serialize()
-			return "x" .. string.char( #ts ) .. ts
+			return "x" .. stringchar( #ts ) .. ts
 			
 		end
 	end
@@ -56,13 +63,13 @@ function TypeValuePair.deserialize( serialized )
 	-- {type}{length of value as char}{value}
 	local tvp
 
-	local type = serialized:sub( 1, 1 )
+	local type = stringsub( serialized, 1, 1 )
 	local lnValue
 	local offset = 0
 	local values = {}
 
-	lnValue = serialized:byte( 2, 2 )
-	values[ 1 ]  = serialized:sub( 3, 2 + lnValue )
+	lnValue = stringbyte( serialized, 2, 2 )
+	values[ 1 ]  = stringsub( serialized, 3, 2 + lnValue )
 	offset = 3 + lnValue
 	
 	if type == "n" then
@@ -75,12 +82,12 @@ function TypeValuePair.deserialize( serialized )
 		tvp = TypeValuePair.new( type, values[ 1 ] == "1" ) 
 
 	elseif type == "v" then 
-		lnValue = serialized:byte( offset, offset )
-		values[ 2 ] = serialized:sub( offset + 1, offset + lnValue )	
+		lnValue = stringbyte( serialized, offset, offset )
+		values[ 2 ] = stringsub( serialized, offset + 1, offset + lnValue )	
 		offset = offset + 1 + lnValue
 
-		lnValue = serialized:byte( offset, offset )
-		values[ 3 ] = serialized:sub( offset + 1, offset + lnValue )	
+		lnValue = stringbyte( serialized, offset, offset )
+		values[ 3 ] = stringsub( serialized, offset + 1, offset + lnValue )	
 		offset = offset + 1 + lnValue
 		
 		tvp = TypeValuePair.new( type, vmath.vector3(
@@ -88,16 +95,16 @@ function TypeValuePair.deserialize( serialized )
 		)) 
 
 	elseif type == "q" then 
-		lnValue = serialized:byte( offset, offset )
-		values[ 2 ] = serialized:sub( offset + 1, offset + lnValue )	
+		lnValue = stringbyte( serialized, offset, offset )
+		values[ 2 ] = stringsub( serialized, offset + 1, offset + lnValue )	
 		offset = offset + 1 + lnValue
 
-		lnValue = serialized:byte( offset, offset )
-		values[ 3 ] = serialized:sub( offset + 1, offset + lnValue )	
+		lnValue = stringbyte( serialized, offset, offset )
+		values[ 3 ] = stringsub( serialized, offset + 1, offset + lnValue )	
 		offset = offset + 1 + lnValue
 
-		lnValue = serialized:byte( offset, offset )
-		values[ 4 ] = serialized:sub( offset + 1, offset + lnValue )	
+		lnValue = stringbyte( serialized, offset, offset )
+		values[ 4 ] = stringsub( serialized, offset + 1, offset + lnValue )	
 		offset = offset + 1 + lnValue
 		
 		tvp = TypeValuePair.new( type, vmath.quat(
@@ -111,7 +118,7 @@ function TypeValuePair.deserialize( serialized )
 	end
 
 	-- return object and the part of serialized that has not been processed yet
-	return tvp, serialized:sub( offset )
+	return tvp, stringsub( serialized, offset )
 end
 
 
@@ -182,11 +189,11 @@ function Serializable:serialize()
 	local parts = {}
 	local i = 1
 	for key, tvp in pairs( self.attrs ) do 
-		parts[ i ] = string.char( #key ) .. key .. tvp:serialize()
+		parts[ i ] = stringchar( #key ) .. key .. tvp:serialize()
 		i = i + 1
 	end
 
-	return table.concat( parts )
+	return tableconcat( parts )
 end
 
 
@@ -198,10 +205,10 @@ function Serializable.deserialize( serialized )
 	local offset
 	local obj = Serializable.new()
 	repeat
-		lnKey = serialized:byte( 1, 1 )
-		key = serialized:sub( 2, 1 + lnKey )
+		lnKey = stringbyte( serialized, 1, 1 )
+		key = stringsub( serialized, 2, 1 + lnKey )
 		
-		tvp, serialized = TypeValuePair.deserialize( serialized:sub( 2 + lnKey ) )
+		tvp, serialized = TypeValuePair.deserialize( stringsub( serialized, 2 + lnKey ) )
 		obj:put( tvp.type, key, tvp.value )
 
 	until #serialized == 0
