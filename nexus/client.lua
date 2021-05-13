@@ -93,28 +93,7 @@ function Client:send( ip, env, port )
 	env:setIP( ip )
 	env:setPort( port )
 
-	-- redundant information should be sent once per batch only,
-	-- e.g. multiple position data of gameobjects. Allow for 
-	-- keeping track of all envelopes for the next batch sending
-	-- and send only one of that type per batch if flag is set
-	if env:getLatestOnly() then 
-		-- for "latestOnly"-envelope-types, remember its position 
-		-- in array and if another shows up, replace the first
-		local index = self.indexOfTypes[ env:getType() ]
-		if index then 
-			-- previous one already exists, replace in situ
-			-- pprint( "Replace envelope: latest only..." )
-			self.queue[ index ] = env
-		else
-			-- first time this type occurrs in this batch
-			table.insert( self.queue, env )
-			self.indexOfTypes[ env:getType() ] = #self.queue
-		end
-	else 
-		-- any amount of same type envelopes can be sent
-		table.insert( self.queue, env )
-	end
-
+	self.queue[ #self.queue + 1 ] = env 
 end
 
 

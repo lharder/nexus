@@ -4,19 +4,17 @@ local Serializable = require( "nexus.serializable" )
 local Envelope = {}
 Envelope.__index = Envelope
 
-function Envelope.new( type, url, latestOnly )
+function Envelope.new( type, url )
 	local this = {}
 	setmetatable( this, Envelope )
 
 	assert( type, "Type of envelope required!" )
 	assert( url, "Url for envelope processing required!" )
-	if latestOnly == nil then latestOnly = false end
-
+	
 	this.meta = Serializable.new()
 	this.meta:putString( "url", url )
 	this.meta:putNumber( "type", type )  
-	this.meta:putBool( "latestOnly", latestOnly )  
-
+	
 	this.attrs = Serializable.new()
 
 	return this
@@ -70,14 +68,6 @@ function Envelope:setType( type )
 	return self.meta:putNumber( "type", type )
 end
 
-
-function Envelope:getLatestOnly( )
-	return self.meta:get( "latestOnly" )
-end
-
-function Envelope:setLatestOnly( isLatestOnly )
-	return self.meta:setBool( "latestOnly", isLatestOnly )
-end
 
 
 -- Custom defined attributes -------------------
@@ -135,7 +125,7 @@ function Envelope.deserialize( serialized )
 	local attrs = Serializable.deserialize( serializedAttrs ) or Serializable.new()
 
 	local env = Envelope.new( 
-		meta:get( "type" ), meta:get( "url" ), meta:get( "latestOnly" ) 
+		meta:get( "type" ), meta:get( "url" ) 
 	)
 	env.attrs = attrs
 
