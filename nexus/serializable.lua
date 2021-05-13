@@ -206,6 +206,8 @@ end
 
 
 function Serializable.deserialize( serialized )
+	if #serialized == 0 then return Serializable.new() end
+
 	local key
 	local lnKey
 	local tvp
