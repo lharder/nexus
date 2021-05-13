@@ -1,6 +1,9 @@
 local stringsub   	= string.sub
 local stringfind  	= string.find
 local sprintf 		= string.format
+local tonumber 		= tonumber
+local vmathvector3 	= vmath.vector3
+local vmathquat 	= vmath.quat
 
 
 local function stringsplit( txt, delim )
@@ -59,76 +62,109 @@ function Syncset:setRotation( rot )
 end
 
 
+function Syncset:get( key )
+	if self.attrs == nil then return nil end
+	
+	local tv = self.attrs[ key ]
+	return tv.value
+end
+
+
+function Syncset:hasCustomProps()
+	return self.attrs ~= nil
+end
+
+
+function Syncset:put( key, type, value )
+	if self.attrs == nil then self.attrs = {} end
+	self.attrs[ key ] = { type = type,  value = value }
+end
+
+
 function Syncset:getRotation()
 	return self.rot
 end
 
 
 function Syncset:serialize()
-	return sprintf( "%s|%d|%d|%d|%d|%d|%d|%d",
+	local cust = ""
+	if self.attrs then 
+		local tmp = {}
+		local i = 1
+		for key, tv in pairs( self.attrs ) do
+			if tv.type == "v" then
+				tmp[ i ] = key .. "|v|" .. tv.value.x .. "|" .. tv.value.y .. "|" .. tv.value.z
+				i = i + 1
+				
+			elseif tv.type == "n" then 
+				tmp[ i ] = key .. "|n|" .. tv.value
+				i = i + 1
+
+			elseif tv.type == "b" then 
+				tmp[ i ] = key .. "|b|" .. tostring( tv.value )
+				i = i + 1
+
+			elseif tv.type == "q" then 
+				tmp[ i ] = key .. "|v|" .. tv.value.x .. "|" .. tv.value.y .. "|" .. tv.value.z
+				i = i + 1
+				
+			end
+		end 
+		cust = "|" .. table.concat( tmp, "|" )
+		
+	end
+		
+	return sprintf( "%s|%f|%f|%f|%f|%f|%f|%f%s",
 		self.gid,
 		self.pos.x, self.pos.y, self.pos.z,
-		self.rot.x, self.rot.y, self.rot.z, self.rot.w 
+		self.rot.x, self.rot.y, self.rot.z, self.rot.w,
+		cust 
 	)
 end
 
 
 function Syncset.deserialize( serialized )
 	local parts = stringsplit( serialized, "|" )
-	if #parts == 8 then 
-		local sync = Syncset.new( parts[ 1 ] )
-		sync.pos = vmath.vector3( tonumber( parts[ 2 ] ), tonumber( parts[ 3 ] ), tonumber( parts[ 4 ] ) ) 
-		sync.rot = vmath.quat( tonumber( parts[ 5 ] ), tonumber( parts[ 6 ] ), tonumber( parts[ 7 ] ), tonumber( parts[ 8 ] ) ) 
-		return sync 
-	end
-	return nil
-end
-
---[[
-function Syncset:serializeC()
-	local nums = {}
-	nums[ 1 ] = self.pos.x
-	nums[ 2 ] = self.pos.y
-	nums[ 3 ] = self.pos.z
-	nums[ 4 ] = self.rot.x
-	nums[ 5 ] = self.rot.y
-	nums[ 6 ] = self.rot.z
-	nums[ 7 ] = self.rot.w
-
-	local ln 
-	local parts = {}
-	local j = 2
-	for i = 1, 7, 1 do
-		parts[ j ] = tostring( nums[ i ] )
-		ln = #parts[ j ]
-		parts[ j - 1 ] = string.char( ln )
-		j = j + 2
-	end
-
-	return table.concat( parts )
-end
-
-
-function Syncset.deserializeC( serialized )
-	local ln
-	local raw
-	local offstart = 1
-	local max = #serialized
-	local parts = {}
-	local i = 1
-	repeat
-		ln = serialized:sub( offstart, offstart ):byte()
-		parts[ i ] = serialized:sub( offstart + 1, offstart + ln )
-		offstart = offstart + ln + 1
-		i = i + 1
-	until offstart >= max
 
 	local sync = Syncset.new( parts[ 1 ] )
-	sync.pos = vmath.vector3( tonumber( parts[ 2 ] ), tonumber( parts[ 3 ] ), tonumber( parts[ 4 ] ) )
-	sync.rot = vmath.vector3( tonumber( parts[ 5 ] ), tonumber( parts[ 6 ] ), tonumber( parts[ 7 ] ), tonumber( parts[ 8 ] ) )
+	sync.pos = vmathvector3( parts[ 2 ], parts[ 3 ], parts[ 4 ] ) 
+	sync.rot = vmathquat( parts[ 5 ], parts[ 6 ], parts[ 7 ], parts[ 8 ] ) 
+
+	if #parts > 8 then
+		local i = 9
+		local type
+		local key
+		local value 
+		while parts[ i ] do
+			key = parts[ i ]
+			type = parts[ i + 1 ]
+			
+			if type == "v" then 
+				sync:put( key, vmathvector3( 
+					parts[ i + 2 ], parts[ i + 3 ], parts[ i + 4 ] 
+				))
+				i = i + 5
+				
+			elseif type == "q" then 
+				sync:put( key, vmathquat( 
+					parts[ i + 2 ], parts[ i + 3 ], parts[ i + 4 ], parts[ i + 5 ]  
+				))
+				i = i + 6
+				
+			elseif type == "b" then 
+				sync:put( key, "true" == parts[ i + 2 ] )
+				i = i + 3
+				
+			elseif type == "n" then 
+				sync:put( key, tonumber( parts[ i + 2 ] ) )
+				i = i + 3
+				
+			end
+		end
+	end
 	
-	return sync
+	return sync 
 end
---]]
+
 
 return Syncset

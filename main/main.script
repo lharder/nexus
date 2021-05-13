@@ -13,19 +13,24 @@ GAME = Game.new( "MultiPlayerGame" )
 -------------------------------------
 
 
-
 function init( self )
 	lua.randomize()
 	msg.post( "main:/screenmaster", "load", { level = "setup" } ) 
 
 	--[[
-	local pos = vmath.vector3( 100, 200, 0 )
+	local pos = vmath.vector3( 100, 200, 0.5 )
 	local rot = go.get_rotation()
 
 	local sync = Syncset.new( "playerA" )
 	sync:setPosition( pos )
 	sync:setRotation( rot )
+	-- beware: every cust prop costs much performance!
+	-- sync:put( "dir", "v", pos )
 
+	local syncOLD = SyncsetOLD.new( "playerA" )
+	syncOLD:setPosition( pos )
+	syncOLD:setRotation( rot )
+	
 	local foo = Serializable.new()
 	foo:putString( "bar", "Hello" )
 	foo:putNumber( "baz", 123 )
@@ -36,8 +41,18 @@ function init( self )
 	ser:putQuat( "rot", rot ) 
 	-- ser:putSerializable( "foo", foo )
 
+	pprint( sync:serialize() )
+	
 	local obj
 	local MIO = 1000000
+
+	------------------
+	now = socket.gettime()
+	for i = 1, MIO, 1 do
+		obj = SyncsetOLD.deserialize( syncOLD:serialize() )
+	end
+	local syncTime = socket.gettime() - now
+	pprint( "SyncsetOLD: " .. syncTime .. " sec" )
 
 	------------------
 	now = socket.gettime()
@@ -47,6 +62,7 @@ function init( self )
 	local syncTime = socket.gettime() - now
 	pprint( "Syncset: " .. syncTime .. " sec" )
 
+	--[[
 	------------------
 	now = socket.gettime()
 	for i = 1, MIO, 1 do
@@ -54,7 +70,7 @@ function init( self )
 	end
 	local syncTime = socket.gettime() - now
 	pprint( "Serializable: " .. syncTime .. " sec" )
-
+	--]]
 		
 	--[[
 	pprint( ser:serialize() )

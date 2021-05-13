@@ -8,7 +8,20 @@ local EVENT_TYPE_SYNC = -1
 local MSG_EXEC_CMD 	= hash( "execCmd" )
 
 
+-- Syncinfo ----------------------
+local Syncinfo = {}
+function Syncinfo.new( gid, custKeyTypes )
+	local this = {}
+	
+	this.gid = gid
+	this.custKeyTypes = custKeyTypes
+	this.hasCustomProps = custKeyTypes ~= nil
 
+	return this
+end
+
+
+-- Client -------------------------
 local Client = {}
 Client.__index = Client
 
@@ -39,6 +52,12 @@ function Client.new( game )
 
 				rot = evt:getRotation()
 				if rot then go.set_rotation( rot, cid ) end
+
+				if evt:hasCustomProps() then 
+					for key, value in pairs( evt.attrs ) do 
+						go.set( msg.url( nil, cid, "script" ), key, value )
+					end
+				end
 			end
 		end
 	end, game.SYNC_PORT )
@@ -129,13 +148,22 @@ function Client:update()
 		-- send auto synced objects' data in a single event
 		if #self.syncObjs > 0 then
 			-- send out properties of auto-synced objects 
-			for i, gid in ipairs( self.syncObjs ) do
-				local cid = self.registry:getClientId( gid )
+			for i, syncinfo in ipairs( self.syncObjs ) do
+				local cid = self.registry:getClientId( syncinfo.gid )
 				if cid then
 					local syncset = Syncset.new( gid )
 					syncset:setPosition( go.get_position( cid ) )
 					syncset:setRotation( go.get_rotation( cid ) )
 
+					-- try to avoid custom properties! Cost performance.
+					-- But if necessary, include keys, types and values...
+					if syncinfo.hasCustomProps then 
+						for _, kt in ipairs( syncinfo.custKeyTypes ) do 
+							syncset:put( kt.key, kt.type, go.get( msg.url( nil, cid, "script" ), kt.key ) )
+						end
+					end
+
+					-- send syncset to all clients
 					for i, callsign in pairs( self.game.match.proposal ) do
 						local host = self.game.hosts:get( callsign )
 						if host.ip ~= self.game.meHost.ip then 
@@ -167,8 +195,12 @@ function Client:destroy()
 end
 
 
-function Client:sync( gid )
-	table.insert( self.syncObjs, gid )
+function Client:sync( gid, custKeyTypes )
+	-- ---------------------------------
+	-- Convention: Nexus assumes custom properties to be 
+	-- defined in a gameobject script named "{cid}#script"!
+	-- ---------------------------------
+	table.insert( self.syncObjs, Syncinfo.new( gid, custKeyTypes ) )
 end
 
 

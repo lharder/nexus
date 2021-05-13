@@ -1,5 +1,5 @@
 components {
-  id: "player"
+  id: "script"
   component: "/level/playground/behaviors/player.script"
   position {
     x: 0.0

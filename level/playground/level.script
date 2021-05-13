@@ -43,6 +43,9 @@ local function parse( message )
 
 		-- sync the local hero to other clients directly
 		if message.attrs.isLocalHero then 
+			-- Better avoid custom properties! Costs performance...
+			-- local customProps = {{ key = "speed",  type = "n" }}
+			-- GAME:sync( message.attrs.gid, customProps ) 
 			GAME:sync( message.attrs.gid ) 
 		end
 		
@@ -60,7 +63,7 @@ end
 
 function init( self )
 	-- GAME:start( "192.168.178.24", 10 )
-	GAME:start( nil, 30 )
+	GAME:start( nil, 20 )
 
 	-- create serverside objects to run the game
 	if GAME:isServer() then

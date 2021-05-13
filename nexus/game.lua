@@ -269,8 +269,8 @@ function Game:start( ipForServer, msgPerSec )
 end
 
 
-function Game:sync( gid )
-	self.client:sync( gid )
+function Game:sync( gid, custKeyTypes )
+	self.client:sync( gid, custKeyTypes )
 end
 
 
