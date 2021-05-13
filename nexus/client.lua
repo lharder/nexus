@@ -151,7 +151,7 @@ function Client:update()
 			for i, syncinfo in ipairs( self.syncObjs ) do
 				local cid = self.registry:getClientId( syncinfo.gid )
 				if cid then
-					local syncset = Syncset.new( gid )
+					local syncset = Syncset.new( syncinfo.gid )
 					syncset:setPosition( go.get_position( cid ) )
 					syncset:setRotation( go.get_rotation( cid ) )
 
