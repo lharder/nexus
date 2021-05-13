@@ -1,8 +1,11 @@
 require( "deflibs.lualib" )
 
--- Serializable -----------------------
-local Serializable = {}
-Serializable.__index = Serializable
+------------------------------
+-- Tried several versions and variants: 
+-- * binary conversion attempt was ca. 50% slower (surprisingly)
+-- * Britzl's Desert is 3x slower (more functions, complicated usage)
+-- * highly specialized, non-generic Syncset is 3x faster (no fair comparison)
+------------------------------
 
 -- performance improvement
 local pairs       = pairs
@@ -11,6 +14,10 @@ local stringchar  = string.char
 local stringsub   = string.sub
 local tableconcat = table.concat
 
+
+-- Serializable -----------------------
+local Serializable = {}
+Serializable.__index = Serializable
 
 -- TypeValuePair -----------------------
 local TypeValuePair = {}
@@ -202,7 +209,6 @@ function Serializable.deserialize( serialized )
 	local key
 	local lnKey
 	local tvp
-	local offset
 	local obj = Serializable.new()
 	repeat
 		lnKey = stringbyte( serialized, 1, 1 )
@@ -210,9 +216,8 @@ function Serializable.deserialize( serialized )
 		
 		tvp, serialized = TypeValuePair.deserialize( stringsub( serialized, 2 + lnKey ) )
 		obj:put( tvp.type, key, tvp.value )
-
+		
 	until #serialized == 0
-
 	return obj	
 end
 
