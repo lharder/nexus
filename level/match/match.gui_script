@@ -1,9 +1,10 @@
 local defgui = require( "defgui.defgui" )
+local Host = require( "nexus.host" )
 
 local MSG_SCREEN_LOADED = hash( "screenmaster:loaded" )
 
 
-function display( self )
+local function display( self )
 	local x = -190
 	local y = 450
 	
@@ -81,6 +82,12 @@ function init( self )
 		label = "label/root",
 	})
 
+	--[[
+	GAME:addHost( Host.new( "127.0.0.1", GAME.SEARCH_PORT, "foo-foo-foo" ) )
+	GAME:addHost( Host.new( "127.0.0.2", GAME.SEARCH_PORT, "bar-bar-bar" ) )
+	GAME:addHost( Host.new( "127.0.0.3", GAME.SEARCH_PORT, "baz-baz-baz" ) )
+	--]]
+	display( self )
 end
 
 
