@@ -5,18 +5,11 @@ local MSG_SCREEN_LOADED = hash( "screenmaster:loaded" )
 
 
 local function display( self )
-	local x = -190
+	local x = 50
 	local y = 450
 	
 	-- display a checkbox for each callsign
 	for _, callsign in ipairs( GAME.hosts:keys() ) do
-		-- calc position
-		x = x + 240
-		if x > 900 then
-			x = -190
-			y = y - 50
-		end
-				
 		-- does a checkbox exist already?
 		local checkbox = self.form.fields[ callsign ] 
 		if checkbox == nil then
@@ -26,6 +19,13 @@ local function display( self )
 				callsign 
 			)
 			checkbox:check( true )
+		end
+
+		-- calculate new position
+		x = x + 240
+		if x > 900 then
+			x = 50
+			y = y - 50
 		end
 	end
 end
@@ -82,11 +82,12 @@ function init( self )
 		label = "label/root",
 	})
 
-	--[[
+	
 	GAME:addHost( Host.new( "127.0.0.1", GAME.SEARCH_PORT, "foo-foo-foo" ) )
 	GAME:addHost( Host.new( "127.0.0.2", GAME.SEARCH_PORT, "bar-bar-bar" ) )
 	GAME:addHost( Host.new( "127.0.0.3", GAME.SEARCH_PORT, "baz-baz-baz" ) )
-	--]]
+	GAME:addHost( Host.new( "127.0.0.3", GAME.SEARCH_PORT, "bingo-bingo-bingo" ) )
+	
 	display( self )
 end
 

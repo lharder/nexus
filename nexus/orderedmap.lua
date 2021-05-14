@@ -12,7 +12,9 @@ function OrderedMap.new()
 end
 
 function OrderedMap:put( key, value )
-	table.insert( self.orderedKeys, key )
+	if self.keyValues[ key ] == nil then 
+		self.orderedKeys[ #self.orderedKeys + 1 ] = key
+	end
 	self.keyValues[ key ] = value
 end	
 
