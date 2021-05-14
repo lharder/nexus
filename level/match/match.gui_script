@@ -82,11 +82,12 @@ function init( self )
 		label = "label/root",
 	})
 
-	
+	--[[
 	GAME:addHost( Host.new( "127.0.0.1", GAME.SEARCH_PORT, "foo-foo-foo" ) )
 	GAME:addHost( Host.new( "127.0.0.2", GAME.SEARCH_PORT, "bar-bar-bar" ) )
 	GAME:addHost( Host.new( "127.0.0.3", GAME.SEARCH_PORT, "baz-baz-baz" ) )
-	GAME:addHost( Host.new( "127.0.0.3", GAME.SEARCH_PORT, "bingo-bingo-bingo" ) )
+	GAME:addHost( Host.new( "127.0.0.4", GAME.SEARCH_PORT, "bingo-bingo-bingo" ) )
+	--]]
 	
 	display( self )
 end
