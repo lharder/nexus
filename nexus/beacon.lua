@@ -28,8 +28,7 @@ function Beacon.new( game, callsign, onHostFound )
 			game:addHost( host )
 			this:onHostFound( host )
 		end
-	end, 
-	true )
+	end, true )
 
 	return this
 end
