@@ -13,10 +13,10 @@ Envelope.__index = Envelope
 function Envelope.new( type, url )
 	local this = {}
 	setmetatable( this, Envelope )
-	
-	assert( type, "Type of envelope required!" )
-	assert( url, "Url for envelope processing required!" )
-	
+
+	-- assert( type, "Type of envelope required!" )
+	-- assert( url, "Url for envelope processing required!" )
+
 	this.serializer = Serializable.new()
 	this.serializer:putString( "_meta_url", url )
 	this.serializer:putNumber( "_meta_type", type )  
@@ -100,7 +100,7 @@ end
 
 
 function Envelope:deepCopy()
-	return Serializable.deserialize( self.serializer:serialize() )
+	return Envelope.deserialize( self.serializer:serialize() )
 end
 
 
@@ -122,7 +122,9 @@ end
 
 
 function Envelope.deserialize( serialized )
-	return Serializable.deserialize( serialized )
+	local env = Envelope.new()
+	env.serializer = Serializable.deserialize( serialized )
+	return env
 end
 
 
