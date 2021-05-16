@@ -7,6 +7,7 @@ local Host = require( "nexus.host" )
 local Serializable = require( "nexus.serializable" )
 local Syncset = require( "nexus.syncset" )
 
+local Envelope = require( "nexus.envelope" )
 
 -- global ---------------------------
 GAME = Game.new( "MultiPlayerGame" )
@@ -27,10 +28,6 @@ function init( self )
 	-- beware: every cust prop costs much performance!
 	-- sync:put( "dir", "v", pos )
 
-	local syncOLD = SyncsetOLD.new( "playerA" )
-	syncOLD:setPosition( pos )
-	syncOLD:setRotation( rot )
-	
 	local foo = Serializable.new()
 	foo:putString( "bar", "Hello" )
 	foo:putNumber( "baz", 123 )
@@ -41,18 +38,16 @@ function init( self )
 	ser:putQuat( "rot", rot ) 
 	-- ser:putSerializable( "foo", foo )
 
-	pprint( sync:serialize() )
+	local env = Envelope.new( 123, "playerA" )
+	env:putVector3( "pos", pos )
+	ser:putQuat( "rot", rot ) 
+
+	pprint( env:serialize() )
+	pprint( Envelope.deserialize( env:serialize() ):get( "pos" ) )
+	pprint( env:toTable() )
 	
 	local obj
 	local MIO = 1000000
-
-	------------------
-	now = socket.gettime()
-	for i = 1, MIO, 1 do
-		obj = SyncsetOLD.deserialize( syncOLD:serialize() )
-	end
-	local syncTime = socket.gettime() - now
-	pprint( "SyncsetOLD: " .. syncTime .. " sec" )
 
 	------------------
 	now = socket.gettime()
@@ -61,6 +56,14 @@ function init( self )
 	end
 	local syncTime = socket.gettime() - now
 	pprint( "Syncset: " .. syncTime .. " sec" )
+
+	------------------
+	now = socket.gettime()
+	for i = 1, MIO, 1 do
+		obj = Envelope.deserialize( env:serialize() )
+	end
+	local syncTime = socket.gettime() - now
+	pprint( "Envelope: " .. syncTime .. " sec" )
 
 	--[[
 	------------------

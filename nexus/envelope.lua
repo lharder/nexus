@@ -1,5 +1,11 @@
 local Serializable = require( "nexus.serializable" )
 
+-- Helper, fast -----------------
+local stringsub   = string.sub
+local startsWith = function( s, start )
+	return stringsub( s, 1, #start ) == start
+end
+
 
 local Envelope = {}
 Envelope.__index = Envelope
@@ -7,129 +13,116 @@ Envelope.__index = Envelope
 function Envelope.new( type, url )
 	local this = {}
 	setmetatable( this, Envelope )
-
+	
 	assert( type, "Type of envelope required!" )
 	assert( url, "Url for envelope processing required!" )
 	
-	this.meta = Serializable.new()
-	this.meta:putString( "url", url )
-	this.meta:putNumber( "type", type )  
-	
-	this.attrs = Serializable.new()
+	this.serializer = Serializable.new()
+	this.serializer:putString( "_meta_url", url )
+	this.serializer:putNumber( "_meta_type", type )  
 
 	return this
 end
 
+-- standard serialization
+
+-- Custom defined attributes -------------------
+function Envelope:putNumber( key, value )
+	self.serializer:putNumber( key, value )
+end
+
+
+function Envelope:putString( key, value )
+	self.serializer:putString( key, value )
+end
+
+
+function Envelope:putBool( key, value )
+	self.serializer:putBool( key, value )
+end
+
+
+function Envelope:putVector3( key, value )
+	self.serializer:putVector3( key, value )
+end
+
+
+function Envelope:putQuat( key, value )
+	self.serializer:putQuat( key, value )
+end
+
+
+function Envelope:get( key )
+	return self.serializer:get( key )
+end
+
 
 function Envelope:serialize()
-	local env = Serializable.new()
-	local strMeta = self.meta:serialize()
-	local strAttrs = self.attrs:serialize()
-	env:putString( "meta", strMeta )
-	env:putString( "attrs", strAttrs )
-
-	return env:serialize()
+	return self.serializer:serialize()
 end
 
 
 -- Meta data for reliable internal handling ------
 function Envelope:setUrl( url )
-	return self.meta:putString( "url", url )
+	return self.serializer:putString( "_meta_url", url )
 end
 
 function Envelope:getUrl( )
-	return self.meta:get( "url" )
+	return self.serializer:get( "_meta_url" )
 end
 
 
 function Envelope:setIP( ip )
-	return self.meta:putString( "ip", ip )
+	return self.serializer:putString( "_meta_ip", ip )
 end
 
 function Envelope:getIP()
-	return self.meta:get( "ip" )
+	return self.serializer:get( "_meta_ip" )
 end
 
 
 function Envelope:setPort( port )
-	return self.meta:putNumber( "port", port )
+	return self.serializer:putNumber( "_meta_port", port )
 end
 
 function Envelope:getPort()
-	return self.meta:get( "port" )
+	return self.serializer:get( "_meta_port" )
 end
 
 
 function Envelope:getType( )
-	return self.meta:get( "type" )
+	return self.serializer:get( "_meta_type" )
 end
 
 function Envelope:setType( type )
-	return self.meta:putNumber( "type", type )
-end
-
-
-
--- Custom defined attributes -------------------
-function Envelope:putNumber( key, value )
-	self.attrs:putNumber( key, value )
-end
-
-
-function Envelope:putString( key, value )
-	self.attrs:putString( key, value )
-end
-
-
-function Envelope:putBool( key, value )
-	self.attrs:putBool( key, value )
-end
-
-
-function Envelope:putVector3( key, value )
-	self.attrs:putVector3( key, value )
-end
-
-
-function Envelope:putQuat( key, value )
-	self.attrs:putQuat( key, value )
-end
-
-
-function Envelope:get( key )
-	return self.attrs:get( key )
-end
-
-
-function Envelope:toTable()
-	local t = {}
-	t.meta = self.meta:toTable()
-	t.attrs = self.attrs:toTable()
-	return t
+	return self.serializer:putNumber( "_meta_type", type )
 end
 
 
 function Envelope:deepCopy()
-	return Envelope.deserialize( self:serialize() )
+	return Serializable.deserialize( self.serializer:serialize() )
 end
 
 
+function Envelope:toTable( serialized )
+	local t = {}
+	t.meta = {}
+	t.attrs = {}
+	for key, typeValuePair in pairs( self.serializer.attrs ) do
+		if startsWith( key, "_meta_" ) then 
+			key = stringsub( key, 7 ) 
+			t.meta[ key ] = typeValuePair.value
+		else 
+			t.attrs[ key ] = typeValuePair.value
+		end
+
+	end
+	return t
+end 
+
+
 function Envelope.deserialize( serialized )
-	assert( string.len( serialized ) > 0, "You must provide a serialized envelope string!" )
-
-	local map = Serializable.deserialize( serialized )
-	local serializedMeta = map:get( "meta" )
-	local serializedAttrs = map:get( "attrs" )
-
-	local meta = Serializable.deserialize( serializedMeta )
-	local attrs = Serializable.deserialize( serializedAttrs ) or Serializable.new()
-
-	local env = Envelope.new( 
-		meta:get( "type" ), meta:get( "url" ) 
-	)
-	env.attrs = attrs
-
-	return env
+	return Serializable.deserialize( serialized )
 end
 
 
