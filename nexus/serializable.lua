@@ -17,7 +17,6 @@ local tableconcat = table.concat
 
 -- Serializable -----------------------
 local Serializable = {}
-Serializable.__index = Serializable
 
 -- TypeValuePair -----------------------
 local TypeValuePair = {}
@@ -131,12 +130,13 @@ end
 
 --------------------------
 function Serializable.new()
-	local this = {}
-	setmetatable( this, Serializable )
+	local o = {}
+	setmetatable( o, Serializable )
+	Serializable.__index = Serializable
 
-	this.attrs = {}
+	o.attrs = {}
 	
-	return this
+	return o
 end
 
 
