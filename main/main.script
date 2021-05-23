@@ -16,8 +16,11 @@ GAME = Game.new( "MultiPlayerGame" )
 
 function init( self )
 	lua.randomize()
-	msg.post( "main:/screenmaster", "load", { level = "setup" } ) 
+	-- msg.post( "main:/screenmaster", "load", { level = "setup" } ) 
 
+	local env = Envelope.new( 1, "foo" )
+	local obj = Envelope.deserialize( env:serialize() )
+	
 	--[[
 	local pos = vmath.vector3( 100, 200, 0.5 )
 	local rot = go.get_rotation()

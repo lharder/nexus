@@ -80,9 +80,10 @@ end
 
 
 
-function Envelope.deserialize( serialized )
+function Envelope.deserialize( serialized ) 
 	local o = Serializable.deserialize( serialized )
 	setmetatable( o, Envelope )
+	Envelope.__index = Envelope
 	return o
 end
 
