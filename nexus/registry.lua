@@ -23,8 +23,8 @@ end
 
 function Registry:remove( cid )
 	local gid = self.globalIds[ cid ]
-	self.clientIds[ gid ] = nil
-	self.globalIds[ cid ] = nil
+	if gid then self.clientIds[ gid ] = nil end 
+	if cid then self.globalIds[ cid ] = nil end
 end
 
 

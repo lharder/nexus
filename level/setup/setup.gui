@@ -68,8 +68,8 @@ nodes {
     w: 1.0
   }
   size {
-    x: 500.0
-    y: 32.0
+    x: 400.0
+    y: 70.0
     z: 0.0
     w: 1.0
   }
@@ -106,8 +106,8 @@ nodes {
 }
 nodes {
   position {
-    x: 4.0
-    y: -8.0
+    x: 0.0
+    y: 0.0
     z: 0.0
     w: 1.0
   }
@@ -124,8 +124,63 @@ nodes {
     w: 1.0
   }
   size {
-    x: 492.0
-    y: 24.0
+    x: 400.0
+    y: 70.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 0.2
+    y: 0.2
+    z: 0.2
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: ""
+  id: "txtfield/background"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_NW
+  adjust_mode: ADJUST_MODE_FIT
+  parent: "txtfield/root"
+  layer: ""
+  inherit_alpha: true
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 1.0
+  template_node_child: true
+  size_mode: SIZE_MODE_MANUAL
+}
+nodes {
+  position {
+    x: 4.0
+    y: -10.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 355.0
+    y: 32.0
     z: 0.0
     w: 1.0
   }
@@ -137,7 +192,7 @@ nodes {
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
-  text: ""
+  text: "eee"
   font: "neuropol"
   id: "txtfield/text"
   xanchor: XANCHOR_NONE
@@ -172,8 +227,8 @@ nodes {
 }
 nodes {
   position {
-    x: 2.0
-    y: -4.0
+    x: 4.0
+    y: -10.0
     z: 0.0
     w: 1.0
   }
@@ -185,26 +240,26 @@ nodes {
   }
   scale {
     x: 1.0
-    y: 1.4
+    y: 1.0
     z: 1.0
     w: 1.0
   }
   size {
-    x: 24.0
-    y: 24.0
+    x: 355.0
+    y: 32.0
     z: 0.0
     w: 1.0
   }
   color {
-    x: 0.6
-    y: 0.6
-    z: 0.6
+    x: 1.0
+    y: 1.0
+    z: 1.0
     w: 1.0
   }
   type: TYPE_TEXT
   blend_mode: BLEND_MODE_ALPHA
   text: "|"
-  font: "System"
+  font: "neuropol"
   id: "txtfield/cursor"
   xanchor: XANCHOR_NONE
   yanchor: YANCHOR_NONE
@@ -404,9 +459,9 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.7019608
-    y: 0.7019608
-    z: 0.7019608
+    x: 1.0
+    y: 0.0
+    z: 0.0
     w: 1.0
   }
   type: TYPE_BOX
@@ -431,6 +486,61 @@ nodes {
   clipping_inverted: false
   alpha: 0.2
   overridden_fields: 30
+  template_node_child: true
+  size_mode: SIZE_MODE_MANUAL
+}
+nodes {
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  size {
+    x: 120.0
+    y: 36.0
+    z: 0.0
+    w: 1.0
+  }
+  color {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+    w: 1.0
+  }
+  type: TYPE_BOX
+  blend_mode: BLEND_MODE_ALPHA
+  texture: ""
+  id: "button/image"
+  xanchor: XANCHOR_NONE
+  yanchor: YANCHOR_NONE
+  pivot: PIVOT_NW
+  adjust_mode: ADJUST_MODE_FIT
+  parent: "button/root"
+  layer: ""
+  inherit_alpha: false
+  slice9 {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 0.0
+  }
+  clipping_mode: CLIPPING_MODE_NONE
+  clipping_visible: true
+  clipping_inverted: false
+  alpha: 0.0
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
 }
