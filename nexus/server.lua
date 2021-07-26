@@ -2,7 +2,6 @@ local udp = require "defnet.udp"
 local Envelope = require( "nexus.envelope" )
 local Personality = require( "nexus.personality" )
 local lua = require( "deflibs.lualib" )
-local Events = require( "level.playground.events" )
 
 
 

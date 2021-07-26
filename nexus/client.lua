@@ -2,7 +2,6 @@ local udp = require "defnet.udp"
 local Envelope = require( "nexus.envelope" )
 local Syncset = require( "nexus.syncset" )
 local Registry = require( "nexus.registry" )
-local Events = require( "level.playground.events" )
 
 local EVENT_TYPE_SYNC = -1
 local MSG_EXEC_CMD 	= hash( "execCmd" )
