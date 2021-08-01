@@ -1,5 +1,5 @@
 -- local p2pLib = require( "defnet.p2p_discovery" )
-local p2pbrute = require( "nexus.p2pbrute" )
+local p2pDiscovery = require( "nexus.p2pdiscovery" )
 local Host = require( "nexus.host" )
 
 local Beacon = {}
@@ -14,7 +14,7 @@ function Beacon.new( game, callsign, onHostFound )
 	this.callback = onHostFound
 
 	-- send out my beacon to other peers in the network
-	this.srv = p2pbrute.create( game.SEARCH_PORT )
+	this.srv = p2pDiscovery.create( game.SEARCH_PORT )
 
 	-- message coming in contains the remote user's callsign
 	this.srv:listen( game.name, function( ip, port, message )
