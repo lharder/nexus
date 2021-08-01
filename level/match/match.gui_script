@@ -1,5 +1,6 @@
 local defgui = require( "defgui.defgui" )
 local Host = require( "nexus.host" )
+local Localhost = require( "nexus.localhost" )
 
 local MSG_SCREEN_LOADED = hash( "screenmaster:loaded" )
 
@@ -82,6 +83,11 @@ function init( self )
 		label = "label/root",
 	})
 
+	self.nLog = gui.get_node( "log" )
+
+	self.nIP = gui.get_node( "ip" )
+	gui.set_text( self.nIP, Localhost.getIP() )
+
 	--[[
 	GAME:addHost( Host.new( "127.0.0.1", GAME.SEARCH_PORT, "foo-foo-foo" ) )
 	GAME:addHost( Host.new( "127.0.0.2", GAME.SEARCH_PORT, "bar-bar-bar" ) )
@@ -102,6 +108,7 @@ end
 
 function update( self, dt )
 	GAME:update()
+	gui.set_text( self.nLog, LOG:toString( true ) )
 end
 
 

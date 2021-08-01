@@ -1,8 +1,9 @@
 require( "deflibs.defold" )
 
 local Game = require( "nexus.game" )
-local lua = require( "deflibs.lualib" )
+local Lua = require( "deflibs.lualib" )
 local Host = require( "nexus.host" )
+local ConStack = require( "main.constack" )
 
 local Serializable = require( "nexus.serializable" )
 local Syncset = require( "nexus.syncset" )
@@ -11,13 +12,29 @@ local Envelope = require( "nexus.envelope" )
 
 -- global ---------------------------
 GAME = Game.new( "MultiPlayerGame" )
+
+-- Log all print messages to game console as well
+LOG = ConStack.new( 10 )
+local _pprint = pprint
+
+function pprint( msg )
+	_pprint( msg )
+	LOG:push( msg )
+end
+
+function print( msg )
+	pprint( msg )
+end
+---------------------------------------------------
+
+
 -------------------------------------
 
 
 function init( self )
-	lua.randomize()
+	Lua.randomize()
 	msg.post( "main:/screenmaster", "load", { level = "setup" } ) 
-
+	
 	--[[
 	local env = Envelope.new( 1, "foo" )
 	local obj = Envelope.deserialize( env:serialize() )

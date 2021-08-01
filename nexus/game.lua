@@ -4,6 +4,7 @@ local udp = require( "defnet.udp" )
 local Beacon = require( "nexus.beacon" )
 local Server = require( "nexus.server" )
 local Client = require( "nexus.client" )
+local Localhost = require( "nexus.localhost" )
 
 
 local function lastOctet( ipv4 )
@@ -42,10 +43,12 @@ end
 local Game = {}
 Game.__index = Game
 
-Game.SERVER_PORT 	= 9999
-Game.CLIENT_PORT 	= 9998
-Game.SEARCH_PORT 	= 9997
-Game.SYNC_PORT 		= 9996
+-- important: no random ports allowed under iOS :o(
+-- use one of https://support.apple.com/en-us/HT202944
+Game.SERVER_PORT 	= 16470
+Game.CLIENT_PORT 	= 16471
+Game.SEARCH_PORT 	= 5898 
+Game.SYNC_PORT 		= 16472
 Game.SEND_INTERVAL 	= 1 / 15
 
 Game.MSG_EXEC_CMD 	= hash( "execCmd" )
@@ -139,23 +142,7 @@ end
 
 -- returns ip address of the localhost
 function Game.getLocalhostIP()
-	local ip = nil
-	local ifaddrs = sys.get_ifaddrs()
-	for _,interface in ipairs( ifaddrs ) do
-		if interface.name == "en0" then
-			local adr = interface.address
-			if adr ~= nil then
-				local cntDots = adr:cntSubstr( "%." )
-				if cntDots == 3 then 
-					ip = adr
-				end
-			end
-		end
-	end
-	-- there may be no network interface available!
-	if ip == nil then ip = "127.0.0.1" end
-
-	return ip
+	return Localhost.getIP()
 end
 
 
@@ -254,7 +241,7 @@ function Game:start( ipForServer, msgPerSec )
 	pprint( "Server IP is " .. self.srvHost.ip )
 
 	-- which host am I?
-	self.meHost = self:getHostByIp( Game.getLocalhostIP() )
+	self.meHost = self:getHostByIp( Localhost.getIP() )
 	pprint( "This host is " .. self.meHost.ip )
 
 	-- check if this host is the (only) game server?
