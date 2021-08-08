@@ -32,6 +32,7 @@ function TypeValuePair.new( type, value )
 			return "n" .. stringchar( #tmp ) .. tmp
 
 		elseif this.type == "s" then 
+			if this.value == nil then this.value = "" end
 			return "s" .. stringchar( #this.value ) .. this.value 
 
 		elseif this.type == "b" then 
@@ -42,12 +43,14 @@ function TypeValuePair.new( type, value )
 			end
 			
 		elseif this.type == "v" then 
+			if this.value == nil then this.value = vmath.vector() end
 			local tx = tostring( this.value.x )
 			local ty = tostring( this.value.y )
 			local tz = tostring( this.value.z )
 			return "v" .. stringchar( #tx ) .. tx .. stringchar( #ty ) .. ty .. stringchar( #tz ) .. tz 
 			
 		elseif this.type == "q" then 
+			if this.value == nil then this.value = vmath.quat() end
 			local tx = tostring( this.value.x )
 			local ty = tostring( this.value.y )
 			local tz = tostring( this.value.z )
@@ -55,6 +58,7 @@ function TypeValuePair.new( type, value )
 			return "q" .. stringchar( #tx ) .. tx .. stringchar( #ty ) .. ty .. stringchar( #tz ) .. tz .. stringchar( #tw ) .. tw
 
 		elseif this.type == "x" then 
+			if this.value == nil then this.value = Serializable.new() end
 			local ts = this.value:serialize()
 			return "x" .. stringchar( #ts ) .. ts
 			
