@@ -1,3 +1,5 @@
+require( "deflibs.defold" )
+
 local udp = require "defnet.udp"
 local Envelope = require( "nexus.envelope" )
 local Syncset = require( "nexus.syncset" )
@@ -11,7 +13,7 @@ local MSG_EXEC_CMD 	= hash( "execCmd" )
 local Syncinfo = {}
 function Syncinfo.new( gid, custKeyTypes )
 	local this = {}
-	
+
 	this.gid = gid
 	this.custKeyTypes = custKeyTypes
 	this.hasCustomProps = custKeyTypes ~= nil
@@ -45,16 +47,25 @@ function Client.new( game )
 		gid = evt:getGlobalId()
 		if gid then 
 			cid = this.registry:getClientId( gid )
-			if cid then
-				pos = evt:getPosition()
-				if pos then go.set_position( pos, cid ) end
 
-				rot = evt:getRotation()
-				if rot then go.set_rotation( rot, cid ) end
+			-- Might be that the gameobject no longer exists:
+			-- level (un)loading kills them while packets are
+			-- on the wire. Costs a little performance, not much:
+			-- go.get_position()  				-- 0.0020
+			-- pcall( go.get_position, nil )  	-- 0.0021
+			-- goExists( nil )  				-- 0.0024
+			if goExists( cid ) then 			
+				if cid then
+					pos = evt:getPosition()
+					if pos then go.set_position( pos, cid ) end
 
-				if evt:hasCustomProps() then 
-					for key, value in pairs( evt.attrs ) do 
-						go.set( msg.url( nil, cid, "script" ), key, value )
+					rot = evt:getRotation()
+					if rot then go.set_rotation( rot, cid ) end
+
+					if evt:hasCustomProps() then 
+						for key, value in pairs( evt.attrs ) do 
+							go.set( msg.url( nil, cid, "script" ), key, value )
+						end
 					end
 				end
 			end
