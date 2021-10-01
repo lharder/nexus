@@ -71,7 +71,11 @@ function Envelope:toTable( serialized )
 			key = stringsub( key, 7 ) 
 			t.meta[ key ] = typeValuePair.value
 		else 
-			t.attrs[ key ] = typeValuePair.value
+			if typeValuePair.type == "x" then
+				t.attrs[ key ] = typeValuePair.value:serialize()
+			else
+				t.attrs[ key ] = typeValuePair.value
+			end
 		end
 
 	end
