@@ -84,7 +84,7 @@ function Client.new( game )
 				-- use "put"/false without resyncing that value
 				this.state:put( gid, k, v, false )
 				
-				-- pprint( this.state:get( gid, k ) )
+				pprint( this.state:get( gid, k ) )
 			end
 			
 		else
