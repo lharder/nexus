@@ -35,9 +35,8 @@ end
 
 
 local function parse( self, message )
-	if message.meta.type == Events.MOVE_TO then
-
-	end
+	-- if message.meta.type == Events.MOVE_TO then
+	-- end
 end
 
 
