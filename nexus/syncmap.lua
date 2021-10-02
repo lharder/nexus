@@ -14,24 +14,31 @@ function Syncmap.new( client )
 	setmetatable( this, Syncmap )
 
 	this.client = client 
-	this.gids = {}
+	this.namespaces = {}
 
 	return this
 end
 
 
-function Syncmap:put( gid, key, value )
+--
+function Syncmap:put( gid, key, value, isSyncNeeded )
+	-- When nexus client receives a new value, it also uses this 
+	-- method to update the local value and align it with the remote
+	-- value. In that case, another sync request would be double,
+	-- so isSyncNeeded = false prevents that 
+	if isSyncNeeded == nil then isSyncNeeded = true end
+	
 	-- no key makes no sense
 	if key == nil then return end
 
 	-- create namespace if required
-	if self.gids[ gid ] == nil then self.gids[ gid ] = {} end
+	if self.namespaces[ gid ] == nil then self.namespaces[ gid ] = {} end
 
 	-- no change in value: no more action required. 
 	-- Prevent endless loop!
-	if self.gids[ gid ][ key ] == value then return end
+	if self.namespaces[ gid ][ key ] == value then return end
 
-	self.gids[ gid ][ key ] = value 
+	self.namespaces[ gid ][ key ] = value 
 
 	-- internal event: declare with optional parameter "true"
 	local env = Envelope.new( EVENT_VAR_CHANGE, gid, true )
@@ -66,8 +73,8 @@ end
 
 
 function Syncmap:get( gid, key )
-	if self.gids[ gid ] == nil then return nil end
-	return self.gids[ gid ][ key ]
+	if self.namespaces[ gid ] == nil then return nil end
+	return self.namespaces[ gid ][ key ]
 end
 
 

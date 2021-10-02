@@ -81,7 +81,9 @@ function Client.new( game )
 			-- gid is used as namespace for key/value pairs
 			local gid = evt:getUrl()
 			for k, v in pairs( evt:toTable().attrs ) do
-				this.state:put( gid, k, v )
+				-- use "put"/false without resyncing that value
+				this.state:put( gid, k, v, false )
+				
 				-- pprint( this.state:get( gid, k ) )
 			end
 			
