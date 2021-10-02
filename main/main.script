@@ -6,8 +6,6 @@ local Host = require( "nexus.host" )
 local ConStack = require( "main.constack" )
 
 local Serializable = require( "nexus.serializable" )
-local Syncset = require( "nexus.syncset" )
-
 local Envelope = require( "nexus.envelope" )
 
 -- global ---------------------------

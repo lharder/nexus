@@ -9,13 +9,19 @@ end
 
 local Envelope = Serializable.new()
 
-function Envelope.new( type, url )
+-- type: for game logic to decide how to process enclosed data
+-- url: globalId or absolute url for object to receive the data as message
+-- isNexusInternal: allow for nexus to use envelopes, types, etc. independently
+function Envelope.new( type, url, isNexusInternal )
 	local o = Serializable:new()
 	o = setmetatable( o, Envelope )
 	Envelope.__index = Envelope
 
+	if isNexusInternal == nil then isNexusInternal = false end
+
 	o:putString( "_meta_url", url )
 	o:putNumber( "_meta_type", type )  
+	o:putBool( "_meta_internal", isNexusInternal )  
 
 	return o
 end
@@ -54,6 +60,11 @@ end
 
 function Envelope:setType( type )
 	return self:putNumber( "_meta_type", type )
+end
+
+
+function Envelope:isInternal()
+	return self:get( "_meta_internal" )
 end
 
 

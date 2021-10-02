@@ -1,6 +1,6 @@
 components {
   id: "robot"
-  component: "/level/playground/behaviors/robot.script"
+  component: "/level/playground/robot.script"
   position {
     x: 0.0
     y: 0.0

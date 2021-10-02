@@ -2,7 +2,6 @@ local lua = require( "deflibs.lualib" )
 local OrderedMap = require( "nexus.orderedmap" )
 local udp = require( "defnet.udp" )
 local Beacon = require( "nexus.beacon" )
-local Server = require( "nexus.server" )
 local Client = require( "nexus.client" )
 local Localhost = require( "nexus.localhost" )
 
@@ -45,7 +44,7 @@ Game.__index = Game
 
 -- important: no random ports allowed under iOS :o(
 -- use one of https://support.apple.com/en-us/HT202944
-Game.SERVER_PORT 	= 16470
+-- Game.SERVER_PORT 	= 16470
 Game.CLIENT_PORT 	= 16471
 Game.SEARCH_PORT 	= 5898 
 Game.SYNC_PORT 		= 16472
@@ -59,11 +58,12 @@ Game.MSG_EXEC_CMD 	= hash( "execCmd" )
 local Match = {}
 Match.__index = Match
 
-function Match.new( ... )
+function Match.new( game, ... )
 	local this = {}
 	setmetatable( this, Match )
 
-	-- self.game: gets injected from the outside
+	-- reference to the game
+	this.game = game 
 	
 	-- list of callsigns containing my desired game peers
 	this.proposal = {...} 
@@ -188,8 +188,8 @@ function Game:newMatch( ... )
 	end
 	
 	-- a list of desired players including the player himself
-	self.match = Match.new( ... )
-	self.match.game = self
+	self.match = Match.new( self, ... )
+	-- self.match.game = self
 	
 	return self.match
 end
@@ -243,12 +243,6 @@ function Game:start( ipForServer, msgPerSec )
 	-- which host am I?
 	self.meHost = self:getHostByIp( Localhost.getIP() )
 	pprint( "This host is " .. self.meHost.ip )
-
-	-- check if this host is the (only) game server?
-	if self:isServer() then
-		if self.server then self.server:destroy() end
-		self.server = Server.new( self )
-	end
 
 	-- every host is a game client
 	if self.client then self.client:destroy() end

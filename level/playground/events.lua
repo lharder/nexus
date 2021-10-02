@@ -4,7 +4,7 @@ local Events = {}
 
 Events.CREATE_PLAYER 		= 1
 Events.CREATE_ROBOT			= 2
-Events.MOVE_TO 				= 3
+Events.MOVE_TO 				= 3 
 Events.POSITION_REACHED 	= 4
 
 Events.names = {}

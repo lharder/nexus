@@ -4,7 +4,7 @@ require( "deflibs.lualib" )
 -- Tried several versions and variants: 
 -- * binary conversion attempt was ca. 50% slower (surprisingly)
 -- * Britzl's Desert is 3x slower (more functions, complicated usage)
--- * highly specialized, non-generic Syncset is 3x faster (no fair comparison)
+-- * highly specialized, non-generic Syncpack is 3x faster (no fair comparison)
 ------------------------------
 
 -- performance improvement

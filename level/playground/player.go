@@ -1,6 +1,6 @@
 components {
-  id: "script"
-  component: "/level/playground/behaviors/player.script"
+  id: "player"
+  component: "/level/playground/player.script"
   position {
     x: 0.0
     y: 0.0

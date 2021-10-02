@@ -28,13 +28,13 @@ local function stringsplit( txt, delim )
 end
 
 
--- Syncset --------------
-local Syncset = {}
-Syncset.__index = Syncset
+-- Syncpack --------------
+local Syncpack = {}
+Syncpack.__index = Syncpack
 
-function Syncset.new( gid )
+function Syncpack.new( gid )
 	local this = {}
-	setmetatable( this, Syncset )
+	setmetatable( this, Syncpack )
 
 	this.gid = gid
 
@@ -42,27 +42,27 @@ function Syncset.new( gid )
 end
 
 
-function Syncset:getGlobalId()
+function Syncpack:getGlobalId()
 	return self.gid
 end
 
 
-function Syncset:setPosition( pos )
+function Syncpack:setPosition( pos )
 	self.pos = pos
 end
 
 
-function Syncset:getPosition()
+function Syncpack:getPosition()
 	return self.pos
 end
 
 
-function Syncset:setRotation( rot )
+function Syncpack:setRotation( rot )
 	self.rot = rot
 end
 
 
-function Syncset:get( key )
+function Syncpack:get( key )
 	if self.attrs == nil then return nil end
 	
 	local tv = self.attrs[ key ]
@@ -70,23 +70,23 @@ function Syncset:get( key )
 end
 
 
-function Syncset:hasCustomProps()
+function Syncpack:hasCustomProps()
 	return self.attrs ~= nil
 end
 
 
-function Syncset:put( key, type, value )
+function Syncpack:put( key, type, value )
 	if self.attrs == nil then self.attrs = {} end
 	self.attrs[ key ] = { type = type,  value = value }
 end
 
 
-function Syncset:getRotation()
+function Syncpack:getRotation()
 	return self.rot
 end
 
 
-function Syncset:serialize()
+function Syncpack:serialize()
 	local cust = ""
 	if self.attrs then 
 		local tmp = {}
@@ -123,10 +123,10 @@ function Syncset:serialize()
 end
 
 
-function Syncset.deserialize( serialized )
+function Syncpack.deserialize( serialized )
 	local parts = stringsplit( serialized, "|" )
 
-	local sync = Syncset.new( parts[ 1 ] )
+	local sync = Syncpack.new( parts[ 1 ] )
 	sync.pos = vmathvector3( parts[ 2 ], parts[ 3 ], parts[ 4 ] ) 
 	sync.rot = vmathquat( parts[ 5 ], parts[ 6 ], parts[ 7 ], parts[ 8 ] ) 
 
@@ -167,4 +167,4 @@ function Syncset.deserialize( serialized )
 end
 
 
-return Syncset
+return Syncpack

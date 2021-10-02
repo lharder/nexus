@@ -1,8 +1,5 @@
-local Events = require( "level.playground.events" )
-local Server = require( "nexus.server" )
-local Robot = require( "level.playground.behaviors.robot" )
 local lua = require( "deflibs.lualib" )
-
+local Events = require( "level.playground.events" )
 
 
 local function createVirtualCtrl( self ) 
@@ -13,13 +10,14 @@ end
 
 local function createPlayer( factoryUrl, pos, speed, txtCaption, isLocalHero )
 	local id = factory.create( 
-		factoryUrl, pos, nil, { 
+	factoryUrl, pos, nil, { 
 		speed = speed, isLocalHero = isLocalHero 
 	})
 	label.set_text( msg.url( nil, id, "caption" ), txtCaption )
 	label.set_text( msg.url( nil, id, "type" ), "Player" )
 	return id
 end
+
 
 local function createRobot( factoryUrl, pos, speed, txtCaption )
 	local id = factory.create( factoryUrl, pos, nil, { speed = speed } )
@@ -29,7 +27,6 @@ local function createRobot( factoryUrl, pos, speed, txtCaption )
 end
 
 
--- client reacts to incoming server events
 local function parse( message )
 	if message.meta.type == Events.CREATE_PLAYER then
 		local id = createPlayer( 
@@ -48,7 +45,7 @@ local function parse( message )
 			-- GAME:sync( message.attrs.gid, customProps ) 
 			GAME:sync( message.attrs.gid ) 
 		end
-		
+
 	elseif message.meta.type == Events.CREATE_ROBOT then
 		local id = createRobot( 
 			message.attrs.factory, 
@@ -61,12 +58,13 @@ local function parse( message )
 end
 
 
+--------------------------
 function init( self )
 	GAME:start( "192.168.178.24", 25 )
 
 	-- create serverside objects to run the game
 	if GAME:isServer() then
-		
+
 		timer.delay( .5, false, function() 
 			pprint( "Create level objects!" )
 
@@ -91,14 +89,14 @@ function init( self )
 					callsign, vmath.vector3( pos.x, pos.y, .5 ), speed, callsign, true 
 				)
 				local host = GAME.hosts:get( callsign )
-				GAME.server:send( host.ip, evtLocalHero )
+				GAME.client:send( host.ip, evtLocalHero )
 
 				-- for all other hosts, this hero is only a drone to 
 				-- be controlled by somebody somewhere else
 				local evtRemoteHero = Events.newCreatePlayer( 
 					callsign, vmath.vector3( pos.x, pos.y, .5 ), speed, callsign, false 
 				)
-				GAME.server:sendToClientsExcept( host.ip, evtRemoteHero )
+				GAME.client:sendToClientsExcept( host.ip, evtRemoteHero )
 
 				j = i + 1
 			end
@@ -109,10 +107,7 @@ function init( self )
 			local speed = 100
 			local pos = startPositions[ j ]
 			local evt = Events.newCreateRobot( gid, vmath.vector3( pos.x, pos.y, .5 ), speed, name )
-			GAME.server:sendToClients( evt )
-
-			local robot = Robot.new( gid )
-			GAME.server:putBehavior( gid, robot )	
+			GAME.client:sendToClients( evt )	
 
 		end )
 	end
@@ -130,11 +125,11 @@ end
 
 
 function update( self, dt )
-	if GAME:isServer() then 
-		GAME.server:update( dt )
-	end
 	if GAME.client then 
 		GAME.client:update( dt )
 	end
 end
+
+
+
 
