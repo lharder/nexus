@@ -40,7 +40,7 @@ function Syncmap:put( gid, key, value, isSyncNeeded )
 
 	self.namespaces[ gid ][ key ] = value 
 
-	-- internal event: declare with optional parameter "true"
+	-- is internal event: declare with (optional) parameter "true"
 	local env = Envelope.new( EVENT_VAR_CHANGE, gid, true )
 	local tv = type( value )
 
@@ -67,8 +67,10 @@ function Syncmap:put( gid, key, value, isSyncNeeded )
 		env:putBool( key, value ) 
 	end
 
-	self.client:sendToOtherClients( env )
-	-- self.client:send( "192.168.178.24", env )
+	if isSyncNeeded then 
+		self.client:sendToOtherClients( env )
+		-- self.client:send( "192.168.178.24", env )
+	end
 end
 
 
