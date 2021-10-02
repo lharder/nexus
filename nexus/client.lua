@@ -82,7 +82,7 @@ function Client.new( game )
 			local gid = evt:getUrl()
 			for k, v in pairs( evt:toTable().attrs ) do
 				this.state:put( gid, k, v )
-				pprint( this.state:get( gid, k ) )
+				-- pprint( this.state:get( gid, k ) )
 			end
 			
 		else
