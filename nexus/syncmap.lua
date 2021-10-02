@@ -61,8 +61,8 @@ function Syncmap:put( gid, key, value )
 		env:putBool( key, value ) 
 	end
 
-	self.client:sendToOtherClients( env )
-	--- self.client:send( "192.168.178.24", env )
+	-- self.client:sendToOtherClients( env )
+	self.client:send( "192.168.178.24", env )
 end
 
 

@@ -13,6 +13,14 @@ local UP = hash( "up" )
 local DOWN = hash( "down" )
 
 
+local function btnPressed( self )
+	local cnt = GAME.client.state:get( self.gid, "counter" ) or 0
+	cnt = cnt + 1
+	label.set_text( "#counter", cnt )
+	GAME.client.state:put( self.gid, "counter", cnt )
+end
+
+
 local function vcontrol( self, action )
 	if action.id == MSG_STICK then
 		if action.released then
@@ -30,6 +38,11 @@ local function vcontrol( self, action )
 	elseif action.id == MSG_BUTTON then
 		if action.pressed then self.buttons[ action.id ] = true end	
 		if action.released then self.buttons[ action.id ] = false end	
+
+		if self.cooldown < socket.gettime() then
+			self.cooldown = socket.gettime() + .3
+			btnPressed( self )
+		end
 	end
 end
 
@@ -44,6 +57,9 @@ end
 function init( self )
 	self.dir = vmath.vector3()
 	self.maxSpeed = self.speed
+
+	-- GAME.client.state:put( self.gid, "counter", 0 )
+	self.cooldown = 0
 
 	-- important: user input only from the one per host / right client!
 	if self.isLocalHero then 
@@ -79,6 +95,9 @@ function on_message( self, message_id, message, sender )
 		self.gid = GAME.client.registry:getGlobalId( go.get_id() )
 
 	elseif message_id == vcontroller.ANALOG then 
+		vcontrol( self, message )
+
+	elseif message_id == vcontroller.BUTTON then 
 		vcontrol( self, message )
 
 	elseif message_id == GAME.MSG_EXEC_CMD then 
