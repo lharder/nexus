@@ -4,7 +4,6 @@ local Envelope = require( "nexus.envelope" )
 local Syncmap = {}
 Syncmap.__index = Syncmap
 
--- MUST be negative to signify an internal nexus event
 local EVENT_VAR_CHANGE = -999
 
 
@@ -61,8 +60,8 @@ function Syncmap:put( gid, key, value )
 		env:putBool( key, value ) 
 	end
 
-	-- self.client:sendToOtherClients( env )
-	self.client:send( "192.168.178.24", env )
+	self.client:sendToOtherClients( env )
+	-- self.client:send( "192.168.178.24", env )
 end
 
 
