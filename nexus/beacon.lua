@@ -43,6 +43,11 @@ function Beacon:onHostFound( host )
 end
 
 
+function Beacon:setCustomIP( ip )
+	self.srv:setCustomIP( ip )
+end
+
+
 function Beacon:destroy()
 	if self.srv then self.srv:destroy() end
 	

@@ -59,8 +59,27 @@ function M:broadcast( msg )
 		ip = peerIPs[ index ]
 		if ip then self.srv.send( msg, ip, self.port ) end
 		index = index + 1
-		if index >= 255 then index = 1 end
+		if index >= 255 then 
+			-- prepare next run...
+			index = 1 
+			
+			-- apart from regular 255 ips, is there a custom ip declared by user?
+			-- if so, try that one, as well (once every run)
+			if self.customIP then 
+				local parts = self.customIP:split( ":" )
+				if #parts == 2 then
+					self.srv.send( msg, parts[ 1 ], parts[ 2 ] ) 
+				else
+					self.srv.send( msg, self.customIP, self.port ) 
+				end
+			end
+		end
 	end )
+end
+
+
+function M:setCustomIP( ip )
+	self.customIP = ip
 end
 
 
