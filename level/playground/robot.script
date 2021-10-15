@@ -21,7 +21,6 @@ end
 
 -------------
 function init( self )
-	self.targetPos = go.get_position()
 	self.dir = vmath.vector3()
 	self.maxSpeed = self.speed
 	self.cid = go.get_id()
