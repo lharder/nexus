@@ -56,7 +56,7 @@ end
 --------------------
 function init( self )
 	self.cid = go.get_id()
-	self.dir = vmath.vector3()
+	self.dir = vmath.vector3( 0, 0, 0 )
 	self.maxSpeed = self.speed
 
 	-- GAME.client.state:put( self.gid, "counter", 0 )
