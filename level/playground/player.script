@@ -90,7 +90,7 @@ function update( self, dt )
 	else
 		if not GAME.client.registry:isSyncFrame( self.cid ) then
 			self.dir = vmath.normalize( self.oldPos - self.pos )
-			if tonumber( self.dir.x ) == nil then self.dir = vmath.vector3( 0, 0, 0 ) end
+			if tostring( self.dir.x ) == "nan" then self.dir = vmath.vector3( 0, 0, 0 ) end
 			
 			self.pos.x = self.pos.x + self.dir.x * self.speed * dt
 			self.pos.y = self.pos.y + self.dir.y * self.speed * dt
