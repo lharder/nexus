@@ -7,6 +7,7 @@ function Registry.new()
 
 	this.globalIds = {}
 	this.clientIds = {}
+	this.syncedState = {}
 
 	return this
 end
@@ -35,6 +36,21 @@ end
 
 function Registry:getClientId( gid )
 	return self.clientIds[ gid ]
+end
+
+
+function Registry:isSyncFrame( cid )
+	if self.globalIds[ cid ] then 
+		return self.syncedState[ self.globalIds[ cid ] ]
+	else
+		return false
+	end
+end
+
+function Registry:setIsSyncFrame( cid, state )
+	if self.globalIds[ cid ] then 
+		self.syncedState[ self.globalIds[ cid ] ] = state
+	end
 end
 
 

@@ -23,6 +23,7 @@ end
 function init( self )
 	self.dir = vmath.vector3()
 	self.maxSpeed = self.speed
+	self.cid = go.get_id()
 
 	msg.post( ".", MSG_ON_FIRST_TICK )
 end
@@ -48,6 +49,13 @@ function update( self, dt )
 			self.targetPos = getNewTargetPos( self )
 			local evt = Events.newMoveTo( self.gid, self.targetPos )
 			GAME.client:sendToOtherClients( evt )
+		end
+		
+	else
+		-- Have not received up-to-date info via network sync this frame? 
+		-- Then interpolate as good as possible.
+		if not GAME.client.registry:isSyncFrame( self.cid ) then
+			pprint( "interpolate..." )
 		end
 	end
 end
