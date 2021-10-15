@@ -21,6 +21,7 @@ end
 
 -------------
 function init( self )
+	self.targetPos = go.get_position()
 	self.dir = vmath.vector3()
 	self.maxSpeed = self.speed
 	self.cid = go.get_id()
@@ -30,19 +31,20 @@ end
 
 
 function update( self, dt )
-	if self.targetPos ~= nil then
-		-- Move towards target in a straight line
-		self.pos = go.get_position()
-		self.dir = vmath.normalize( self.targetPos - self.pos )
-		self.pos.x = self.pos.x + self.dir.x * self.speed * dt
-		self.pos.y = self.pos.y + self.dir.y * self.speed * dt
-		go.set_position( self.pos )
-
-	end
-
+	self.pos = go.get_position()
+	self.dir = vmath.normalize( self.targetPos - self.pos )
+	self.pos.x = self.pos.x + self.dir.x * self.speed * dt
+	self.pos.y = self.pos.y + self.dir.y * self.speed * dt
+	
 	-- Am I responsible for providing game logic?
 	if GAME:isServer() then 
-		-- Previous target position reached? 
+		-- move towards target position if available
+		if self.targetPos ~= nil then
+			-- Move towards target in a straight line
+			go.set_position( self.pos )
+		end
+		
+		-- Target position reached? 
 		-- Then select and inform other clients about new target
 		if lua.approximates( self.pos.x, self.targetPos.x, 4 ) and
 		   lua.approximates( self.pos.y, self.targetPos.y, 4 ) then 
@@ -52,10 +54,12 @@ function update( self, dt )
 		end
 		
 	else
+		-- If I am a remote drone, I get movement info not every frame.
+		-- When I do, client sync takes care of position automatically.
 		-- Have not received up-to-date info via network sync this frame? 
 		-- Then interpolate as good as possible.
 		if not GAME.client.registry:isSyncFrame( self.cid ) then
-			pprint( "interpolate..." )
+			go.set_position( self.pos )
 		end
 	end
 end
