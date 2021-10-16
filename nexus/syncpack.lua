@@ -62,6 +62,27 @@ function Syncpack:setRotation( rot )
 end
 
 
+function Syncpack:getRotation()
+	return self.rot
+end
+
+
+function Syncpack:setDirection( dir )
+	self.dir = dir
+end
+
+
+function Syncpack:getDirection()
+	return self.dir
+end
+
+
+
+function Syncpack:hasCustomProps()
+	return self.attrs ~= nil
+end
+
+
 function Syncpack:get( key )
 	if self.attrs == nil then return nil end
 	
@@ -70,19 +91,9 @@ function Syncpack:get( key )
 end
 
 
-function Syncpack:hasCustomProps()
-	return self.attrs ~= nil
-end
-
-
 function Syncpack:put( key, type, value )
 	if self.attrs == nil then self.attrs = {} end
 	self.attrs[ key ] = { type = type,  value = value }
-end
-
-
-function Syncpack:getRotation()
-	return self.rot
 end
 
 
@@ -114,10 +125,11 @@ function Syncpack:serialize()
 		
 	end
 		
-	return sprintf( "%s|%f|%f|%f|%f|%f|%f|%f%s",
+	return sprintf( "%s|%f|%f|%f|%f|%f|%f|%f|%f|%f|%f%s",
 		self.gid,
 		self.pos.x, self.pos.y, self.pos.z,
 		self.rot.x, self.rot.y, self.rot.z, self.rot.w,
+		self.dir.x, self.dir.y, self.dir.z,
 		cust 
 	)
 end
@@ -129,9 +141,10 @@ function Syncpack.deserialize( serialized )
 	local sync = Syncpack.new( parts[ 1 ] )
 	sync.pos = vmathvector3( parts[ 2 ], parts[ 3 ], parts[ 4 ] ) 
 	sync.rot = vmathquat( parts[ 5 ], parts[ 6 ], parts[ 7 ], parts[ 8 ] ) 
-
-	if #parts > 8 then
-		local i = 9
+	sync.dir = vmathvector3( parts[ 9 ], parts[ 10 ], parts[ 11 ] ) 
+	
+	if #parts > 11 then
+		local i = 12
 		local type
 		local key
 		local value 

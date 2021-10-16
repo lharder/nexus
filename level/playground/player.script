@@ -1,3 +1,5 @@
+
+go.property( "dir", vmath.vector3() )
 go.property( "speed", 0 )
 go.property( "isLocalHero", false )
 
@@ -79,6 +81,7 @@ end
 
 
 function update( self, dt )
+	pprint( self.dir )
 	if self.isLocalHero then 
 		self.pos = go.get_position()
 		self.pos.x = self.pos.x + self.dir.x * self.speed * dt
