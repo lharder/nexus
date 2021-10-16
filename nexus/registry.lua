@@ -39,20 +39,5 @@ function Registry:getClientId( gid )
 end
 
 
-function Registry:isSyncFrame( cid )
-	if self.globalIds[ cid ] then 
-		return self.syncedState[ self.globalIds[ cid ] ]
-	else
-		return false
-	end
-end
-
-function Registry:setIsSyncFrame( cid, state )
-	if self.globalIds[ cid ] then 
-		self.syncedState[ self.globalIds[ cid ] ] = state
-	end
-end
-
-
 return Registry
 

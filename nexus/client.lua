@@ -53,9 +53,6 @@ function Client.new( game )
 		-- pcall( go.get_position, nil )  	-- 0.0021
 		-- goExists( nil )  				-- 0.0024
 		if cid and goExists( cid ) then 			
-			-- mark this frame as having up to date information
-			game.client.registry:setIsSyncFrame( cid, true )
-			
 			pos = evt:getPosition()
 			if pos then go.set_position( pos, cid ) end
 
@@ -148,11 +145,6 @@ end
 
 
 function Client:update()
-	-- clear flag for having synced local gameobjects with network data
-	for i, syncinfo in ipairs( self.syncObjs ) do
-		self.registry:setIsSyncFrame( syncinfo.gid, false )
-	end
-	
 	-- listen to incoming network packets
 	if self.srv then self.srv.update( self ) end
 	if self.syncer then self.syncer.update( self ) end
