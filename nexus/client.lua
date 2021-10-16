@@ -59,8 +59,8 @@ function Client.new( game )
 			local rot = evt:getRotation()
 			if rot then go.set_rotation( rot, cid ) end
 
-			local dir = evt:getDirection()
 			-- local ok, result = pcall( go.set, "dir", cid )
+			local dir = evt:getDirection()
 			if dir then go.set( msg.url( nil, cid, "script" ), "dir", dir ) end
 			
 			if evt:hasCustomProps() then 
