@@ -62,7 +62,7 @@ function Client.new( game )
 			local dir = evt:getDirection()
 			-- local ok, result = pcall( go.set, "dir", cid )
 			if dir then go.set( msg.url( nil, cid, "script" ), "dir", dir ) end
-			
+			 
 			if evt:hasCustomProps() then 
 				for key, value in pairs( evt.attrs ) do 
 					go.set( msg.url( nil, cid, "script" ), key, value )

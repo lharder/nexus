@@ -29,7 +29,7 @@ embedded_components {
   "  w: 0.0\n"
   "}\n"
   "color {\n"
-  "  x: 1.0\n"
+  "  x: 0.0\n"
   "  y: 1.0\n"
   "  z: 1.0\n"
   "  w: 1.0\n"
