@@ -53,12 +53,16 @@ function Client.new( game )
 		-- pcall( go.get_position, nil )  	-- 0.0021
 		-- goExists( nil )  				-- 0.0024
 		if cid and goExists( cid ) then 			
-			pos = evt:getPosition()
+			local pos = evt:getPosition()
 			if pos then go.set_position( pos, cid ) end
 
-			rot = evt:getRotation()
+			local rot = evt:getRotation()
 			if rot then go.set_rotation( rot, cid ) end
 
+			local dir = evt:getDirection()
+			-- local ok, result = pcall( go.set, "dir", cid )
+			if dir then go.set( "dir", cid ) end
+			
 			if evt:hasCustomProps() then 
 				for key, value in pairs( evt.attrs ) do 
 					go.set( msg.url( nil, cid, "script" ), key, value )
