@@ -168,6 +168,7 @@ function Client:update()
 					local syncpack = Syncpack.new( syncinfo.gid )
 					syncpack:setPosition( go.get_position( cid ) )
 					syncpack:setRotation( go.get_rotation( cid ) )
+					syncpack:setDirection( go.get( "dir", cid ) )
 
 					-- try to avoid custom properties! Cost performance.
 					-- But if necessary, include keys, types and values...
