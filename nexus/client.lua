@@ -61,7 +61,7 @@ function Client.new( game )
 
 			local dir = evt:getDirection()
 			-- local ok, result = pcall( go.set, "dir", cid )
-			if dir then go.set( "dir", cid ) end
+			if dir then go.set( cid, "dir", dir ) end
 			
 			if evt:hasCustomProps() then 
 				for key, value in pairs( evt.attrs ) do 
@@ -168,7 +168,7 @@ function Client:update()
 					local syncpack = Syncpack.new( syncinfo.gid )
 					syncpack:setPosition( go.get_position( cid ) )
 					syncpack:setRotation( go.get_rotation( cid ) )
-					syncpack:setDirection( go.get( "dir", cid ) )
+					syncpack:setDirection( go.get( cid, "dir" ) )
 
 					-- try to avoid custom properties! Cost performance.
 					-- But if necessary, include keys, types and values...
