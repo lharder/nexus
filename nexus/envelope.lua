@@ -7,7 +7,7 @@ local startsWith = function( s, start )
 end
 
 
-local Envelope = Serializable.new()
+local Envelope = Serializable.new() 
 
 -- type: for game logic to decide how to process enclosed data
 -- url: globalId or absolute url for object to receive the data as message
@@ -20,10 +20,11 @@ function Envelope.new( type, url, isNexusInternal )
 	if isNexusInternal == nil then isNexusInternal = false end
 
 	o.attrs = {}
+	o.meta = {}
 	
-	o:put( "_meta_url", url )
-	o:put( "_meta_type", type )  
-	o:put( "_meta_internal", isNexusInternal )  
+	o.meta[ "url" ] 	 = url 
+	o.meta[ "type" ] 	 = type 
+	o.meta[ "internal" ] = isNexusInternal 
 
 	return o
 end
@@ -42,43 +43,43 @@ end
 
 -- Meta data for reliable internal handling ------
 function Envelope:setUrl( url )
-	return self:put( "_meta_url", url ) 
+	self.meta[ "url" ] = url 
 end
 
-function Envelope:getUrl( )
-	return self:get( "_meta_url" )
+function Envelope:getUrl()
+	return self.meta[ "url" ]
 end
 
 
 function Envelope:setIP( ip )
-	self:put( "_meta_ip", ip )
+	self.meta[ "ip" ] = ip
 end
 
 function Envelope:getIP()
-	return self:get( "_meta_ip" )
+	return self.meta[ "ip" ]
 end
 
 
 function Envelope:setPort( port )
-	return self:put( "_meta_port", port )
+	self.meta[ "port" ] = port
 end
 
 function Envelope:getPort()
-	return self:get( "_meta_port" )
+	return self.meta[ "port" ]
 end
 
 
 function Envelope:getType( )
-	return self:get( "_meta_type" )
+	return self.meta[ "type" ]
 end
 
 function Envelope:setType( type )
-	return self:put( "_meta_type", type )
+	self.meta[ "type" ] = type
 end
 
 
 function Envelope:isInternal()
-	return self:get( "_meta_internal" )
+	return self.meta[ "internal" ]
 end
 
 
@@ -87,19 +88,11 @@ function Envelope:deepCopy()
 end
 
 
-function Envelope:toTable( serialized )
+function Envelope:toTable()
 	local t = {}
-	t.meta = {}
-	t.attrs = {}
-	for key, value in pairs( self.attrs ) do
-		if startsWith( key, "_meta_" ) then 
-			key = stringsub( key, 7 ) 
-			t.meta[ key ] = value
-		else 
-			t.attrs[ key ] = value
-		end
-
-	end
+	t.meta = self.meta
+	t.attrs = self.attrs 
+	
 	return t
 end 
 

@@ -59,14 +59,9 @@ function Client.new( game )
 			local rot = evt:get( "rot" )
 			if rot then go.set_rotation( rot, cid ) end
 
-			-- local ok, result = pcall( go.set, "dir", cid )
-			-- local dir = evt:get( "dir" )
-			-- if dir then go.set( msg.url( nil, cid, "script" ), "dir", dir ) end
-		
 			for i, prop in pairs( evt.props ) do 
 				go.set( msg.url( nil, cid, prop.segment ), prop.key, prop.value )
-			end
-		
+			end		
 		end
 	end, game.SYNC_PORT )
 
@@ -185,9 +180,9 @@ function Client:update()
 					-- send syncpack to all clients
 					for i, callsign in pairs( self.game.match.proposal ) do
 						local host = self.game.hosts:get( callsign )
-						if host.ip ~= self.game.meHost.ip then 
+						-- if host.ip ~= self.game.meHost.ip then 
 							self.srv.send( syncpack:serialize(), host.ip, self.game.SYNC_PORT ) 
-						end
+						-- end
 					end 
 				else
 					-- object no longer exists, stop sync automatically
