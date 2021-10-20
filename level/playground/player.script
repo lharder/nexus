@@ -94,6 +94,8 @@ function update( self, dt )
 		self.cnt = GAME.client.state:get( self.gid, "counter" ) or 0
 		label.set_text( "#counter", self.cnt )
 	end
+
+	pprint( self.dir ) 
 end
 
 

@@ -26,7 +26,9 @@ end
 
 
 function Serializable.deserialize( serialized )
-	return sys.deserialize( serialized )
+	local obj = sys.deserialize( serialized )
+	setmetatable( obj, Serializable )
+	return obj
 end
 
 

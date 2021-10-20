@@ -43,7 +43,7 @@ local function parse( message )
 			-- Better avoid custom properties! Costs performance...
 			-- local customProps = {{ key = "speed",  type = "n" }}
 			-- GAME:sync( message.attrs.gid, customProps ) 
-			GAME:sync( message.attrs.gid, { key = "dir",  segment = "script" } ) 
+			GAME:sync( message.attrs.gid, {{ key = "dir",  segment = "script" }} ) 
 		end
 
 	elseif message.meta.type == Events.CREATE_ROBOT then

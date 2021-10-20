@@ -186,7 +186,8 @@ function Client:update()
 					for i, callsign in pairs( self.game.match.proposal ) do
 						local host = self.game.hosts:get( callsign )
 						if host.ip ~= self.game.meHost.ip then 
-							self.srv.send( syncpack:serialize(), host.ip, self.game.SYNC_PORT ) 
+							local data = syncpack:serialize()
+							self.srv.send( data, host.ip, self.game.SYNC_PORT ) 
 						end
 					end
 				else
