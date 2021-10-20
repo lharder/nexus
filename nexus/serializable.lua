@@ -25,10 +25,14 @@ function Serializable:serialize()
 end
 
 
-function Serializable.deserialize( serialized )
-	local obj = sys.deserialize( serialized )
-	setmetatable( obj, Serializable )
-	return obj
+function Serializable.deserialize( serialized, asTable )
+	if asTable then 
+		return sys.deserialize( serialized )
+	else
+		local obj = sys.deserialize( serialized )
+		setmetatable( obj, Serializable )
+		return obj
+	end
 end
 
 
