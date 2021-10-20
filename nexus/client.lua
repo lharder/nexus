@@ -77,10 +77,10 @@ function Client.new( game )
 			for k, v in pairs( evt:toTable().attrs ) do
 				-- use "put"/false without resyncing that value
 				this.state:put( gid, k, v, false )
-				
+
 				-- pprint( this.state:get( gid, k ) )
 			end
-			
+
 		else
 			-- custom game logic events 
 			local url = evt:getUrl()
@@ -163,11 +163,10 @@ function Client:update()
 					syncpack:put( "gid", syncinfo.gid )
 					syncpack:put( "pos", go.get_position( cid ) )
 					syncpack:put( "rot", go.get_rotation( cid ) )
-					-- syncpack:setDirection( go.get( msg.url( nil, cid, "script" ), "dir" ) )
+					syncpack:put( "props", {} )
 
 					-- But if necessary, include keys, types and values...
 					if syncinfo.hasCustomProps then 
-						syncpack.props = {}
 						for _, kt in ipairs( syncinfo.custKeyTypes ) do 
 							local prop = {}
 							prop.key = kt.key
