@@ -19,16 +19,30 @@ function Envelope.new( type, url, isNexusInternal )
 
 	if isNexusInternal == nil then isNexusInternal = false end
 
-	o:putString( "_meta_url", url )
-	o:putNumber( "_meta_type", type )  
-	o:putBool( "_meta_internal", isNexusInternal )  
+	o.attrs = {}
+	
+	o:put( "_meta_url", url )
+	o:put( "_meta_type", type )  
+	o:put( "_meta_internal", isNexusInternal )  
 
 	return o
 end
 
+
+-- make sure to distiguish user data / attrs 
+-- from meta data and functions
+function Envelope:put( key, value )
+	self.attrs[ key ] = value
+end
+
+function Envelope:get( key )
+	return self.attrs[ key ]
+end
+
+
 -- Meta data for reliable internal handling ------
 function Envelope:setUrl( url )
-	return self:putString( "_meta_url", url )
+	return self:put( "_meta_url", url ) 
 end
 
 function Envelope:getUrl( )
@@ -37,7 +51,7 @@ end
 
 
 function Envelope:setIP( ip )
-	return self:putString( "_meta_ip", ip )
+	self:put( "_meta_ip", ip )
 end
 
 function Envelope:getIP()
@@ -46,7 +60,7 @@ end
 
 
 function Envelope:setPort( port )
-	return self:putNumber( "_meta_port", port )
+	return self:put( "_meta_port", port )
 end
 
 function Envelope:getPort()
@@ -59,7 +73,7 @@ function Envelope:getType( )
 end
 
 function Envelope:setType( type )
-	return self:putNumber( "_meta_type", type )
+	return self:put( "_meta_type", type )
 end
 
 
@@ -77,16 +91,12 @@ function Envelope:toTable( serialized )
 	local t = {}
 	t.meta = {}
 	t.attrs = {}
-	for key, typeValuePair in pairs( self.attrs ) do
+	for key, value in pairs( self.attrs ) do
 		if startsWith( key, "_meta_" ) then 
 			key = stringsub( key, 7 ) 
-			t.meta[ key ] = typeValuePair.value
+			t.meta[ key ] = value
 		else 
-			if typeValuePair.type == "x" then
-				t.attrs[ key ] = typeValuePair.value:serialize()
-			else
-				t.attrs[ key ] = typeValuePair.value
-			end
+			t.attrs[ key ] = value
 		end
 
 	end

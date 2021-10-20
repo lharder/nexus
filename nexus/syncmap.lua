@@ -1,4 +1,4 @@
-local Serializable = require( "nexus.serializable" )
+local Serializable = require( "nexus.serializableOld" )
 local Envelope = require( "nexus.envelope" )
 
 local Syncmap = {}

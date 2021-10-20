@@ -16,37 +16,37 @@ Events.names[ 4 ] = "POSITION_REACHED"
 
 function Events.newCreatePlayer( gid, pos, speed, name, isLocalHero )
 	local env = Envelope.new( Events.CREATE_PLAYER, "playground:/level" )
-	env:putString( "factory", "playground:/factories#playerfactory" )
-	env:putString( "gid", gid )
-	env:putVector3( "pos", pos )
-	env:putString( "name", name )
-	env:putNumber( "speed", speed )
-	env:putBool( "isLocalHero", isLocalHero )
+	env:put( "factory", "playground:/factories#playerfactory" )
+	env:put( "gid", gid )
+	env:put( "pos", pos )
+	env:put( "name", name )
+	env:put( "speed", speed )
+	env:put( "isLocalHero", isLocalHero )
 	return env
 end
 
 
 function Events.newCreateRobot( gid, pos, speed, name )
 	local env = Envelope.new( Events.CREATE_ROBOT, "playground:/level", false )
-	env:putString( "factory", "playground:/factories#robotfactory" )
-	env:putString( "gid", gid )
-	env:putVector3( "pos", pos )
-	env:putNumber( "speed", speed )
-	env:putString( "name", name )
+	env:put( "factory", "playground:/factories#robotfactory" )
+	env:put( "gid", gid )
+	env:put( "pos", pos )
+	env:put( "speed", speed )
+	env:put( "name", name )
 	return env
 end
 
 
 function Events.newMoveTo( gid, pos )
 	local env = Envelope.new( Events.MOVE_TO, gid, false )
-	env:putVector3( "pos", pos )
+	env:put( "pos", pos )
 	return env
 end
 
 
 function Events.newPositionReached( gid, pos )
 	local env = Envelope.new( Events.POSITION_REACHED, gid )
-	env:putVector3( "pos", pos )
+	env:put( "pos", pos )
 	return env
 end
 

@@ -2,9 +2,9 @@ require( "deflibs.defold" )
 
 local udp = require "defnet.udp"
 local Envelope = require( "nexus.envelope" )
-local Syncpack = require( "nexus.syncpack" )
 local Registry = require( "nexus.registry" )
 local Syncmap = require( "nexus.syncmap" )
+local Serializable = require( "nexus.serializable" )
 
 local EVENT_TYPE_SYNC = -1
 local MSG_EXEC_CMD 	= hash( "execCmd" )
@@ -43,8 +43,8 @@ function Client.new( game )
 	-- server for auto sync gameobject states
 	this.syncer = udp.create( function( data, ip, port )
 		-- nexus sync events for gameobjects
-		local evt = Syncpack.deserialize( data )
-		local cid = this.registry:getClientId( evt:getGlobalId() )
+		local evt = Serializable.deserialize( data )
+		local cid = this.registry:getClientId( evt:get( "gid" ) )
 
 		-- Might be that the gameobject no longer exists:
 		-- level (un)loading kills them while packets are
@@ -53,21 +53,20 @@ function Client.new( game )
 		-- pcall( go.get_position, nil )  	-- 0.0021
 		-- goExists( nil )  				-- 0.0024
 		if cid and goExists( cid ) then 			
-			local pos = evt:getPosition()
+			local pos = evt:get( "pos" )
 			if pos then go.set_position( pos, cid ) end
 
-			local rot = evt:getRotation()
+			local rot = evt:get( "rot" )
 			if rot then go.set_rotation( rot, cid ) end
 
 			-- local ok, result = pcall( go.set, "dir", cid )
-			local dir = evt:getDirection()
-			if dir then go.set( msg.url( nil, cid, "script" ), "dir", dir ) end
-			
-			if evt:hasCustomProps() then 
-				for key, value in pairs( evt.attrs ) do 
-					go.set( msg.url( nil, cid, "script" ), key, value )
-				end
+			-- local dir = evt:get( "dir" )
+			-- if dir then go.set( msg.url( nil, cid, "script" ), "dir", dir ) end
+		
+			for i, prop in pairs( evt.props ) do 
+				go.set( msg.url( nil, cid, prop.segment ), prop.key, prop.value )
 			end
+		
 		end
 	end, game.SYNC_PORT )
 
@@ -165,16 +164,21 @@ function Client:update()
 			for i, syncinfo in ipairs( self.syncObjs ) do
 				local cid = self.registry:getClientId( syncinfo.gid )
 				if cid then
-					local syncpack = Syncpack.new( syncinfo.gid )
-					syncpack:setPosition( go.get_position( cid ) )
-					syncpack:setRotation( go.get_rotation( cid ) )
-					syncpack:setDirection( go.get( msg.url( nil, cid, "script" ), "dir" ) )
+					local syncpack = Serializable.new()
+					syncpack:put( "gid", syncinfo.gid )
+					syncpack:put( "pos", go.get_position( cid ) )
+					syncpack:put( "rot", go.get_rotation( cid ) )
+					-- syncpack:setDirection( go.get( msg.url( nil, cid, "script" ), "dir" ) )
 
-					-- try to avoid custom properties! Cost performance.
 					-- But if necessary, include keys, types and values...
 					if syncinfo.hasCustomProps then 
+						syncpack.props = {}
 						for _, kt in ipairs( syncinfo.custKeyTypes ) do 
-							syncpack:put( kt.key, kt.type, go.get( msg.url( nil, cid, "script" ), kt.key ) )
+							local prop = {}
+							prop.key = kt.key
+							prop.segment = kt.segment
+							prop.value = go.get( msg.url( nil, cid, prop.segment ), prop.key )
+							table.insert( syncpack.props, prop )
 						end
 					end
 

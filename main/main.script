@@ -33,72 +33,34 @@ function init( self )
 	Lua.randomize()
 	msg.post( "main:/screenmaster", "load", { level = "setup" } ) 
 	
-	--[[
-	local env = Envelope.new( 1, "foo" )
-	local obj = Envelope.deserialize( env:serialize() )
-	
-	
-	local pos = vmath.vector3( 100, 200, 0.5 )
-	local rot = go.get_rotation()
-
-	local sync = Syncset.new( "playerA" )
-	sync:setPosition( pos )
-	sync:setRotation( rot )
-	-- beware: every cust prop costs much performance!
-	-- sync:put( "dir", "v", pos )
-
-	local foo = Serializable.new()
-	foo:putString( "bar", "Hello" )
-	foo:putNumber( "baz", 123 )
-	
+	--[[ ------------------
 	local ser = Serializable.new()
-	ser:putString( "gid", "playerA" )
-	ser:putVector3( "pos", pos )
-	ser:putQuat( "rot", rot ) 
-	-- ser:putSerializable( "foo", foo )
-
-	local env = Envelope.new( 123, "playerA" )
-	env:putVector3( "pos", pos )
-	ser:putQuat( "rot", rot ) 
-
-	pprint( env:serialize() )
-	pprint( Envelope.deserialize( env:serialize() ):get( "pos" ) )
-	pprint( env:toTable() )
+	ser:put( "gid", "playerA" )
+	ser:put( "pos", go.get_position() )
+	ser:put( "rot", go.get_rotation() ) 
 	
-	local obj
-	local MIO = 1000000
-
-	------------------
-	now = socket.gettime()
-	for i = 1, MIO, 1 do
-		obj = Syncset.deserialize( sync:serialize() )
-	end
-	local syncTime = socket.gettime() - now
-	pprint( "Syncset: " .. syncTime .. " sec" )
-
-	------------------
-	now = socket.gettime()
-	for i = 1, MIO, 1 do
-		obj = Envelope.deserialize( env:serialize() )
-	end
-	local syncTime = socket.gettime() - now
-	pprint( "Envelope: " .. syncTime .. " sec" )
-
-	--[[
-	------------------
-	now = socket.gettime()
-	for i = 1, MIO, 1 do
+	local now = socket.gettime()
+	for i = 1, 100000, 1 do
 		obj = Serializable.deserialize( ser:serialize() )
 	end
 	local syncTime = socket.gettime() - now
 	pprint( "Serializable: " .. syncTime .. " sec" )
-	--]]
-		
-	--[[
+
+	pprint( obj )
 	pprint( ser:serialize() )
-	obj = Serializable.deserialize( ser:serialize() )
-	pprint( obj:get( "pos" ) )
-	pprint( obj:get( "foo" ) )
+	
+	----
+	local ser = SerializableOld.new()
+	ser:putString( "gid", "playerA" )
+	ser:putVector3( "pos", go.get_position() )
+	ser:putQuat( "rot", go.get_rotation() )
+
+	local now = socket.gettime()
+	for i = 1, 100000, 1 do
+		obj = SerializableOld.deserialize( ser:serialize() )
+	end
+	local syncTime = socket.gettime() - now
+	pprint( "SerializableOld: " .. syncTime .. " sec" )
 	--]]
 	
 end
