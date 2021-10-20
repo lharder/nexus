@@ -40,9 +40,11 @@ local function parse( message )
 
 		-- sync the local hero to other clients directly
 		if message.attrs.isLocalHero then 
-			-- Better avoid custom properties! Costs performance...
-			-- local customProps = {{ key = "speed",  type = "n" }}
-			-- GAME:sync( message.attrs.gid, customProps ) 
+			-- pos and rot get synced automatically.
+			-- Optionally, custom props of a go can be synced, as well:
+			-- need not only the prop key, but also the (script) component 
+			-- segment of the url where that property is defined:
+			-- e.g. "playground:/player#script"
 			GAME:sync( message.attrs.gid, {{ key = "dir",  segment = "script" }} ) 
 		end
 
