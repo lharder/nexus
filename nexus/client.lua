@@ -180,9 +180,9 @@ function Client:update()
 					-- send syncpack to all clients
 					for i, callsign in pairs( self.game.match.proposal ) do
 						local host = self.game.hosts:get( callsign )
-						-- if host.ip ~= self.game.meHost.ip then 
+						if host.ip ~= self.game.meHost.ip then 
 							self.srv.send( syncpack:serialize(), host.ip, self.game.SYNC_PORT ) 
-						-- end
+						end
 					end 
 				else
 					-- object no longer exists, stop sync automatically
