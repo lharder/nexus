@@ -26,7 +26,7 @@ function Syncmap:put( gid, key, value, isSyncNeeded )
 	-- value. In that case, another sync request would be double,
 	-- so isSyncNeeded = false prevents that 
 	if isSyncNeeded == nil then isSyncNeeded = true end
-	
+
 	-- no key makes no sense
 	if key == nil then return end
 
@@ -41,30 +41,7 @@ function Syncmap:put( gid, key, value, isSyncNeeded )
 
 	-- is internal event: declare with (optional) parameter "true"
 	local env = Envelope.new( EVENT_VAR_CHANGE, gid, true )
-	local tv = type( value )
-
-	if tv == "string" then 
-		env:putString( key, value )
-
-	elseif tv == "number" then 
-		env:putNumber( key, value )
-
-	elseif tv == "userdata" then 
-		local udata = tostring( value )
-		if udata:indexOf( "quat" ) > -1 then 
-			env:putQuat( key, value )
-		elseif udata:indexOf( "vector" ) > -1 then 
-			env:putVector3( key, value )
-		elseif udata:indexOf( "boolean" ) > -1 then 
-			env:putBool( key, value )
-		end
-
-	elseif tv == "table" then 	
-		env:putSerializable( key, value )
-
-	elseif tv == "boolean" then 
-		env:putBool( key, value ) 
-	end
+	env:put( key, value )
 
 	if isSyncNeeded then 
 		self.client:sendToOtherClients( env )
