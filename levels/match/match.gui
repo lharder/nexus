@@ -72,9 +72,9 @@ nodes {
     w: 1.0
   }
   color {
-    x: 1.0
-    y: 0.0
-    z: 0.0
+    x: 0.3019608
+    y: 0.3019608
+    z: 0.3019608
     w: 1.0
   }
   type: TYPE_BOX
@@ -98,6 +98,7 @@ nodes {
   clipping_visible: true
   clipping_inverted: false
   alpha: 1.0
+  overridden_fields: 5
   template_node_child: true
   size_mode: SIZE_MODE_MANUAL
   custom_type: 0
@@ -188,9 +189,9 @@ nodes {
     w: 1.0
   }
   color {
-    x: 0.9490196
-    y: 0.9490196
-    z: 0.9490196
+    x: 0.85490197
+    y: 1.0
+    z: 0.68235296
     w: 1.0
   }
   type: TYPE_TEXT
@@ -221,6 +222,7 @@ nodes {
   alpha: 1.0
   outline_alpha: 1.0
   shadow_alpha: 1.0
+  overridden_fields: 5
   template_node_child: true
   text_leading: 1.0
   text_tracking: 0.0

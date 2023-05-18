@@ -19,7 +19,7 @@ end
 
 
 local function createDrone( self, cmd )
-	cmd.pos.x = cmd.pos.x + 530
+	-- cmd.pos.x = cmd.pos.x + 530
 	
 	-- local drone game object, remote controlled
 	local id = factorycreate( cmd.factUrl, cmd.pos, cmd.rot, cmd.params, cmd.scale )
@@ -40,7 +40,7 @@ end
 
 
 local function updateDrone( self, cmd )
-	cmd.pos.x = cmd.pos.x + 530
+	-- cmd.pos.x = cmd.pos.x + 530
 
 	-- calculate position of active GO msgPerSecFraction secs in the future...
 	local id = self.passives.ids[ cmd.gid ]
@@ -149,7 +149,7 @@ function Puppeteer:sendToOthers( cmd )
 	if cmd == nil then return end
 
 	local serialized = sys.serialize( cmd )
-	for i, contact in ipairs( self.contacts ) do
+	for i, contact in ipairs( self.others ) do
 		self.srv.send( serialized, contact.ip, contact.port )
 	end
 end
