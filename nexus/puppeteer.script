@@ -1,0 +1,42 @@
+go.property( "isMaster", false )
+go.property( "msgPerSec", 6 )
+
+local MSG_SCREEN_LOADED = hash( "screenmaster:loaded" )
+
+local Puppeteer = require( "nexus.puppeteer" )
+
+-- Global --------------
+puppeteer = nil
+------------------------
+
+
+-- methods --------------------------
+function update( self, dt )
+	if puppeteer then puppeteer:update( dt ) end
+end
+
+
+function on_message( self, message_id, message, sender )
+	if message_id == MSG_SCREEN_LOADED then
+		-- receive the game's contacts from the previous screen
+		if message ~= nil then 
+			local isMaster = ( message.mycontact.ip == message.mastercontact.ip )
+			puppeteer = Puppeteer.new( message.mycontact.callsign, isMaster, self.msgPerSec )
+
+			puppeteer.mycontact = message.mycontact
+			puppeteer.contacts = message.contacts
+			puppeteer.mastercontact = message.mastercontact
+			puppeteer.isMaster = isMaster
+
+			for i, contact in ipairs( message.contacts ) do
+				if contact.ip ~= message.mycontact.ip then
+					table.insert( puppeteer.others, contact )
+				end
+			end
+		end
+		
+	-- else
+	--	if puppeteer then puppeteer:on_message( self, message_id, message, sender ) end
+	end
+end
+

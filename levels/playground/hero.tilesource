@@ -1,0 +1,83 @@
+image: "/assets/images/SF_Actor2.png"
+tile_width: 144
+tile_height: 144
+tile_margin: 0
+tile_spacing: 0
+collision: ""
+material_tag: "tile"
+collision_groups: "default"
+animations {
+  id: "standback"
+  start_tile: 92
+  end_tile: 92
+  playback: PLAYBACK_NONE
+  fps: 0
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "standfront"
+  start_tile: 56
+  end_tile: 56
+  playback: PLAYBACK_NONE
+  fps: 0
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "standleft"
+  start_tile: 68
+  end_tile: 68
+  playback: PLAYBACK_NONE
+  fps: 0
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "standright"
+  start_tile: 80
+  end_tile: 80
+  playback: PLAYBACK_NONE
+  fps: 0
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walkback"
+  start_tile: 91
+  end_tile: 93
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 5
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walkfront"
+  start_tile: 55
+  end_tile: 57
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 5
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walkleft"
+  start_tile: 67
+  end_tile: 69
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 5
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+animations {
+  id: "walkright"
+  start_tile: 79
+  end_tile: 81
+  playback: PLAYBACK_LOOP_FORWARD
+  fps: 5
+  flip_horizontal: 0
+  flip_vertical: 0
+}
+extrude_borders: 0
+inner_padding: 0
+sprite_trim_mode: SPRITE_TRIM_MODE_OFF

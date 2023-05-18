@@ -1,5 +1,7 @@
-local M = {}
+require( "nexus.utils" )
 
+
+local M = {}
 
 function M.getIP()
 	local ip = nil

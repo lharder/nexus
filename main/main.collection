@@ -21,68 +21,11 @@ instances {
 }
 scale_along_z: 0
 embedded_instances {
-  id: "main"
-  data: "components {\n"
-  "  id: \"main\"\n"
-  "  component: \"/main/main.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "}\n"
-  ""
-  position {
-    x: 320.0
-    y: 568.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
-  id: "level"
-  children: "match"
-  children: "setup"
-  data: ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
-  id: "match"
+  id: "setup"
   data: "embedded_components {\n"
   "  id: \"proxy\"\n"
   "  type: \"collectionproxy\"\n"
-  "  data: \"collection: \\\"/level/match/match.collection\\\"\\n"
+  "  data: \"collection: \\\"/levels/setup/setup.collection\\\"\\n"
   "exclude: false\\n"
   "\"\n"
   "  position {\n"
@@ -116,11 +59,48 @@ embedded_instances {
   }
 }
 embedded_instances {
-  id: "setup"
+  id: "main"
+  data: "components {\n"
+  "  id: \"main\"\n"
+  "  component: \"/main/starter.script\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "  property_decls {\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+embedded_instances {
+  id: "match"
   data: "embedded_components {\n"
   "  id: \"proxy\"\n"
   "  type: \"collectionproxy\"\n"
-  "  data: \"collection: \\\"/level/setup/setup.collection\\\"\\n"
+  "  data: \"collection: \\\"/levels/match/match.collection\\\"\\n"
   "exclude: false\\n"
   "\"\n"
   "  position {\n"
@@ -158,7 +138,7 @@ embedded_instances {
   data: "embedded_components {\n"
   "  id: \"proxy\"\n"
   "  type: \"collectionproxy\"\n"
-  "  data: \"collection: \\\"/level/playground/playground.collection\\\"\\n"
+  "  data: \"collection: \\\"/levels/playground/playground.collection\\\"\\n"
   "exclude: false\\n"
   "\"\n"
   "  position {\n"

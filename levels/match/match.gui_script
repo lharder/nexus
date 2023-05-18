@@ -1,0 +1,125 @@
+local defgui = require( "defgui.defgui" )
+local Contact = require( "nexus.contact" )
+local Localhost = require( "nexus.localhost" )
+local Beacon = require( "nexus.beacon" )
+local Matcher = require( "nexus.matcher" )
+
+local MSG_SCREEN_LOADED = hash( "screenmaster:loaded" )
+
+
+local function display( self, contacts )
+	local x = 50
+	local y = 450
+
+	-- display a checkbox for each callsign
+	for i, contact in ipairs( contacts ) do
+		-- does a checkbox exist already?
+		local checkbox = self.form.fields[ contact.callsign ] 
+		if checkbox == nil then
+			checkbox = self.form:addCheckbox( contact.callsign, x, y,
+			function() pprint( "Click!" ) end, 
+				contact.callsign 
+			)
+			checkbox:check( true )
+		end
+
+		-- calculate new position
+		x = x + 240
+		if x > 900 then
+			x = 50
+			y = y - 50
+		end
+	end
+end
+
+
+local function getCheckedCallsigns( self )
+	local callsigns = {}
+	for id, field in pairs( self.form.fields ) do
+		-- only checkboxes have this method...
+		if field.isChecked and field:isChecked() then
+			table.insert( callsigns, field.caption )
+		end
+	end
+	return callsigns
+end
+
+
+-- methods -----------------------
+function init( self )
+	msg.post( ".", "acquire_input_focus" )
+	msg.post( "@render:", "use_fixed_fit_projection", { near = -1, far = 1 } )
+
+	self.contacts = {}
+	
+	self.form = defgui.createForm( "callsigns", { 
+		button = "button/root",  
+		checkbox = "checkbox/root",  
+		label = "label/root",
+	})
+
+	display( self, self.contacts )
+end
+
+
+
+function on_message( self, message_id, message, sender )
+	if message_id == MSG_SCREEN_LOADED then
+		-- receive the player's callsign from the previous screen
+		-- use it to start broadcasting and searching for peers
+		if message ~= nil then 
+			-- create beacon to find other players
+			self.beacon = Beacon.new( "MyGame", message.callsign, function( other )
+				if other == nil then return end
+				pprint( "Found contact: " .. other.callsign .. " (" .. other.ip .. ")" )
+
+				-- new contact found, remember
+				table.insert( self.contacts, other )
+				display( self, self.contacts )
+			end )
+
+			self.form:addLabel( "callsign", 50, 550, 500, 40, nil, message.callsign .. ", select your co-players:" )
+			self.form:addButton( "play", 750, 550, 200, 48, function() 
+				pprint( "Clicked start button...!" ) 
+				local callsigns = getCheckedCallsigns( self )
+
+				-- my local contact info
+				self.mycontact = self.beacon:me()
+
+				-- stop searching, start negotiating
+				self.beacon:destroy()
+
+				-- negotiate a common set of players for a game
+				self.matcher = Matcher.new( self.mycontact )
+				self.matcher:propose( self.contacts, function( mastercontact ) 
+					pprint( "All selected players confirmed, let's rock!!!" )
+
+					local messages = {}
+					messages[ "playground:/puppeteer" ] = { 
+						mycontact = self.mycontact, 
+						mastercontact = mastercontact,
+						contacts = self.contacts 
+					}
+
+					msg.post( "main:/screenmaster", "load", {
+						level = "/playground",  messages = messages
+					})
+				end )
+			end, "Start" )
+		end
+	end
+end
+
+
+function update( self, dt )
+	if self.beacon then self.beacon:update() end
+	if self.matcher then self.matcher:update() end
+end
+
+
+function on_input( self, action_id, action )
+	if self.form then self.form:input( self, action_id, action ) end 
+end
+
+
+

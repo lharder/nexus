@@ -1,0 +1,9 @@
+
+function init( self )
+	math.randomseed( socket.gettime() )
+	math.random()
+	math.random()
+	math.random()
+	
+	msg.post( "main:/screenmaster", "load", { level = "setup" } )
+end

@@ -1,6 +1,10 @@
 [project]
 title = nexus
-dependencies = https://github.com/lharder/defgui/archive/master.zip,https://github.com/britzl/defold-input/archive/master.zip,https://github.com/lharder/screenmaster/archive/master.zip,https://github.com/britzl/defold-luasocket/archive/master.zip,https://github.com/britzl/defnet/archive/master.zip,https://github.com/lharder/deflibs/archive/main.zip
+dependencies#0 = https://github.com/lharder/defgui/archive/master.zip
+dependencies#1 = https://github.com/britzl/defold-input/archive/master.zip
+dependencies#2 = https://github.com/lharder/screenmaster/archive/master.zip
+dependencies#3 = https://github.com/britzl/defold-luasocket/archive/master.zip
+dependencies#4 = https://github.com/britzl/defnet/archive/master.zip
 
 [bootstrap]
 main_collection = /main/main.collectionc
