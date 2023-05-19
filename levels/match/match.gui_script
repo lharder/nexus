@@ -32,7 +32,6 @@ local function display( self, contacts )
 	end
 end
 
-
 local function getCheckedCallsigns( self )
 	local callsigns = {}
 	for id, field in pairs( self.form.fields ) do
@@ -42,6 +41,17 @@ local function getCheckedCallsigns( self )
 		end
 	end
 	return callsigns
+end
+
+local function getCheckedContacts( self )
+	local callsigns = getCheckedCallsigns( self )
+	local checkedcontacts = {}
+	for i, contact in ipairs( self.contacts ) do
+		if contains( callsigns, contact.callsign ) then 
+			table.insert( checkedcontacts, contact )
+		end
+	end
+	return checkedcontacts
 end
 
 
@@ -92,10 +102,12 @@ function on_message( self, message_id, message, sender )
 				end
 
 				-- negotiate a common set of players for a game
-				local callsigns = getCheckedCallsigns( self )
-
-				self.matcher = Matcher.new( self.mycontact )
-				self.matcher:propose( self.contacts, function( mastercontact ) 
+				if self.matcher == nil then 
+					self.matcher = Matcher.new( self.mycontact ) 
+				end
+				
+				local checkedcontacts = getCheckedContacts( self )
+				self.matcher:propose( checkedcontacts, function( mastercontact ) 
 					pprint( "All selected players confirmed, let's rock!!!" )
 
 					local messages = {}

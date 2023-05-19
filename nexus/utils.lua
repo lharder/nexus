@@ -1,4 +1,22 @@
 
+function length( t )
+	if t == nil then return 0 end
+
+	local count = 0
+	for _ in pairs( t ) do count = count + 1 end
+	return count
+end
+
+function contains( tab, value )
+	for key, item in pairs( tab ) do
+		if item == value then
+			return true
+		end
+	end 
+	return false
+end
+
+
 string.startsWith = function( s, start )
 	return s:sub( 1, #start ) == start
 end
