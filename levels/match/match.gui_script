@@ -91,15 +91,10 @@ function on_message( self, message_id, message, sender )
 			self.form:addLabel( "callsign", 50, 550, 500, 40, nil, message.callsign .. ", select your co-players:" )
 			self.form:addButton( "play", 750, 550, 200, 48, function() 
 				pprint( "Clicked start button...!" ) 
-				if self.beacon then 
-					-- my local contact info
-					self.mycontact = self.beacon:me()
-					self.others = self.beacon:others()
-
-					-- stop searching, start negotiating
-					self.beacon:destroy()
-					self.beacon = nil
-				end
+				
+				-- my local contact info
+				self.mycontact = self.beacon:me()
+				self.others = self.beacon:others()
 
 				-- negotiate a common set of players for a game
 				if self.matcher == nil then 
@@ -110,6 +105,9 @@ function on_message( self, message_id, message, sender )
 				self.matcher:propose( checkedcontacts, function( mastercontact ) 
 					pprint( "All selected players confirmed, let's rock!!!" )
 
+					-- stop searching
+					self.beacon:destroy()
+					
 					local messages = {}
 					messages[ "playground:/puppeteer" ] = { 
 						mycontact = self.mycontact, 
