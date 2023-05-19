@@ -101,7 +101,6 @@ end
 
 
 local function onMessage( self, message_id, message, sender )
-	pprint( "onMessage: ", message )
 end
 
 
