@@ -81,16 +81,19 @@ function on_message( self, message_id, message, sender )
 			self.form:addLabel( "callsign", 50, 550, 500, 40, nil, message.callsign .. ", select your co-players:" )
 			self.form:addButton( "play", 750, 550, 200, 48, function() 
 				pprint( "Clicked start button...!" ) 
-				local callsigns = getCheckedCallsigns( self )
+				if beacon then 
+					-- my local contact info
+					self.mycontact = self.beacon:me()
+					self.others = self.beacon:others()
 
-				-- my local contact info
-				self.mycontact = self.beacon:me()
-				self.others = self.beacon:others()
-
-				-- stop searching, start negotiating
-				self.beacon:destroy()
+					-- stop searching, start negotiating
+					self.beacon:destroy()
+					self.beacon = nil
+				end
 
 				-- negotiate a common set of players for a game
+				local callsigns = getCheckedCallsigns( self )
+
 				self.matcher = Matcher.new( self.mycontact )
 				self.matcher:propose( self.contacts, function( mastercontact ) 
 					pprint( "All selected players confirmed, let's rock!!!" )
