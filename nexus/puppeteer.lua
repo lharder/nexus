@@ -246,7 +246,7 @@ function Puppeteer:update( dt )
 				go.set_position( pos + dir * data.speed * dt, id )
 
 				-- rotation
-				go.animate( id, "euler.z", go.PLAYBACK_ONCE_FORWARD, data.degrees, go.EASING_LINEAR, .2 )
+				go.animate( id, "euler.z", go.PLAYBACK_ONCE_FORWARD, data.degrees, go.EASING_LINEAR, self.msgPerSecFraction )
 			end
 		end
 	end
