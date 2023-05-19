@@ -5,7 +5,7 @@ end
 
 
 function onMessage( self, message_id, message, sender )
-	pprint( "Received: ", message_id, message )
+	-- pprint( "Received: ", message_id, message )
 end
 
 
