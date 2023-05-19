@@ -54,7 +54,7 @@ function M:broadcast( msg )
 	local index = 1
 	local ip
 	local peerIPs = getLocalPeerIPs()
-	timer.delay( .020, true, function( this, handle, dt ) 
+	timer.delay( .010, true, function( this, handle, dt ) 
 		-- pprint( dt )
 		ip = peerIPs[ index ]
 		if ip then self.srv.send( msg, ip, self.port ) end
