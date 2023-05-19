@@ -44,7 +44,9 @@ end
 
 function Beacon:others()
 	local results = {}
-	for i, contact in ipairs( self.contacts ) do
+	local keys = self.contacts:keys()
+	for i, key in ipairs( keys ) do
+		local contact = self.contacts:get( key )
 		if( contact.ip ~= self.contact.ip ) then 
 			table.insert( results, contact ) 
 		end
