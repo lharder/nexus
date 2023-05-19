@@ -84,32 +84,34 @@ function Matcher:propose( proposedContacts, agreedHandler )
 	end
 	
 	-- create udp sender / receiver
-	self.negotiator = udp.create( function( data, ip, port )
-		if data == nil then return end
+	if self.negotiator == nil then 
+		self.negotiator = udp.create( function( data, ip, port )
+			if data == nil then return end
 
-		local callsigns = sys.deserialize( data )
-		if containSameItems( proposal, callsigns ) then
+			local callsigns = sys.deserialize( data )
+			if containSameItems( proposal, callsigns ) then
 
-			-- remember that this ip has sent an answer
-			self.confirms[ ip ] = true
+				-- remember that this ip has sent an answer
+				self.confirms[ ip ] = true
 
-			-- check how many have agreed
-			local cntConfirms = length( self.confirms ) 
-			if cntConfirms == #proposal then 
-				-- stop sending out this proposal to all hosts
-				timer.cancel( self.proposeTimer )
-				self.negotiator:destroy()
-				self.negotiator = nil
+				-- check how many have agreed
+				local cntConfirms = length( self.confirms ) 
+				if cntConfirms == #proposal then 
+					-- stop sending out this proposal to all hosts
+					timer.cancel( self.proposeTimer )
+					self.negotiator:destroy()
+					self.negotiator = nil
 
-				local master = selectMasterContact( proposedContacts )
+					local master = selectMasterContact( proposedContacts )
 
-				-- callback application handler when all agreed:
-				-- provide the contact commanding all NPCs as parameter
-				if agreedHandler then agreedHandler( master ) end
+					-- callback application handler when all agreed:
+					-- provide the contact commanding all NPCs as parameter
+					if agreedHandler then agreedHandler( master ) end
+				end
 			end
-		end
-	end, MATCH_PORT )
-
+		end, MATCH_PORT )
+	end
+	
 	-- always include player himself
 	if not contains( proposal, self.contact.callsign ) then
 		table.insert( proposal, self.contact.callsign )
