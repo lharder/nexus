@@ -3,10 +3,11 @@ local Stack = require( "nexus.stack" )
 local udp = require( "defnet.udp" )
 
 local COM_PORT = 5898
+local MSG_PER_SEC = 6
 
 
 local function globalize( self, gid )
-	return self.callsign .. "-" .. gid 
+	return self.mycontact.callsign .. "-" .. gid 
 end
 
 -- create gameobjects with complex init data.
@@ -97,12 +98,13 @@ local function execCmd( self, cmd )
 end
 
 
-local function doSoundPlayer( self, id, soundcomp, doPlay, props )
-	local gid = self.actives.gids[ id ]
-	local cmd = Commands.newSound( gid, soundcomp, doPlay, props )
+local function doSoundPlayer( self, url, doPlay, props )
+	assert( url.path, "Please provide a proper url!" )
+	
+	local gid = self.actives.gids[ url.path ]
+	local cmd = Commands.newSound( gid, url.fragment, doPlay, props )
 	self.actives.cmdQueue:push( cmd )
 	
-	local url = msg.url( nil, id, soundcomp )
 	if doPlay then sound.play( url, props ) else sound.stop( url ) end
 end	
 
@@ -112,18 +114,22 @@ end
 local Puppeteer = {}
 Puppeteer.__index = Puppeteer
 
-function Puppeteer.new( callsign, isMaster, msgPerSec )
+function Puppeteer.new( gamemaster, mycontact, others  )
 	local this = {}
 	setmetatable( this, Puppeteer )
 
-	this.callsign = callsign
-	this.isMaster = isMaster
-	this.msgPerSec = msgPerSec
-	this.msgPerSecFraction = 1 / msgPerSec
-
+	this.mycontact = mycontact
+	this.others = others or {}
 	this.contacts = {}
-	this.others = {}
 
+	table.insert( this.contacts, mycontact )
+	for i, other in ipairs( others ) do 
+		table.insert( this.contacts, other ) 
+	end
+
+	this.isMaster = ( mycontact.ip == gamemaster.ip )
+	this.msgPerSecFraction = 1 / MSG_PER_SEC
+	
 	this.actives = {}
 	this.actives.gids = {}
 	this.actives.ids = {}
@@ -184,20 +190,22 @@ function Puppeteer:delete( gid, recursive )
 end
 	
 
-function Puppeteer:animate( id, spritecomp, anim )
-	local gid = self.actives.gids[ id ]
-	local cmd = Commands.newAnimate( gid, spritecomp, anim )
+function Puppeteer:animate( url, anim )
+	assert( url.path, "Please provide a proper url!" )
+
+	local gid = self.actives.gids[ url.path ]
+	local cmd = Commands.newAnimate( gid, url.fragment, anim )
 	self.actives.cmdQueue:push( cmd )
-	sprite.play_flipbook( msg.url( nil, id, spritecomp ), anim )
+	sprite.play_flipbook( url, anim )
 end
 
 
-function Puppeteer:soundPlay( id, soundcomp, props ) 
-	doSoundPlayer( self, id, soundcomp, true, props )
+function Puppeteer:soundPlay( url, props ) 
+	doSoundPlayer( self, url, true, props )
 end
 
-function Puppeteer:soundStop( id, soundcomp, props ) 
-	doSoundPlayer( self, id, soundcomp, false, props )
+function Puppeteer:soundStop( url, props ) 
+	doSoundPlayer( self, url, false, props )
 end
 
 

@@ -85,6 +85,7 @@ function on_message( self, message_id, message, sender )
 
 				-- my local contact info
 				self.mycontact = self.beacon:me()
+				self.others = self.beacon:others()
 
 				-- stop searching, start negotiating
 				self.beacon:destroy()
@@ -98,7 +99,7 @@ function on_message( self, message_id, message, sender )
 					messages[ "playground:/puppeteer" ] = { 
 						mycontact = self.mycontact, 
 						mastercontact = mastercontact,
-						contacts = self.contacts 
+						others = self.others 
 					}
 
 					msg.post( "main:/screenmaster", "load", {

@@ -43,9 +43,18 @@ end
 
 
 function Beacon:others()
-	return self.contacts
+	local results = {}
+	for i, contact in ipairs( self.contacts ) do
+		if( contact.ip ~= self.contact.ip ) then 
+			table.insert( results, contact ) 
+		end
+	end
+	return results
 end
 
+function Beacon:all()
+	return self.contacts
+end
 
 function Beacon:me()
 	return self.contact
