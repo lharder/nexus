@@ -75,7 +75,7 @@ end
 local Matcher = {}
 Matcher.__index = Matcher
 
-local MATCH_PORT = 5898
+local MATCH_PORT = 16471
 
 
 function Matcher.new( mycontact )
