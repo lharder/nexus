@@ -18,7 +18,7 @@ local function display( self, contacts )
 		local checkbox = self.form.fields[ contact.callsign ] 
 		if checkbox == nil then
 			checkbox = self.form:addCheckbox( contact.callsign, x, y, function( guiSelf, field, action_id, action ) 
-				if field.value == me.callsign then
+				if field.caption == me.callsign then
 					pprint( "That is myself! Cannot play without me....!" ) 
 					field:check( true )
 				end
@@ -72,7 +72,6 @@ function init( self )
 		label = "label/root",
 	})
 
-	display( self, self.contacts )
 end
 
 
