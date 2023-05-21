@@ -16,10 +16,11 @@ local function display( self, contacts )
 		-- does a checkbox exist already?
 		local checkbox = self.form.fields[ contact.callsign ] 
 		if checkbox == nil then
-			checkbox = self.form:addCheckbox( contact.callsign, x, y,
-			function() pprint( "Click!" ) end, 
-				contact.callsign 
-			)
+			checkbox = self.form:addCheckbox( contact.callsign, x, y, function( guiSelf, field, action_id, action ) 
+				pprint( "That is myself! Cannot play without me....!" ) 
+				field:check( true )
+			end, 
+			contact.callsign )
 			checkbox:check( true )
 		end
 

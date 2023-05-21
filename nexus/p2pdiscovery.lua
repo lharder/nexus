@@ -47,7 +47,7 @@ function M:broadcast( msg )
 	-- create only if not available yet
 	if self.srv == nil then 
 		self.srv = udp.create( function( data, ip, port )	
-			-- no reaction for broadcasting only
+			-- no reaction, is for broadcasting only
 		end, self.port )
 	end
 	

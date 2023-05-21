@@ -71,6 +71,37 @@ function Matcher.new( mycontact )
 
 	-- confirmations received from hosts
 	this.confirms = {}
+	this.proposal = {}
+
+	-- create udp sender / receiver
+	if this.srv == nil then 
+		this.srv = udp.create( function( data, ip, port )
+			if data == nil then return end  		-- something wrong
+			if this.confirms[ ip ] then return end 	-- processed already
+
+			local counterproposal = sys.deserialize( data )
+			if containSameItems( this.proposal, counterproposal ) then
+
+				-- remember that this ip has sent an answer
+				this.confirms[ ip ] = true
+
+				-- check how many have agreed
+				local cntConfirms = length( this.confirms ) 
+				if cntConfirms == #this.proposal then 
+					-- stop sending out this proposal to all hosts
+					timer.cancel( this.proposeTimer )
+					this.srv:destroy()
+					this.srv = nil
+
+					local gamemaster = selectMasterContact( this.proposedContacts )
+
+					-- callback application handler when all agreed:
+					-- provide the contact commanding all NPCs as parameter
+					if this.agreedHandler then this.agreedHandler( gamemaster ) end
+				end
+			end
+		end, MATCH_PORT )
+	end
 
 	return this
 end
@@ -78,59 +109,32 @@ end
 -- proposal: list of callsigns
 -- agreedHandler: function called when all have agreed
 function Matcher:propose( proposedContacts, agreedHandler )
-	local proposal = {}
-	for i, contact in ipairs( proposedContacts ) do
-		table.insert( proposal, contact.callsign )
+	self.proposal = {}
+	self.proposedContacts = proposedContacts or {}
+	self.agreedHandler = agreedHandler
+	for i, contact in ipairs( self.proposedContacts ) do
+		table.insert( self.proposal, contact.callsign )
 	end
-	
-	-- create udp sender / receiver
-	if self.negotiator == nil then 
-		self.negotiator = udp.create( function( data, ip, port )
-			if data == nil then return end
-
-			local callsigns = sys.deserialize( data )
-			if containSameItems( proposal, callsigns ) then
-
-				-- remember that this ip has sent an answer
-				self.confirms[ ip ] = true
-
-				-- check how many have agreed
-				local cntConfirms = length( self.confirms ) 
-				if cntConfirms == #proposal then 
-					-- stop sending out this proposal to all hosts
-					timer.cancel( self.proposeTimer )
-					self.negotiator:destroy()
-					self.negotiator = nil
-
-					local master = selectMasterContact( proposedContacts )
-
-					-- callback application handler when all agreed:
-					-- provide the contact commanding all NPCs as parameter
-					if agreedHandler then agreedHandler( master ) end
-				end
-			end
-		end, MATCH_PORT )
-	end
-	
+		
 	-- always include player himself
-	if not contains( proposal, self.contact.callsign ) then
-		table.insert( proposal, self.contact.callsign )
-		table.insert( proposedContacts, self.contact )
+	if not contains( self.proposal, self.contact.callsign ) then
+		table.insert( self.proposal, self.contact.callsign )
+		table.insert( self.proposedContacts, self.contact )
 	end
 
 	-- keep sending player's proposal until all others agree
-	local serialized = sys.serialize( proposal )
+	local serialized = sys.serialize( self.proposal )
 	self.proposeTimer = timer.delay( .5, true, function()
 		-- send proposal to all hosts
-		for i, contact in ipairs( proposedContacts ) do
-			self.negotiator.send( serialized, contact.ip, MATCH_PORT )
+		for i, contact in ipairs( self.proposedContacts ) do
+			self.srv.send( serialized, contact.ip, MATCH_PORT )
 		end
 	end )
 end
 
 
 function Matcher:update()
-	if self.negotiator then self.negotiator.update() end
+	if self.srv then self.srv.update() end
 end
 
 
