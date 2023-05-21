@@ -12,13 +12,16 @@ local function display( self, contacts )
 	local y = 450
 
 	-- display a checkbox for each callsign
+	local me = self.beacon:me()
 	for i, contact in ipairs( contacts ) do
 		-- does a checkbox exist already?
 		local checkbox = self.form.fields[ contact.callsign ] 
 		if checkbox == nil then
 			checkbox = self.form:addCheckbox( contact.callsign, x, y, function( guiSelf, field, action_id, action ) 
-				pprint( "That is myself! Cannot play without me....!" ) 
-				field:check( true )
+				if field.value == me.callsign then
+					pprint( "That is myself! Cannot play without me....!" ) 
+					field:check( true )
+				end
 			end, 
 			contact.callsign )
 			checkbox:check( true )
