@@ -250,7 +250,8 @@ function Puppeteer:update( dt )
 			if data then 
 				-- position
 				pos = go.get_position( id )
-				dir = vmath.normalize( data.target - pos )
+				dir = data.target - pos 
+				if vmath.length( dir ) > 0 then dir = vmath.normalize( dir ) end
 				go.set_position( pos + dir * data.speed * dt, id )
 
 				-- rotation
