@@ -231,58 +231,58 @@ function Puppeteer:update( dt )
 		for id, gid in pairs( self.actives.gids ) do
 			local scrurl = msg.url( nil, id, "script" )
 			self:sendToOthers( 
-			Commands.newUpdate( 
-			gid, 
-			go.get_position( id ),
-			go.get( id, "euler.z" ),
-			go.get( scrurl, "dir" ),
-			go.get( scrurl, "speed" )
-		)
-	)
-end
-
--- also send all custom and non-update commands that
--- may have been queued up since last sending
-local cmd
-repeat
-	cmd = self.actives.cmdQueue:pop()
-	if cmd then self:sendToOthers( cmd ) end
-until( cmd == nil )
-else
--- every other frame, move passive GOs according to the
--- data that has most recently been received from active
-local data
-local target
-local pos
-local speed
-local dir
-for id, gid in pairs( self.passives.gids ) do
-	data = self.passives.data[ gid ]
-	if data then 
-		-- position
-		pos = go.get_position( id )
-		dir = data.target - pos 
-		if vmath.length( dir ) > 0 then dir = vmath.normalize( dir ) end
-
-		-- target pos has not been reached yet: MUST move, even if the master go has
-		-- already stopped moving / no speed! In that case, continue with previous speed
-		if not equals( data.target, pos ) then
-			url = msg.url( nil, id, "script" )
-			if data.speed == 0 then speed = go.get( url, "speed" ) else speed = data.speed end
-			go.set( url, "speed", speed )
-			go.set_position( pos + dir * speed * dt, id )
+				Commands.newUpdate( 
+					gid, 
+					go.get_position( id ),
+					go.get( id, "euler.z" ),
+					go.get( scrurl, "dir" ),
+					go.get( scrurl, "speed" )
+				)
+			)
 		end
 
-		-- rotation
-		go.animate( id, "euler.z", go.PLAYBACK_ONCE_FORWARD, data.degrees, go.EASING_LINEAR, self.msgPerSecFraction )
+		-- also send all custom and non-update commands that
+		-- may have been queued up since last sending
+		local cmd
+		repeat
+			cmd = self.actives.cmdQueue:pop()
+			if cmd then self:sendToOthers( cmd ) end
+		until( cmd == nil )
+	else
+		-- every other frame, move passive GOs according to the
+		-- data that has most recently been received from active
+		local data
+		local target
+		local pos
+		local speed
+		local dir
+		for id, gid in pairs( self.passives.gids ) do
+			data = self.passives.data[ gid ]
+			if data then 
+				-- position
+				pos = go.get_position( id )
+				dir = data.target - pos 
+				if vmath.length( dir ) > 0 then dir = vmath.normalize( dir ) end
+
+				-- target pos has not been reached yet: MUST move, even if the master go has
+				-- already stopped moving / no speed! In that case, continue with previous speed
+				if not equals( data.target, pos ) then
+					url = msg.url( nil, id, "script" )
+					if data.speed == 0 then speed = go.get( url, "speed" ) else speed = data.speed end
+					go.set( url, "speed", speed )
+					go.set_position( pos + dir * speed * dt, id )
+				end
+
+				-- rotation
+				go.animate( id, "euler.z", go.PLAYBACK_ONCE_FORWARD, data.degrees, go.EASING_LINEAR, self.msgPerSecFraction )
+			end
+		end
 	end
-end
-end
 end
 
 
 function Puppeteer:getGid( id )
-return self.actives.gids[ id ]
+	return self.actives.gids[ id ]
 end 
 
 
