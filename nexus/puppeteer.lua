@@ -6,12 +6,15 @@ local COM_PORT = 5898
 local MSG_PER_SEC = 6
 
 
-local function equals( v1, v2 )
-	return 	math.abs( lua.round( v1.x ) ) == math.abs( lua.round( v2.x ) ) and
-			math.abs( lua.round( v1.y ) ) == math.abs( lua.round( v2.y ) ) and
-			math.abs( lua.round( v1.z ) ) == math.abs( lua.round( v2.z ) ) 
+function round( num )
+	return math.floor( num + .5 )
 end
-		
+
+local function equals( v1, v2 )
+	return 	math.abs( round( v1.x ) ) == math.abs( round( v2.x ) ) and
+			math.abs( round( v1.y ) ) == math.abs( round( v2.y ) ) and
+			math.abs( round( v1.z ) ) == math.abs( round( v2.z ) ) 
+end
 
 local function globalize( self, gid )
 	return self.mycontact.callsign .. "-" .. gid 
