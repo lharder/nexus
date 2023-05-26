@@ -6,6 +6,13 @@ local COM_PORT = 5898
 local MSG_PER_SEC = 6
 
 
+local function equals( v1, v2 )
+	return 	math.abs( lua.round( v1.x ) ) == math.abs( lua.round( v2.x ) ) and
+			math.abs( lua.round( v1.y ) ) == math.abs( lua.round( v2.y ) ) and
+			math.abs( lua.round( v1.z ) ) == math.abs( lua.round( v2.z ) ) 
+end
+		
+
 local function globalize( self, gid )
 	return self.mycontact.callsign .. "-" .. gid 
 end
@@ -244,6 +251,7 @@ function Puppeteer:update( dt )
 		local data
 		local target
 		local pos
+		local speed
 		local dir
 		for id, gid in pairs( self.passives.gids ) do
 			data = self.passives.data[ gid ]
@@ -252,8 +260,14 @@ function Puppeteer:update( dt )
 				pos = go.get_position( id )
 				dir = data.target - pos 
 				if vmath.length( dir ) > 0 then dir = vmath.normalize( dir ) end
-				go.set_position( pos + dir * data.speed * dt, id )
 
+				-- target pos has not been reached yet: MUST move, even if the master go has
+				-- already stopped moving / no speed! In that case, continue with previous speed
+				if not equals( data.target, pos ) then
+					if data.speed == 0 then speed = go.get( id, "speed" ) else speed = data.speed end
+					go.set_position( pos + dir * speed * dt, id )
+				end
+				
 				-- rotation
 				go.animate( id, "euler.z", go.PLAYBACK_ONCE_FORWARD, data.degrees, go.EASING_LINEAR, self.msgPerSecFraction )
 			end
