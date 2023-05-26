@@ -12,8 +12,8 @@ end
 
 local function equals( v1, v2 )
 	return 	math.abs( round( v1.x ) ) == math.abs( round( v2.x ) ) and
-			math.abs( round( v1.y ) ) == math.abs( round( v2.y ) ) and
-			math.abs( round( v1.z ) ) == math.abs( round( v2.z ) ) 
+	math.abs( round( v1.y ) ) == math.abs( round( v2.y ) ) and
+	math.abs( round( v1.z ) ) == math.abs( round( v2.z ) ) 
 end
 
 local function globalize( self, gid )
@@ -31,10 +31,10 @@ end
 
 local function createDrone( self, cmd )
 	-- cmd.pos.x = cmd.pos.x + 530
-	
+
 	-- local drone game object, remote controlled
 	local id = factorycreate( cmd.factUrl, cmd.pos, cmd.rot, cmd.params, cmd.scale )
-	
+
 	self.passives.gids[ id ] = cmd.gid
 	self.passives.ids[ cmd.gid ] = id
 end
@@ -91,7 +91,7 @@ local function execCmd( self, cmd )
 
 		elseif cmd.type == Commands.DELETE then
 			deleteDrone( self, cmd.attrs )
-			
+
 		elseif cmd.type == Commands.UPDATE then
 			updateDrone( self, cmd.attrs )
 
@@ -100,7 +100,7 @@ local function execCmd( self, cmd )
 
 		elseif cmd.type == Commands.SOUND then 
 			doSoundDrone( self, cmd.attrs )
-			
+
 		elseif cmd.type == Commands.MESSAGE then
 			sendMsgCmd( self, cmd.attrs )
 		end
@@ -110,11 +110,11 @@ end
 
 local function doSoundPlayer( self, url, doPlay, props )
 	assert( url.path, "Please provide a proper url!" )
-	
+
 	local gid = self.actives.gids[ url.path ]
 	local cmd = Commands.newSound( gid, url.fragment, doPlay, props )
 	self.actives.cmdQueue:push( cmd )
-	
+
 	if doPlay then sound.play( url, props ) else sound.stop( url ) end
 end	
 
@@ -139,7 +139,7 @@ function Puppeteer.new( gamemaster, mycontact, others  )
 
 	this.isMaster = ( mycontact.ip == gamemaster.ip )
 	this.msgPerSecFraction = 1 / MSG_PER_SEC
-	
+
 	this.actives = {}
 	this.actives.gids = {}
 	this.actives.ids = {}
@@ -149,14 +149,14 @@ function Puppeteer.new( gamemaster, mycontact, others  )
 	this.passives.gids = {}
 	this.passives.ids = {}
 	this.passives.data = {}
-	
+
 	this.time = 0
 
 	this.srv = udp.create( function( data, ip, port )
 		if data == nil then return end
 		execCmd( this, sys.deserialize( data ) )
 	end, COM_PORT )
-	
+
 	return this
 end
 
@@ -179,7 +179,7 @@ function Puppeteer:create( gid, factUrlCtrl, factUrlDrone, pos, rot, params, sca
 
 	self.actives.gids[ id ] = gid
 	self.actives.ids[ gid ] = id
-	
+
 	local cmdCreate = Commands.newCreate( gid, factUrlDrone, pos, rot, params, scale ) 
 	self:sendToOthers( cmdCreate )
 end
@@ -198,7 +198,7 @@ function Puppeteer:delete( gid, recursive )
 		self.actives.ids[ gid ] = nil
 	end
 end
-	
+
 
 function Puppeteer:animate( url, anim )
 	assert( url.path, "Please provide a proper url!" )
@@ -222,7 +222,7 @@ end
 -- methods -------------------
 function Puppeteer:update( dt )
 	if self.srv then self.srv:update() end
-	
+
 	self.time = self.time + dt
 	if self.time >= self.msgPerSecFraction then 
 		self.time = 0
@@ -231,56 +231,58 @@ function Puppeteer:update( dt )
 		for id, gid in pairs( self.actives.gids ) do
 			local scrurl = msg.url( nil, id, "script" )
 			self:sendToOthers( 
-				Commands.newUpdate( 
-					gid, 
-					go.get_position( id ),
-					go.get( id, "euler.z" ),
-					go.get( scrurl, "dir" ),
-					go.get( scrurl, "speed" )
-				)
-			)
+			Commands.newUpdate( 
+			gid, 
+			go.get_position( id ),
+			go.get( id, "euler.z" ),
+			go.get( scrurl, "dir" ),
+			go.get( scrurl, "speed" )
+		)
+	)
+end
+
+-- also send all custom and non-update commands that
+-- may have been queued up since last sending
+local cmd
+repeat
+	cmd = self.actives.cmdQueue:pop()
+	if cmd then self:sendToOthers( cmd ) end
+until( cmd == nil )
+else
+-- every other frame, move passive GOs according to the
+-- data that has most recently been received from active
+local data
+local target
+local pos
+local speed
+local dir
+for id, gid in pairs( self.passives.gids ) do
+	data = self.passives.data[ gid ]
+	if data then 
+		-- position
+		pos = go.get_position( id )
+		dir = data.target - pos 
+		if vmath.length( dir ) > 0 then dir = vmath.normalize( dir ) end
+
+		-- target pos has not been reached yet: MUST move, even if the master go has
+		-- already stopped moving / no speed! In that case, continue with previous speed
+		if not equals( data.target, pos ) then
+			url = msg.url( nil, id, "script" )
+			if data.speed == 0 then speed = go.get( url, "speed" ) else speed = data.speed end
+			go.set( url, "speed", speed )
+			go.set_position( pos + dir * speed * dt, id )
 		end
 
-		-- also send all custom and non-update commands that
-		-- may have been queued up since last sending
-		local cmd
-		repeat
-			cmd = self.actives.cmdQueue:pop()
-			if cmd then self:sendToOthers( cmd ) end
-		until( cmd == nil )
-	else
-		-- every other frame, move passive GOs according to the
-		-- data that has most recently been received from active
-		local data
-		local target
-		local pos
-		local speed
-		local dir
-		for id, gid in pairs( self.passives.gids ) do
-			data = self.passives.data[ gid ]
-			if data then 
-				-- position
-				pos = go.get_position( id )
-				dir = data.target - pos 
-				if vmath.length( dir ) > 0 then dir = vmath.normalize( dir ) end
-
-				-- target pos has not been reached yet: MUST move, even if the master go has
-				-- already stopped moving / no speed! In that case, continue with previous speed
-				if not equals( data.target, pos ) then
-					if data.speed == 0 then speed = go.get( id, "speed" ) else speed = data.speed end
-					go.set_position( pos + dir * speed * dt, id )
-				end
-				
-				-- rotation
-				go.animate( id, "euler.z", go.PLAYBACK_ONCE_FORWARD, data.degrees, go.EASING_LINEAR, self.msgPerSecFraction )
-			end
-		end
+		-- rotation
+		go.animate( id, "euler.z", go.PLAYBACK_ONCE_FORWARD, data.degrees, go.EASING_LINEAR, self.msgPerSecFraction )
 	end
+end
+end
 end
 
 
 function Puppeteer:getGid( id )
-	return self.actives.gids[ id ]
+return self.actives.gids[ id ]
 end 
 
 
