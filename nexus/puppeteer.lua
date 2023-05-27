@@ -286,6 +286,11 @@ function Puppeteer:getGid( id )
 end 
 
 
+function Puppeteer:getId( gid )
+	return self.actives.ids[ global ize( self, gid ) ]
+end 
+
+
 return Puppeteer
 
 
