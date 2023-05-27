@@ -287,7 +287,7 @@ end
 
 
 function Puppeteer:getId( gid )
-	return self.actives.ids[ global ize( self, gid ) ]
+	return self.actives.ids[ globalize( self, gid ) ]
 end 
 
 
