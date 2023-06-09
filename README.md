@@ -16,11 +16,15 @@ The first step in a multiplayer game is to find out who can join in a match. To 
 To start searching, you instantiate a *beacon* on every device with the same, arbitrary name of your game and an individual callsign for each player. As soon as *beacon* discovers a new game contact, the handler is called and passed in the new contact object with its ip, port and callsign:
 
 ````
--- discover peers in the local network
+-- discover peers in the local network as contacts:
+-- local contact = Contact.new( ip, port, callsign, attrs )
 -- create a beacon
-local beacon = Beacon.new( "NameOfTheGame", "callsign", function( other )
-	pprint( "Found contact: " .. other.callsign )
-end ) 
+local attrs = { avatar = "bob", foo = "bar" }
+local beacon = Beacon.new( "NameOfTheGame", "callsign", 
+	function( other )
+		pprint( "Found contact: " .. other.callsign,  other.attrs )
+	end, 
+attrs )
 
 -- search and react
 function update( self, dt )

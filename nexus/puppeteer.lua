@@ -16,9 +16,6 @@ local function equals( v1, v2 )
 	math.abs( round( v1.z ) ) == math.abs( round( v2.z ) ) 
 end
 
-local function globalize( self, gid )
-	return self.mycontact.callsign .. "-" .. gid 
-end
 
 -- create gameobjects with complex init data.
 -- go script must be ready to process an "init" msg with params after creation
@@ -174,7 +171,6 @@ end
 function Puppeteer:create( gid, factUrlCtrl, factUrlDrone, pos, rot, params, scale )
 	assert( gid, "gid of new puppet must not be nil!" )
 
-	gid = globalize( self, gid )  -- add namespace for each player
 	local id = factorycreate( factUrlCtrl, pos, rot, params, scale )
 
 	self.actives.gids[ id ] = gid
@@ -282,12 +278,12 @@ end
 
 
 function Puppeteer:getGid( id )
-	return self.actives.gids[ id ]
+	return self.actives.gids[ id ] or self.passives.gids[ id ]
 end 
 
 
 function Puppeteer:getId( gid )
-	return self.actives.ids[ globalize( self, gid ) ]
+	return self.actives.ids[ gid ] or self.passives.ids[ gid ]
 end 
 
 
