@@ -18,7 +18,9 @@ To start searching, you instantiate a *beacon* on every device with the same, ar
 ````
 -- discover peers in the local network as contacts:
 -- local contact = Contact.new( ip, port, callsign, attrs )
--- create a beacon
+-- To instantiate a beacon, you must provide information 
+-- about the local player. A callsign is mandatory, but you
+-- may otionally add additional custom attributes, as well:
 local attrs = { avatar = "bob", foo = "bar" }
 local beacon = Beacon.new( "NameOfTheGame", "callsign", 
 	function( other )
