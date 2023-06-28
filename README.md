@@ -78,7 +78,7 @@ Once consensus has been reached, the negotiation is over and *matcher* calls the
 local matcher = Matcher.new( mycontact )
 matcher:propose( selectcontacts, function( gamemaster ) 
 	pprint( "All selected players confirmed, let's rock!!!" )
-	pprint(."NPCs guided by " .. gamemaster.callsign )
+	pprint( "NPCs guided by " .. gamemaster.callsign )
 end )
 
 ```` 
