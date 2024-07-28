@@ -1,0 +1,30 @@
+local screenmaster = require( "screenmaster.screenmaster" )
+
+
+-- ---------------------------------
+function on_message( self, message_id, message, sender ) 
+	if message_id == hash( "proxy_loaded" ) then
+		-- callback message from proxies after loading collection
+		print( "Level loaded: " .. sender )
+		
+		msg.post( sender, "init" )
+		msg.post( sender, "enable" )
+		print( "Level activated: " .. sender )
+
+	elseif message_id == hash( "proxy_unloaded" ) then
+			-- callback message from proxies after loading collection
+			print( "Level unloaded: " .. sender )
+			
+	elseif message_id == hash( "load" ) then
+		screenmaster:load( message.level, message.messages )
+	
+	elseif message_id == hash( "loadOverlay" ) then
+		screenmaster:loadOverlay( message.level, message.messages )
+		
+	elseif message_id == hash( "removeOverlay" ) then
+		screenmaster:removeOverlay( message.level )
+		
+	end
+	
+end
+

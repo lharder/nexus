@@ -1,0 +1,20 @@
+local Events = require( "events.events" )
+local nexus = require( "main.gameserver" )
+
+
+function init( self, dt )
+	Events.FACTORY_CREATED:trigger( self, function( self, attrs ) 
+		self.callsign = attrs.callsign
+		label.set_text( "#caption", attrs.callsign )
+	end )
+end
+
+
+function on_message( self, message_id, message, sender )
+	if message_id == nexus.CUSTOM_MSG then 
+		if message.txt then 
+			label.set_text( "#caption", message.txt )
+			timer.delay( 3, false, function() label.set_text( "#caption", self.callsign ) end )
+		end
+	end
+end

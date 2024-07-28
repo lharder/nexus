@@ -1,61 +1,64 @@
 local defgui = require( "defgui.defgui" )
-local Contact = require( "nexus.contact" )
-local Localhost = require( "nexus.localhost" )
-local Beacon = require( "nexus.beacon" )
-local Matcher = require( "nexus.matcher" )
+local nexus = require( "main.gameserver" )
 
 local MSG_SCREEN_LOADED = hash( "screenmaster:loaded" )
 
+local x = 50
+local y = 450
+
+
+local function clearCheckboxes( form )
+	if form == nil then return end 
+	
+	for ipPort, contact in pairs( nexus.contacts ) do
+		form:remove( ipPort )
+	end
+	x = 50
+	y = 450
+end
+
 
 local function display( self, contacts )
-	local x = 50
-	local y = 450
-
 	-- display a checkbox for each callsign
-	local me = self.beacon:me()
-	for i, contact in ipairs( contacts ) do
-		-- does a checkbox exist already?
-		local checkbox = self.form.fields[ contact.callsign ] 
-		if checkbox == nil then
-			checkbox = self.form:addCheckbox( contact.callsign, x, y, function( guiSelf, field, action_id, action ) 
-				if field.caption == me.callsign then
+	local me = nexus:me()
+	for ipPort, contact in pairs( contacts ) do
+		local callsign = contact.profile.callsign 
+
+		-- does a checkbox exist already? Have we received profile info already?
+		-- At first, only ip:port are known: must not display checkbox yet.
+		local checkbox = self.form.fields[ ipPort ] 
+		if checkbox == nil and ( callsign ~= nil ) then
+			checkbox = self.form:addCheckbox( ipPort, x, y, function( guiSelf, field, action_id, action ) 
+				if field.caption == me.profile.callsign then
 					pprint( "That is myself! Cannot play without me....!" ) 
 					field:check( true )
 				end
 			end, 
-			contact.callsign )
+			callsign )
+			
 			checkbox:check( true )
-		end
+			checkbox.profile = contact.profile
 
-		-- calculate new position
-		x = x + 240
-		if x > 900 then
-			x = 50
-			y = y - 50
+			-- calculate new position
+			x = x + 240
+			if x > 900 then
+				x = 50
+				y = y - 50
+			end
 		end
 	end
 end
 
-local function getCheckedCallsigns( self )
-	local callsigns = {}
+
+local function getCheckedProfiles( self )
+	local profiles = {}
 	for id, field in pairs( self.form.fields ) do
 		-- only checkboxes have this method...
 		if field.isChecked and field:isChecked() then
-			table.insert( callsigns, field.caption )
+			profiles[ field.profile.id ] = field.profile
 		end
 	end
-	return callsigns
-end
-
-local function getCheckedContacts( self )
-	local callsigns = getCheckedCallsigns( self )
-	local checkedcontacts = {}
-	for i, contact in ipairs( self.contacts ) do
-		if contains( callsigns, contact.callsign ) then 
-			table.insert( checkedcontacts, contact )
-		end
-	end
-	return checkedcontacts
+	return profiles
 end
 
 
@@ -64,16 +67,20 @@ function init( self )
 	msg.post( ".", "acquire_input_focus" )
 	msg.post( "@render:", "use_fixed_fit_projection", { near = -1, far = 1 } )
 
-	self.contacts = {}
-	
 	self.form = defgui.createForm( "callsigns", { 
 		button = "button/root",  
 		checkbox = "checkbox/root",  
 		label = "label/root",
 	})
-
+	
+	self.form.remove = function( self, id ) 
+		local field = self.fields[ id ]
+		if field then 
+			gui.delete_node( field.rootNode )
+			self.fields[ id ] = nil
+		end
+	end
 end
-
 
 
 function on_message( self, message_id, message, sender )
@@ -81,56 +88,51 @@ function on_message( self, message_id, message, sender )
 		-- receive the player's callsign from the previous screen
 		-- use it to start broadcasting and searching for peers
 		if message ~= nil then 
-			-- create beacon to find other players
-			self.beacon = Beacon.new( "MyGame", message.callsign, function( other )
-				if other == nil then return end
-				pprint( "Found contact: " .. other.callsign .. " (" .. other.ip .. ")" )
-
-				-- new contact found, remember
-				table.insert( self.contacts, other )
-				display( self, self.contacts )
-			end )
-
+			nexus:startsearch( message.callsign, 
+				-- on player connected
+				function( contact )  
+					pprint( "Hey, found a gamer: " .. contact.profile.callsign )
+					display( self, nexus:filter() )
+				end,
+				-- on player disconnected
+				function( contact )  
+					pprint( "Lost a gamer: " .. contact.profile.callsign )
+					
+					clearCheckboxes( self.form )
+					local contacts = nexus:filter()
+					contacts[ contact:id() ] = nil
+					display( self, contacts )
+				end			
+			)
+			
 			self.form:addLabel( "callsign", 50, 550, 500, 40, nil, message.callsign .. ", select your co-players:" )
 			self.form:addButton( "play", 750, 550, 200, 48, function() 
-				pprint( "Clicked start button...!" ) 
+				pprint( "Clicked start game button...!" ) 
+				local profiles = getCheckedProfiles( self )
 				
-				-- my local contact info
-				self.mycontact = self.beacon:me()
-				self.others = self.beacon:others()
+				pprint( "-- Profiles selected -----------" )
+				pprint( profiles )
+				pprint( "--------------------------------" )
 
-				-- negotiate a common set of players for a game
-				if self.matcher == nil then 
-					self.matcher = Matcher.new( self.mycontact ) 
-				end
-				
-				local checkedcontacts = getCheckedContacts( self )
-				self.matcher:propose( checkedcontacts, function( mastercontact ) 
-					pprint( "All selected players confirmed, let's rock!!!" )
-
-					-- stop searching
-					self.beacon:destroy()
+				nexus:startpropose( profiles, function() 
+					pprint( "Going to load playground, stop search, stop proposal." )
 					
-					local messages = {}
-					messages[ "playground:/puppeteer" ] = { 
-						mycontact = self.mycontact, 
-						mastercontact = mastercontact,
-						others = self.others 
-					}
-
+					nexus:stopsearch()
+					nexus:stoppropose()
+					
 					msg.post( "main:/screenmaster", "load", {
-						level = "/playground",  messages = messages
+						level = "playground"
 					})
 				end )
-			end, "Start" )
+				
+			end, "Start Game" )
 		end
 	end
 end
 
 
 function update( self, dt )
-	if self.beacon then self.beacon:update() end
-	if self.matcher then self.matcher:update() end
+	if nexus then nexus:update( dt ) end
 end
 
 

@@ -1,0 +1,7 @@
+images {
+  image: "/assets/images/ship.png"
+}
+images {
+  image: "/assets/images/laser.png"
+}
+extrude_borders: 2

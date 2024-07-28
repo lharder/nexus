@@ -1,0 +1,95 @@
+local Events = require( "events.events" )
+local Commands = require( "nexus.commands" )
+local nexus = require( "main.gameserver" )
+
+local MSG_TOUCH = hash( "touch" )
+local MSG_KEY_PRESSED = hash( "text" )
+
+
+local function vectorToAngle( vec )
+	return math.atan2( vec.y, vec.x )
+end
+
+local shotworker = "/factories#shotworker"
+local shotdrone = "/factories#shotdrone"
+
+
+
+local function shoot( self, weapon )
+	if socket.gettime() > self.firetime then 
+		self.firetime = socket.gettime() + weapon.cooldown
+
+		local gid = nexus:makeGid()
+		
+		local attrs = {}
+		attrs.weapon 	= weapon
+		attrs.creatorId = go.get_id()
+		attrs.dir 		= self.dir
+		attrs.gid 		= gid
+		
+		local ang = math.atan2( -1 * attrs.dir.x, attrs.dir.y )
+		local rot = vmath.quat_rotation_z( ang )	
+
+		local pos = go.get_position()
+		pos = pos + 40 * attrs.dir
+
+		nexus:newEntity( gid, shotworker,shotdrone, pos, rot, attrs, 1 )
+	end	
+end
+
+
+-- methods -----------------------
+function init( self, dt )
+	Events.FACTORY_CREATED:trigger( self, function( self, attrs ) 
+		label.set_text( "#caption", attrs.callsign )
+
+		self.gid = attrs.gid
+		self.callsign = attrs.callsign
+		self.turnrate = attrs.turnrate
+		self.speed = attrs.speed
+
+		self.weapon = {
+			cooldown	= .3,
+			speed 		= 800,
+			lethality	= 100,
+			range		= 800
+		}
+		
+		self.firetime 	= socket.gettime()
+
+		self.target = go.get_position()
+		self.target.y = self.target.y - 1
+	end )
+end
+
+
+function update( self, dt )
+	if self.target then 
+		self.pos = go.get_position() 
+		self.dir = vmath.normalize( self.target - self.pos )
+
+		self.angle = vectorToAngle( self.dir )
+		self.rot = vmath.quat_rotation_z( self.angle )	
+		go.set_rotation( vmath.slerp( dt * self.turnrate, go.get_rotation(), self.rot ) )
+		
+		self.pos = self.pos + self.dir * self.speed * dt
+		if vmath.length( self.pos - self.target ) > 3 then go.set_position( self.pos ) end
+	end
+end
+
+
+function on_message( self, message_id, message, sender )
+	if message_id == MSG_TOUCH then 
+		self.target = vmath.vector3( message.x, message.y, .3 )
+
+	elseif message_id == nexus.CUSTOM_MSG then 
+		if message.txt then 
+			label.set_text( "#caption", message.txt )
+			timer.delay( 3, false, function() label.set_text( "caption", self.callsign ) end )
+		end
+	end
+
+	if message_id == MSG_KEY_PRESSED then
+		shoot( self, self.weapon )
+	end
+end

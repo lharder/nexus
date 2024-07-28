@@ -4,6 +4,8 @@ function init( self )
 	math.random()
 	math.random()
 	math.random()
+
+	msg.post( "main:/levels", "acquire_input_focus" )
 	
 	msg.post( "main:/screenmaster", "load", { level = "setup" } )
 end

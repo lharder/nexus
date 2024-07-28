@@ -21,44 +21,6 @@ instances {
 }
 scale_along_z: 0
 embedded_instances {
-  id: "setup"
-  data: "embedded_components {\n"
-  "  id: \"proxy\"\n"
-  "  type: \"collectionproxy\"\n"
-  "  data: \"collection: \\\"/levels/setup/setup.collection\\\"\\n"
-  "exclude: false\\n"
-  "\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "}\n"
-  ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
   id: "main"
   data: "components {\n"
   "  id: \"main\"\n"
@@ -96,9 +58,9 @@ embedded_instances {
   }
 }
 embedded_instances {
-  id: "match"
+  id: "levels"
   data: "embedded_components {\n"
-  "  id: \"proxy\"\n"
+  "  id: \"match\"\n"
   "  type: \"collectionproxy\"\n"
   "  data: \"collection: \\\"/levels/match/match.collection\\\"\\n"
   "exclude: false\\n"
@@ -115,30 +77,28 @@ embedded_instances {
   "    w: 1.0\n"
   "  }\n"
   "}\n"
-  ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
-  id: "playground"
-  data: "embedded_components {\n"
-  "  id: \"proxy\"\n"
+  "embedded_components {\n"
+  "  id: \"playground\"\n"
   "  type: \"collectionproxy\"\n"
   "  data: \"collection: \\\"/levels/playground/playground.collection\\\"\\n"
+  "exclude: false\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"setup\"\n"
+  "  type: \"collectionproxy\"\n"
+  "  data: \"collection: \\\"/levels/setup/setup.collection\\\"\\n"
   "exclude: false\\n"
   "\"\n"
   "  position {\n"

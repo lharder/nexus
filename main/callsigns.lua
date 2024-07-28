@@ -35,11 +35,25 @@ callsigns[ 32 ] = "Knight"
 callsigns[ 33 ] = "Warlock"
 callsigns[ 34 ] = "Griffon"
 callsigns[ 35 ] = "Pegasus"
-callsigns[ 36 ] = "Icetea"
+callsigns[ 36 ] = "Trinity"
 callsigns[ 37 ] = "Legend"
 callsigns[ 38 ] = "Oberon"
 callsigns[ 39 ] = "Razor"
 callsigns[ 40 ] = "Werewolf"
+callsigns[ 41 ] = "Ikarus"
+callsigns[ 42 ] = "Jason"
+callsigns[ 43 ] = "Rubicon"
+callsigns[ 44 ] = "Nova"
+callsigns[ 44 ] = "Daemon"
+callsigns[ 45 ] = "Trident"
+callsigns[ 46 ] = "Ikarus"
+callsigns[ 47 ] = "Temerity"
+callsigns[ 48 ] = "Serenity"
+
+function callsigns.get()
+	math.randomseed( socket.gettime() )
+	return callsigns[ math.random( 1, #callsigns ) ]
+end
 
 return callsigns
 

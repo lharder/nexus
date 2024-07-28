@@ -1,6 +1,6 @@
 components {
-  id: "puppeteer"
-  component: "/nexus/puppeteer.script"
+  id: "screenmaster"
+  component: "/screenmaster/screenmaster.script"
   position {
     x: 0.0
     y: 0.0

@@ -1,0 +1,29 @@
+local Events = require( "events.events" )
+local nexus = require( "main.gameserver" )
+
+
+-- method ------------------------
+function init( self )
+	Events.FACTORY_CREATED:trigger( self, function( self, attrs ) 
+		self.gid 		= attrs.gid
+		self.dir 		= attrs.dir
+		self.speed		= attrs.weapon.speed
+		self.lethality 	= attrs.weapon.lethality
+		self.range		= attrs.weapon.range
+		self.creatorId	= attrs.creatorId
+		self.dying 		= false
+	end )
+end
+
+
+function update( self, dt )
+	self.pos = go.get_position()
+	self.delta = vmath.normalize( self.dir ) * self.speed * dt
+	self.pos = self.pos + self.delta
+	self.pos.z = .4
+	go.set_position( self.pos )
+
+	self.range = self.range - vmath.length( self.delta )
+	if self.range < 0 then nexus:delete( self.gid ) end
+end
+
