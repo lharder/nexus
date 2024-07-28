@@ -6,6 +6,7 @@ dependencies#2 = https://github.com/britzl/defold-luasocket/archive/master.zip
 dependencies#3 = https://github.com/DanEngelbrecht/LuaScriptInstance/archive/refs/heads/master.zip
 dependencies#4 = https://github.com/lharder/events/archive/master.zip
 dependencies#5 = https://github.com/lharder/factorycreate/archive/master.zip
+dependencies#6 = https://github.com/britzl/defnet/archive/refs/heads/master.zip
 
 [bootstrap]
 main_collection = /main/main.collectionc
