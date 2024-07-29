@@ -31,13 +31,13 @@ function Nexus.create( gamename, gameversion )
 
 	-- default sync provider
 	local synp = SyncProvider.create( 
-		-- get params
+		-- get params of local worker entity
 		function( entity ) 
 			entity.params.pos = go.get_position( entity.id )
 			entity.params.rot = go.get_rotation( entity.id )
 			return entity.params
 		end, 
-		-- set params
+		-- set params of remote drone entity
 		function( entity, params ) 
 			go.animate( entity.id, "position", go.PLAYBACK_ONCE_FORWARD, params.pos, go.EASING_LINEAR, .2 )
 			go.animate( entity.id, "rotation", go.PLAYBACK_ONCE_FORWARD, params.rot, go.EASING_LINEAR, .2 )
@@ -65,8 +65,7 @@ function Nexus.create( gamename, gameversion )
 	-------------------------------------------------
 	-- New profile announced: a tcp contact must provide the name 
 	-- and version of the game it wants to play. If it does not, then 
-	-- it is not a valid game client and must be removed from the list
-	-- of valid contacts.    
+	-- it is not a valid game client.    
 	this.cmdsrv:addCmdHandler( Commands.ANNOUNCE, function( cmdattrs ) 
 		-- pprint( "Announce message received."  )
 		if cmdattrs.gamename == this.gamename then 
@@ -88,20 +87,22 @@ function Nexus.create( gamename, gameversion )
 	end )
 
 	-- new incoming proposal --------------------------
+	-- When one player has setup the combination of players for a game,
+	-- he starts broadcasting that setup.l So do all others. When all 
+	-- members of a proposal agree on exactly that setup, a match is found.
 	this.cmdsrv:addCmdHandler( Commands.PROPOSE, function( cmdattrs ) 
 		-- local ipPort = ( "%s:%s" ):format( this.cmdsrv.ip, this.cmdsrv.port )
 		-- pprint( ( "Message with proposal profiles from %s received at %s" ):format( cmdattrs.id,  ipPort ) )
 		
 		if this.contacts[ cmdattrs.id ] ~= nil then 
 			this.contacts[ cmdattrs.id ].proposal = cmdattrs.profiles
-			-- pprint( this.contacts[ cmdattrs.id ].proposal )
 		end
 	end )
 
-	-- incoming readyToPlay messages to the designated gamemaster only 
-	-- All players must declare readiness, then gamemaster signals start
-	-- Gamemaster must start last to be certain that clients will receive
-	-- all commands to setup the first game level properly.
+	-- Incoming readyToPlay messages to the designated gamemaster only. 
+	-- All players must declare readiness, then gamemaster signals the start.
+	-- Gamemaster must start the game last to be certain that clients will 
+	-- receive all his commands to setup the first game level properly.
 	this.cmdsrv:addCmdHandler( Commands.READYTOPLAY, function( cmdattrs ) 
 		pprint( "Status 'ReadyToPlay' confirmed by:" .. cmdattrs.id )
 
@@ -129,8 +130,7 @@ function Nexus.create( gamename, gameversion )
 
 				-- execute the callbacks from match making done:
 				-- should lead to loading of playground level
-				-- and immediate start of the action. Normally,
-				-- should be only one callback function:
+				-- and immediate start of the action:
 				if #this.matcher.callbacks > 0 then 
 					for i, callback in ipairs( this.matcher.callbacks ) do callback() end
 					this.matcher.callbacks = {}
@@ -143,6 +143,9 @@ function Nexus.create( gamename, gameversion )
 
 	
 	-- Game start command for clients to stop waiting ---------------
+	-- Gamemaster sends this signal to all other members of that game
+	-- when he received ready reports from all of them. Gamemaster is
+	-- then the last to start to play the game.
 	this.cmdsrv:addCmdHandler( Commands.STARTTOPLAY, function( cmdattrs ) 
 		local ipPort = ( "%s:%s" ):format( this.cmdsrv.ip, this.cmdsrv.port )
 		pprint( "StartToPlay message received at " .. ipPort )
@@ -157,6 +160,9 @@ function Nexus.create( gamename, gameversion )
 
 
 	-- Create a new remote controlled drone on this host
+	-- When a worker entity is created, it sends this command to all
+	-- other players to create a local drone that will mirror all
+	-- movement, rotation and behavior of the worker automatically.
 	this.cmdsrv:addCmdHandler( Commands.CREATE_DRONE, function( cmdattrs ) 
 		local ipPort = ( "%s:%s" ):format( this.cmdsrv.ip, this.cmdsrv.port )
 		-- pprint( "CreateDrone message received at " .. ipPort )
@@ -164,7 +170,10 @@ function Nexus.create( gamename, gameversion )
 	end )
 
 
-	-- Update a remote drone entity with params from its worker
+	-- Update remote drone entities with params from the local worker
+	-- entities. Every player sends his workers' data at a fixed interval 
+	-- to all other hosts and receives their data in turn to update 
+	-- its own drones mirroring their behavior.
 	this.cmdsrv:addCmdHandler( Commands.UPDATE, function( cmdattrs ) 
 		local id = this.puppeteer.droneIds[ cmdattrs.gid ]
 		if id then this.puppeteer.drones[ id ]:setParams( cmdattrs ) end
@@ -248,7 +257,6 @@ end
 
 
 function Nexus:delete( gid )
-	-- broadcast to all clients
 	self.puppeteer:delete( gid, true )
 end
 
@@ -287,19 +295,7 @@ end
 
 -- my own contact object
 function Nexus:me()
-	local ipPort = ( "%s:%s" ):format( self.cmdsrv.ip, self.cmdsrv.port )
-	return self.contacts[ ipPort ]
-end
-
-
--- returns the local gameobject's id of a global entity on this host
-function Nexus:getId( gid )
-	return self.puppeteer.workerIds[ gid ]
-end
-
--- returns the global entity id of a local gameobject
-function Nexus:getGid( id )
-	return self.puppeteer.workers[ id ].gid
+	return self.contacts[ ( "%s:%s" ):format( self.cmdsrv.ip, self.cmdsrv.port ) ]
 end
 
 

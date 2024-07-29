@@ -17,7 +17,7 @@ Entity.__index = Entity
 
 function Entity.create()
 	local this = {}
-	setmetatable( this, Drone )
+	setmetatable( this, Entity )
 	return this
 end
 
