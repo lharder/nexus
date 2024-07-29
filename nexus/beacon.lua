@@ -2,7 +2,7 @@ local PORTS = require( "nexus.ports" )
 local tcpCnt = require( "defnet.tcp_client" )
 local Contact = require( "nexus.contact" )
 local Commands = require( "nexus.commands" )
-
+local Localhost = require( "nexus.localhost" )
 
 local ips
 
@@ -33,8 +33,8 @@ function Beacon:search( callsign, onClientConnect, onClientDisconnect )
 	pprint( "I am " .. callsign )
 
 	-- search out there
-	-- ips = Localhost.getLocalPeerIPs()
-	ips = { "192.168.178.23", "192.168.178.24" }
+	ips = Localhost.getLocalPeerIPs()
+	-- ips = { "192.168.178.23", "192.168.178.24" }
 	self.ipIndex = 1
 	self.portIndex = 1
 	self.isSearching = true
