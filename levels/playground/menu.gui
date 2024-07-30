@@ -1,0 +1,18 @@
+script: "/levels/playground/menu.gui_script"
+textures {
+  name: "playground"
+  texture: "/levels/playground/playground.atlas"
+}
+nodes {
+  position {
+    x: 1050.0
+    y: 80.0
+  }
+  type: TYPE_BOX
+  texture: "playground/button"
+  id: "btn"
+  inherit_alpha: true
+  size_mode: SIZE_MODE_AUTO
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

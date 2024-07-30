@@ -2,10 +2,13 @@ name: "playground"
 scale_along_z: 0
 embedded_instances {
   id: "level"
-  children: "btn"
   data: "components {\n"
   "  id: \"game\"\n"
   "  component: \"/levels/playground/level.script\"\n"
+  "}\n"
+  "components {\n"
+  "  id: \"menu\"\n"
+  "  component: \"/levels/playground/menu.gui\"\n"
   "}\n"
   "embedded_components {\n"
   "  id: \"nexus\"\n"
@@ -51,24 +54,4 @@ embedded_instances {
   "\"\n"
   "}\n"
   ""
-}
-embedded_instances {
-  id: "btn"
-  data: "embedded_components {\n"
-  "  id: \"sprite\"\n"
-  "  type: \"sprite\"\n"
-  "  data: \"default_animation: \\\"button\\\"\\n"
-  "material: \\\"/builtins/materials/sprite.material\\\"\\n"
-  "textures {\\n"
-  "  sampler: \\\"texture_sampler\\\"\\n"
-  "  texture: \\\"/levels/playground/playground.atlas\\\"\\n"
-  "}\\n"
-  "\"\n"
-  "}\n"
-  ""
-  position {
-    x: 1090.0
-    y: 40.0
-    z: 0.5
-  }
 }

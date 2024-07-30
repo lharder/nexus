@@ -4,7 +4,7 @@ local nexus = require( "main.gameserver" )
 local MSG_SCREEN_LOADED = hash( "screenmaster:loaded" )
 
 local x = 50
-local y = 450
+local y = 490
 
 
 local function clearCheckboxes( form )
@@ -82,15 +82,17 @@ function init( self )
 		end
 	end
 
-	self.form:addLabel( "hint", 50, 100, 800, 60, function() 
+	self.form:addLabel( "hint", 50, 380, 800, 60, function() 
 		if self.ipfield == nil then 
-			self.ipfield = self.form:addTextField( "ip", 50, 70, 330, 36, nil )
+			self.ipfield = self.form:addTextField( "ip", 50, 350, 330, 36, nil )
 			self.ipfield:setText( "192.168.178.24" )
 			
-			self.search = self.form:addButton( "search", 390, 70, 120, 36, function() 
+			self.search = self.form:addButton( "search", 390, 350, 120, 36, function() 
 				nexus.beacon:addContactIP( self.ipfield.value )
+				gui.hide_keyboard()
 			end, "Search" )
 		end
+		gui.show_keyboard( gui.KEYBOARD_TYPE_DEFAULT, false )
 	end, "> Looking for friends not showing up here?" )
 
 	
