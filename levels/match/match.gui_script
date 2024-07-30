@@ -84,10 +84,7 @@ function init( self )
 
 	self.form:addLabel( "hint", 50, 100, 800, 60, function() 
 		if self.ipfield == nil then 
-			self.ipfield = self.form:addTextField( "ip", 50, 70, 330, 36, 
-			function() 
-				pprint( self.ipfield.value ) 
-			end )
+			self.ipfield = self.form:addTextField( "ip", 50, 70, 330, 36, nil )
 			self.ipfield:setText( "192.168.178.24" )
 			
 			self.search = self.form:addButton( "search", 390, 70, 120, 36, function() 
