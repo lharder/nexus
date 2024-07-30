@@ -18,10 +18,10 @@ end
 function init( self )
 	msg.post( ".", "acquire_input_focus" )
 	gui.hide_keyboard()
+
+	self.nBtn = gui.get_node( "btn" )	
 	
 	nexus:readytoplay( function() 
-		self.nBtn = gui.get_node( "btn" )
-		
 		local heroGid = nexus:makeGid( "hero" )
 		self.heroId = nexus:getId( heroGid )
 	end )
