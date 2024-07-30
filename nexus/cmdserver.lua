@@ -1,5 +1,5 @@
 local TcpServer = require( "defnet.tcp_server" )
-local b64 = require( "nexus.b64" )
+-- local b64 = require( "nexus.b64" )
 
 
 -- CmdServer ----------------------
@@ -11,7 +11,8 @@ function CmdServer.create( port, fnConnect, fnDisconnect, optAlternativePort )
 	setmetatable( this, CmdServer )
 
 	local onData = function( data, cip, cport, client )
-		local cmd = sys.deserialize( b64.decode( data ) )
+		-- local cmd = sys.deserialize( b64.decode( data ) )
+		local cmd = sys.deserialize( data ) 
 		if cmd and cmd[ "type" ] then 
 			local handler = this.handlers[ cmd.type ]
 			if handler == nil then 
@@ -34,11 +35,12 @@ function CmdServer.create( port, fnConnect, fnDisconnect, optAlternativePort )
 	this.port 		= port
 	this.handlers 	= {}
 
-	this.tcpsrv 	= TcpServer.create( this.port, onData, onConnect, onDisconnect )
+	local options = { binary = true }
+	this.tcpsrv 	= TcpServer.create( this.port, onData, onConnect, onDisconnect, options )
 	local _, ok 	= pcall( this.tcpsrv.start )
 	if not ok and ( optAlternativePort ~= nil ) then 
 		this.port 	= optAlternativePort
-		this.tcpsrv = TcpServer.create( this.port, onData, onConnect, onDisconnect )
+		this.tcpsrv = TcpServer.create( this.port, onData, onConnect, onDisconnect, options )
 		_, ok 		= pcall( this.tcpsrv.start )
 		if not ok then 
 			pprint( ( "Unable to establish server on port %d or %d!" ):format( port, this.port ) ) 

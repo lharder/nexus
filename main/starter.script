@@ -5,6 +5,7 @@ function init( self )
 	math.random()
 	math.random()
 
+	-- propagate input to loaded collection objects
 	msg.post( "main:/levels", "acquire_input_focus" )
 	
 	msg.post( "main:/screenmaster", "load", { level = "setup" } )

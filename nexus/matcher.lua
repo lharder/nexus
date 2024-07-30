@@ -1,6 +1,6 @@
 local Localhost = require( "nexus.localhost" )
 local Commands = require( "nexus.commands" )
-local b64 = require( "nexus.b64" )
+-- local b64 = require( "nexus.b64" )
 
 
 local function determineGamemaster( contacts, fixedIp )
@@ -48,7 +48,10 @@ end
 
 
 function Matcher:start( profiles, callback )
-	self.nexus:me().proposal = profiles
+	local me = self.nexus:me()
+	if me == nil then return end
+	
+	me.proposal = profiles
 	table.insert( self.callbacks, callback )
 	self.nextProposeTime = socket.gettime()
 	self.isProposing = true
@@ -168,7 +171,6 @@ function Matcher:readytoplay( callback )
 		local gmcId = self.nexus:me().game.gmcId
 		local gmc = self.nexus.contacts[ gmcId ]
 		self.nexus:send( cmd, gmc )
-		-- gmc.tcpclient.send( b64.encode( cmd:serialize() ) .. "\n" )
 		pprint( ( "Sending 'readyToPlay' from %s to %s" ):format( cmd:get( "id" ), gmcId ) )
 	end
 

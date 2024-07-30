@@ -9,7 +9,7 @@ embedded_components {
   "material: \"/builtins/materials/sprite.material\"\n"
   "textures {\n"
   "  sampler: \"texture_sampler\"\n"
-  "  texture: \"/levels/playground/hero/ship.atlas\"\n"
+  "  texture: \"/levels/playground/playground.atlas\"\n"
   "}\n"
   ""
   scale {

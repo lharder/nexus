@@ -33,17 +33,26 @@ function Beacon:search( callsign, onClientConnect, onClientDisconnect )
 	pprint( "I am " .. callsign )
 
 	-- search out there
-	ips = Localhost.getLocalPeerIPs()
-	-- ips = { "192.168.178.23", "192.168.178.24" }
+	-- ips = Localhost.getLocalPeerIPs()
+	ips = { "192.168.178.23", "192.168.178.25" }
 	self.ipIndex = 1
 	self.portIndex = 1
 	self.isSearching = true
 
-	self.options = {}
-	self.options.connection_timeout = .01
+	self.options = { 
+		binary = true,  
+		connection_timeout = .01 
+	}
 
 	-- no logging desired
 	tcpCnt.log = function() end
+end
+
+
+function Beacon:addContactIP( ip )
+	assert( ip, "You must provide an ip address to contact!" )
+	if table.contains( ips, ip ) then return end
+	table.insert( ips, ip ) 
 end
 
 

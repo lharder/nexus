@@ -1,6 +1,6 @@
 local PORTS = require( "nexus.ports" )
 local Localhost = require( "nexus.localhost" )
-local b64 = require( "nexus.b64" )
+-- local b64 = require( "nexus.b64" )
 local CmdServer = require( "nexus.cmdserver" )
 local Commands = require( "nexus.commands" )
 local Beacon = require( "nexus.beacon" )
@@ -276,14 +276,15 @@ end
 
 function Nexus:send( cmd, contact )
 	if cmd == nil or contact == nil then return false end
-	contact.tcpclient.send( b64.encode( cmd:serialize() ) .. "\n" )
+	contact.tcpclient.send( cmd:serialize() .. "\n" )
 end
 
 function Nexus:broadcast( cmd, contacts )
 	if cmd == nil then return end
 	if contacts == nil then contacts = self:others() end
 
-	local payload = b64.encode( cmd:serialize() ) .. "\n"
+	-- local payload = b64.encode( cmd:serialize() ) .. "\n"
+	local payload = cmd:serialize() .. "\n"
 	for ipPort, contact in pairs( contacts ) do
 		contact.tcpclient.send( payload )
 		

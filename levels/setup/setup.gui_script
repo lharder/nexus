@@ -46,4 +46,8 @@ function update( self, dt )
 end
 
 
+function final( self )
+	msg.post( ".", "release_input_focus" )
+end
+
 

@@ -4,4 +4,10 @@ images {
 images {
   image: "/assets/images/laser.png"
 }
+images {
+  image: "/assets/images/button.png"
+}
+images {
+  image: "/nexus.png"
+}
 extrude_borders: 2

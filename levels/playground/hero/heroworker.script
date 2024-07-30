@@ -4,6 +4,7 @@ local nexus = require( "main.gameserver" )
 
 local MSG_TOUCH = hash( "touch" )
 local MSG_KEY_PRESSED = hash( "text" )
+local MSG_BUTTON_CLICKED = hash( "btnClicked" )
 
 
 local function vectorToAngle( vec )
@@ -80,16 +81,17 @@ end
 
 function on_message( self, message_id, message, sender )
 	if message_id == MSG_TOUCH then 
-		self.target = vmath.vector3( message.x, message.y, .3 )
-
+		-- primitive button bottom right of screen
+		if message.x > 1030 and message.y < 100 then 
+			shoot( self, self.weapon )
+		else
+			self.target = vmath.vector3( message.x, message.y, .3 )
+		end
+		
 	elseif message_id == nexus.CUSTOM_MSG then 
 		if message.txt then 
 			label.set_text( "#caption", message.txt )
 			timer.delay( 3, false, function() label.set_text( "caption", self.callsign ) end )
 		end
-	end
-
-	if message_id == MSG_KEY_PRESSED then
-		shoot( self, self.weapon )
 	end
 end
