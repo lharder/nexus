@@ -29,13 +29,15 @@ end
 
 
 function on_input( self, action_id, action )
+	-- single touch
 	if guiIsClicked( self.nBtn, action_id, action ) then 
 		msg.post( self.heroId, MSG_BUTTON_CLICKED, action )
 		
 	elseif action_id == MSG_TOUCH then 
 		msg.post( self.heroId, MSG_TOUCH, action )
 	end
-	
+
+	-- multi touch
 	if action_id == MSG_MULTI_TOUCH then 
 		for i, touch in ipairs( action.touch ) do
 			if guiIsClicked( self.nBtn, MSG_TOUCH, touch ) then 
