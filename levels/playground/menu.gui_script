@@ -1,14 +1,14 @@
 local nexus = require( "main.gameserver" )
 
-local MSG_TOUCH = hash( "touch" )
-local MSG_MULTI_TOUCH = hash( "touch_multi" )
-local MSG_KEY_PRESSED = hash( "text" )
-local MSG_BUTTON_CLICKED = hash( "btnClicked" )
+local ACTION_TOUCH = hash( "touch" )
+local ACTION_MULTI_TOUCH = hash( "touch_multi" )
+local ACTION_BUTTON_CLICKED = hash( "btnClicked" )
+local ACTION_KEY_PRESSED = hash( "text" )
 
 
 local function guiIsClicked( node, action_id, action )
 	if node == nil then return false end
-	if action_id == MSG_TOUCH then 
+	if action_id == ACTION_TOUCH then 
 		return gui.is_enabled( node ) and gui.pick_node( node, action.x, action.y ) 
 	end
 	return false
@@ -31,20 +31,20 @@ end
 
 function on_input( self, action_id, action )
 	-- single touch
-	if guiIsClicked( self.nBtn, action_id, action ) or action_id == MSG_KEY_PRESSED then 
-		msg.post( self.heroId, MSG_BUTTON_CLICKED, action )
+	if guiIsClicked( self.nBtn, action_id, action ) or action_id == ACTION_KEY_PRESSED then 
+		msg.post( self.heroId, ACTION_BUTTON_CLICKED, action )
 		
-	elseif action_id == MSG_TOUCH then 
-		msg.post( self.heroId, MSG_TOUCH, action )
+	elseif action_id == ACTION_TOUCH then 
+		msg.post( self.heroId, ACTION_TOUCH, action )
 	end
 
 	-- multi touch
-	if action_id == MSG_MULTI_TOUCH then 
+	if action_id == ACTION_MULTI_TOUCH then 
 		for i, touch in ipairs( action.touch ) do
-			if guiIsClicked( self.nBtn, MSG_TOUCH, touch ) then 
-				msg.post( self.heroId, MSG_BUTTON_CLICKED, touch )
+			if guiIsClicked( self.nBtn, ACTION_TOUCH, touch ) then 
+				msg.post( self.heroId, ACTION_BUTTON_CLICKED, touch )
 			else
-				msg.post( self.heroId, MSG_TOUCH, touch )
+				msg.post( self.heroId, ACTION_TOUCH, touch )
 			end
 		end
 	end
