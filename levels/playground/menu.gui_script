@@ -1,11 +1,12 @@
 local nexus = require( "main.gameserver" )
 
-local MSG_BUTTON_CLICKED = hash( "btnClicked" )
 local MSG_TOUCH = hash( "touch" )
 local MSG_MULTI_TOUCH = hash( "touch_multi" )
+local MSG_KEY_PRESSED = hash( "text" )
+local MSG_BUTTON_CLICKED = hash( "btnClicked" )
 
 
-function guiIsClicked( node, action_id, action )
+local function guiIsClicked( node, action_id, action )
 	if node == nil then return false end
 	if action_id == MSG_TOUCH then 
 		return gui.is_enabled( node ) and gui.pick_node( node, action.x, action.y ) 
@@ -30,7 +31,7 @@ end
 
 function on_input( self, action_id, action )
 	-- single touch
-	if guiIsClicked( self.nBtn, action_id, action ) then 
+	if guiIsClicked( self.nBtn, action_id, action ) or action_id == MSG_KEY_PRESSED then 
 		msg.post( self.heroId, MSG_BUTTON_CLICKED, action )
 		
 	elseif action_id == MSG_TOUCH then 

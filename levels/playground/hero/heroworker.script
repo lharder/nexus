@@ -4,16 +4,14 @@ local nexus = require( "main.gameserver" )
 
 local MSG_TOUCH = hash( "touch" )
 local MSG_BUTTON_CLICKED = hash( "btnClicked" )
-local MSG_KEY_PRESSED = hash( "text" )
+
+
+local shotfact = "/factories#shot"
 
 
 local function vectorToAngle( vec )
 	return math.atan2( vec.y, vec.x )
 end
-
-local shotworker = "/factories#shotworker"
-local shotdrone = "/factories#shotworker"
-
 
 
 local function shoot( self, weapon )
@@ -34,7 +32,11 @@ local function shoot( self, weapon )
 		local pos = go.get_position()
 		pos = pos + 40 * attrs.dir
 
-		nexus:newEntity( gid, shotworker,shotdrone, pos, rot, attrs, 1 )
+		-- this entity is created on all hosts, but does
+		-- not get synced automatically at a fixed interval.
+		-- Self-contained, identical logic on all hosts:
+		-- good for performance, saves much communication.
+		nexus:newEntity( gid, shotfact, shotfact, pos, rot, attrs, 1 )
 	end	
 end
 
