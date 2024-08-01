@@ -7,9 +7,8 @@ function init( self )
 		local herodrone = "/factories#herodrone"
 		local pos = vmath.vector3( math.random( 100, 900 ), math.random( 100, 500 ), .5 )
 
-		-- no need to sync every shot: identical logic on every host
-		nexus:setSyncProvider( nil, "/factories#shotdrone" )
-		nexus:setSyncProvider( nil, "/factories#shotworker" )
+		-- avoid syncing every shot: self-contained, simple logic on all hosts
+		nexus:setSyncProvider( nil, "/factories#shot" )
 		
 		local heroGid = nexus:makeGid( "hero" )
 		self.hero = nexus:newEntity( heroGid, heromain, herodrone, pos, nil, {

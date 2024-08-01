@@ -49,11 +49,9 @@ function Drone.create( cmdattrs )
 	local factUrl = msg.url( cmdattrs.factName )
 	this.id = factorycreate( factUrl, cmdattrs.pos, cmdattrs.rot, cmdattrs.params, cmdattrs.scale )
 	this.gid = cmdattrs.gid
-
 	this.params = {}
 
-	this.syncprovider = syncproviders[ cmdattrs.factName ] or syncproviders[ "default" ]
-	if this.syncprovider == "none" then this.syncprovider = nil end
+	this:setSyncProvider( cmdattrs.factName )
 	
 	return this
 end
