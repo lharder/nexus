@@ -146,7 +146,7 @@ function Beacon:update( dt )
 				self.portIndex = 1
 			end
 
-			-- one search cycle completed. If no other(!) clients found, increase timeout
+			-- one search cycle completed. If no other clients found, increase timeout
 			-- in steps. Network may be slow, so increase and start next search cycle.
 			if table.length( self.nexus.contacts ) < 2 then 
 				self.options.connection_timeout = .001 + self.options.connection_timeout
