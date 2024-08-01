@@ -127,8 +127,8 @@ function on_message( self, message_id, message, sender )
 				local profiles = getCheckedProfiles( self )
 				
 				pprint( "-- Profiles selected -----------" )
-				pprint( profiles )
-				pprint( "--------------------------------" )
+				-- pprint( profiles )
+				-- pprint( "--------------------------------" )
 
 				nexus:startpropose( profiles, function() 
 					pprint( "Going to load playground, stop search, stop proposal." )

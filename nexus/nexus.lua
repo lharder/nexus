@@ -49,11 +49,11 @@ function Nexus.create( gamename, gameversion )
 	-- command server ------------------------------
 	this.cmdsrv = CmdServer.create( PORTS[ 1 ], 
 		function( ip, port, client )
-			pprint( ( "Tcp client %s:%d connected!" ):format( ip, port ) )
+			pprint( ( "Tcp client %s:%s connected!" ):format( ip, port ) )
 		end, 
 
 		function( ip, port, client )
-			pprint( ( "Tcp client %s:%d disconnected!" ):format( ip, port ) )
+			pprint( ( "Tcp client %s:%s disconnected!" ):format( ip, port ) )
 		end,
 
 		PORTS[ 2 ] 

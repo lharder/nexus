@@ -87,7 +87,7 @@ function Matcher:update( dt )
 
 		if cntAgreementsAchieved == cntRequiredAgreements then 
 			pprint( "We have agreed to a common proposal!" )
-
+			
 			myContact.game = {}
 			myContact.game.profiles = table.deepcopy( myProposal )
 
@@ -98,7 +98,6 @@ function Matcher:update( dt )
 			myContact.game.gmcId = gmc:id()
 			myContact.game.isGamemaster = ( myContact.game.gmcId == self.nexus:me():id() )
 
-			pprint( "Starting a new game now!" )	
 			if myContact.game.isGamemaster then 
 				pprint( "I am the gamemaster: now waiting for clients to report readiness!" )
 				-- special case: is gamemaster the only player? Do not wait eternally!
@@ -113,7 +112,7 @@ function Matcher:update( dt )
 					-- other clients reporting readiness
 				end
 			else
-				pprint( "I am not the gamemaster, execute callback now..." )
+				pprint( "I am not the gamemaster, getting ready to play, execute callbacks now..." )
 				if #self.callbacks > 0 then 
 					for i, callback in ipairs( self.callbacks ) do callback( myContact.game ) end
 					self.callbacks = {}
