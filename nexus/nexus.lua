@@ -269,8 +269,15 @@ function Nexus:update( dt )
 	self.matcher:update( dt ) 
 	self.puppeteer:update( dt ) 
 
-	-- update communications: discovered client connections
-	for ip, contact in pairs( self.contacts ) do contact.tcpclient.update() end
+	-- update communications with relevant clients 
+	if self.beacon.isSearching or self.matcher.isProposing then 
+		-- all discovered client connections
+		for ip, contact in pairs( self.contacts ) do contact.tcpclient.update() end
+		
+	elseif self.puppeteer.isPlaying then 
+		-- only the chosen players
+		for ip, contact in pairs( self.puppeteer.players ) do contact.tcpclient.update() end
+	end
 end
 
 
@@ -322,12 +329,14 @@ function Nexus:filter( fnFilter )
 	return results
 end
 
+
 -- all other contacts except myself
 function Nexus:others()
 	return self:filter( function( contact ) 
 		return ( contact.ip ~= self.cmdsrv.ip ) or ( contact.port ~= self.cmdsrv.port )
 	end )
 end
+
 
 -- all other contacts except myself
 function Nexus:coplayers()
@@ -336,10 +345,20 @@ function Nexus:coplayers()
 
 	local cops = {}
 	local myId = me:id()
-	for ipPort, profile in pairs( me.game.profiles ) do 
+	for ipPort, _ in pairs( me.game.profiles ) do 
 		if ipPort ~= myId then cops[ ipPort ] = self.contacts[ ipPort ] end
 	end
 	return cops
+end
+
+
+-- all player contacts of the current match
+function Nexus:players()
+	local all = self:coplayers()
+	local me = self:me()
+	all[ me:id() ] = me
+	
+	return all
 end
 
 

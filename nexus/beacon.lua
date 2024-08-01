@@ -51,8 +51,12 @@ end
 
 function Beacon:addContactIP( ip )
 	assert( ip, "You must provide an ip address to contact!" )
+	
 	if table.contains( ips, ip ) then return end
 	table.insert( ips, ip ) 
+
+	-- make sure that next connect attempt is the given ip
+	self.ipIndex = #ips
 end
 
 
@@ -89,12 +93,25 @@ function Beacon:update( dt )
 					local contact = self.nexus.contacts[ ipPort ]
 					pprint( "No longer available: " .. contact.profile.callsign .. " (" .. ipPort .. ")" )
 
-					-- inform interested scripts via callback
-					self:onPlayerDisconnect( contact )
+					-- beacon is active: if peer disconnects, delete it
+					-- and keep searching over all ips (including this one
+					-- in case the peer restarts / reconnects.
+					if self.isSearching then 
+						-- inform interested scripts via callback
+						self:onPlayerDisconnect( contact )
 
-					-- cleanup, no longer available
-					contact.tcpclient.destroy()
-					self.nexus.contacts[ ipPort ] = nil
+						-- cleanup, no longer available
+						contact.tcpclient.destroy()
+						self.nexus.contacts[ ipPort ] = nil
+
+					else
+						-- Not searching and matching anymore, now playing.
+						-- When disconnected, do not destroy client, but try to 
+						-- reestablish the connection to proceed as soon as peer is 
+						-- available again. Assume it is the same and has the same
+						-- state, e.g. because it was interrupted by a tel call.
+						
+					end
 				end, 
 				self.options 
 			)
@@ -132,8 +149,10 @@ function Beacon:update( dt )
 			-- one search cycle completed. If no other(!) clients found, increase timeout
 			-- in steps. Network may be slow, so increase and start next search cycle.
 			if table.length( self.nexus.contacts ) < 2 then 
-				self.options.connection_timeout = 0.005 + self.options.connection_timeout
-				if self.options.connection_timeout > .15 then self.options.connection_timeout = .15 end
+				self.options.connection_timeout = .001 + self.options.connection_timeout
+				if self.options.connection_timeout > .15 then 
+					self.options.connection_timeout = .15 
+				end
 				-- pprint( self.options.connection_timeout )
 			end
 		end

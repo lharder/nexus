@@ -8,6 +8,8 @@ local SEC_PER_SYNC = 0.1
 -- A type is defined by the factoryurl used to create it.
 -- The default is to use the same "default" syncprovider 
 -- for all entities: syncproviders[ factName ] = { synp }
+-- A type may also define that it does not sync at all
+-- by setting its syncprovider = nil
 local syncproviders = {}
 
 
@@ -91,8 +93,9 @@ function Puppeteer.create( nexus )
 	this.drones 		= {}		-- map of drones: 		drones[ id ] = { drone }
 	this.droneIds		= {}		-- map of ids by gids: 	droneIds[ gid ] = id
 
-	this.nextSyncTime 	= socket.gettime()					-- start sync immediately
-	this.coplayers 		= {}
+	this.nextSyncTime 	= socket.gettime()		-- start sync immediately
+	this.coplayers 		= {}					-- all player contacts in this match except me
+	this.players		= {}					-- all player contacts in this match
 	this.isPlaying 		= false
 	
 	return this
@@ -198,6 +201,8 @@ function Puppeteer:start()
 	end		
 	
 	self.coplayers = self.nexus:coplayers()
+	self.players = self.nexus:players()
+	
 	self.isPlaying = true
 end
 
