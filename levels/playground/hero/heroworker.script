@@ -12,7 +12,7 @@ local function vectorToAngle( vec )
 end
 
 local shotworker = "/factories#shotworker"
-local shotdrone = "/factories#shotdrone"
+local shotdrone = "/factories#shotworker"
 
 
 

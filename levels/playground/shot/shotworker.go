@@ -1,6 +1,6 @@
 components {
   id: "script"
-  component: "/levels/playground/shot/shotworker.script"
+  component: "/levels/playground/shot/shot.script"
 }
 embedded_components {
   id: "sprite"
