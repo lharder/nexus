@@ -22,11 +22,18 @@ function Entity.create()
 end
 
 function Entity:getParams()
+	if self.syncprovider == nil then return end
 	return self.syncprovider:get( self )
 end
 
 function Entity:setParams( params )
+	if self.syncprovider == nil then return end
 	return self.syncprovider:set( self, params )
+end
+
+function Entity:setSyncProvider( factName )
+	self.syncprovider = syncproviders[ factName ] or syncproviders[ "default" ]
+	if self.syncprovider == "none" then self.syncprovider = nil end
 end
 
 
@@ -44,8 +51,10 @@ function Drone.create( cmdattrs )
 	this.gid = cmdattrs.gid
 
 	this.params = {}
-	this.syncprovider = syncproviders[ cmdattrs.factName ] or syncproviders[ "default" ]
 
+	this.syncprovider = syncproviders[ cmdattrs.factName ] or syncproviders[ "default" ]
+	if this.syncprovider == "none" then this.syncprovider = nil end
+	
 	return this
 end
 
@@ -60,10 +69,10 @@ function Worker.create( gid, factName, pos, rot, attrs, scale )
 
 	this.id = factorycreate( msg.url( factName ), pos, rot, attrs, scale )
 	this.gid = gid
-	
 	this.params = {}
-	this.syncprovider = syncproviders[ factName ] or syncproviders[ "default" ]
 
+	this:setSyncProvider( factName )
+	
 	return this
 end
 
@@ -85,7 +94,7 @@ function Puppeteer.create( nexus )
 	this.droneIds		= {}		-- map of ids by gids: 	droneIds[ gid ] = id
 
 	this.nextSyncTime 	= socket.gettime()					-- start sync immediately
-	this.others 		= {}
+	this.coplayers 		= {}
 	this.isPlaying 		= false
 	
 	return this
@@ -107,7 +116,7 @@ end
 -- create a new worker on this host and multiple drones on remote hosts
 function Puppeteer:newEntity( gid, workerFactName, droneFactName, pos, rot, attrs, scale )
 	local cmd = Commands.newCreateDrone( gid, droneFactName, pos, rot, attrs, scale ) 
-	self.nexus:broadcast( cmd, self.others )
+	self.nexus:broadcast( cmd, self.coplayers )
 
 	local worker = Worker.create( gid, workerFactName, pos, rot, attrs, scale )
 	self.workers[ worker.id ] = worker
@@ -154,9 +163,11 @@ function Puppeteer:update( dt )
 			self.nextSyncTime = socket.gettime() + SEC_PER_SYNC
 			
 			for ip, worker in pairs( self.workers ) do 
-				for ipPort, contact in pairs( self.others ) do
-					local cmd = Commands.newUpdate( worker.gid, worker:getParams() ) 
-					self.nexus:broadcast( cmd, self.others )
+				if worker.syncprovider then 
+					for ipPort, contact in pairs( self.coplayers ) do
+						local cmd = Commands.newUpdate( worker.gid, worker:getParams() ) 
+						self.nexus:broadcast( cmd, self.coplayers )
+					end
 				end
 			end
 			
@@ -165,9 +176,19 @@ function Puppeteer:update( dt )
 end
 
 
+-- Sets the syncprovider for every type of managed entity:
+-- syncproviders get/set data to be synced autom. at a constant rate.
+-- Every entity type may sync different data and use its own provider.
+-- If a syncprovider is set without a factoryUrl, that is the default.
+-- If a factUrl is set but the syncprovider is nil then that means
+-- that for this type of entity, no automatic sync is intended.
 function Puppeteer:setSyncProvider( synp, factName )
-	if not factName then factName = "default" end
+	-- without factoryUrl, treat as default
+	if factName == nil then factName = "default" end
 	syncproviders[ factName ] = synp 
+
+	-- without syncprovider, do not sync for this type
+	if synp == nil then syncproviders[ factName ] = "none" end
 end
 
 
@@ -178,7 +199,7 @@ function Puppeteer:start()
 		if contact.game and contact.game.proposal then contact.game.proposal = nil end
 	end		
 	
-	self.others = self.nexus:others()
+	self.coplayers = self.nexus:coplayers()
 	self.isPlaying = true
 end
 
