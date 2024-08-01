@@ -41,7 +41,7 @@ function Beacon:search( callsign, onClientConnect, onClientDisconnect )
 
 	self.options = { 
 		binary = true,  
-		connection_timeout = .01 
+		connection_timeout = .005 
 	}
 
 	-- no logging desired
@@ -133,7 +133,7 @@ function Beacon:update( dt )
 			-- in steps. Network may be slow, so increase and start next search cycle.
 			if table.length( self.nexus.contacts ) < 2 then 
 				self.options.connection_timeout = 0.005 + self.options.connection_timeout
-				if self.options.connection_timeout > .25 then self.options.connection_timeout = .25 end
+				if self.options.connection_timeout > .15 then self.options.connection_timeout = .15 end
 				-- pprint( self.options.connection_timeout )
 			end
 		end

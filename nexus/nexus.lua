@@ -329,6 +329,19 @@ function Nexus:others()
 	end )
 end
 
+-- all other contacts except myself
+function Nexus:coplayers()
+	local me = self:me()
+	if me == nil or me.game == nil or me.game.profiles == nil then return end 
+
+	local cops = {}
+	local myId = me:id()
+	for ipPort, profile in pairs( me.game.profiles ) do 
+		if ipPort ~= myId then cops[ ipPort ] = self.contacts[ ipPort ] end
+	end
+	return cops
+end
+
 
 return Nexus
 

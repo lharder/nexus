@@ -172,6 +172,12 @@ end
 
 
 function Puppeteer:start()
+	-- cleanup matcher info: not required anymore
+	for ipPort, contact in pairs( self.nexus.contacts ) do
+		contact.proposal = nil
+		if contact.game and contact.game.proposal then contact.game.proposal = nil end
+	end		
+	
 	self.others = self.nexus:others()
 	self.isPlaying = true
 end

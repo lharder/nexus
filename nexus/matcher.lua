@@ -105,7 +105,7 @@ function Matcher:update( dt )
 				if table.length( myContact.game.profiles ) == 1 then 
 					pprint( "I am the only player - no need to wait. Executing callback..." )
 					if #self.callbacks > 0 then 
-						for i, callback in ipairs( self.callbacks ) do callback() end
+						for i, callback in ipairs( self.callbacks ) do callback( myContact.game ) end
 						self.callbacks = {}
 					end
 				else
@@ -115,7 +115,7 @@ function Matcher:update( dt )
 			else
 				pprint( "I am not the gamemaster, execute callback now..." )
 				if #self.callbacks > 0 then 
-					for i, callback in ipairs( self.callbacks ) do callback() end
+					for i, callback in ipairs( self.callbacks ) do callback( myContact.game ) end
 					self.callbacks = {}
 				end
 			end
@@ -127,18 +127,12 @@ end
 function Matcher:stop()
 	self.isProposing = false
 
-	-- Allow for proposals in transit to arrive 
-	-- and be processed so that ALL get deleted
-	-- once agreement was achieved:_
-	timer.delay( 1.5, false, function() 
-		-- a game is created on all agreeing.
-		-- No more need for the proposals...
-		if self.nexus:me().game then 
-			for ipPort, contact in pairs( self.contacts ) do
-				contact.proposal = nil
-			end
-		end		
-	end )
+	-- cleanup
+	if self.nexus:me().game then 
+		for ipPort, contact in pairs( self.nexus.contacts ) do
+			contact.proposal = nil
+		end
+	end		
 end
 
 
