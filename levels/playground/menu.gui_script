@@ -20,7 +20,10 @@ function init( self )
 	msg.post( ".", "acquire_input_focus" )
 	gui.hide_keyboard()
 
-	self.nBtn = gui.get_node( "btn" )	
+	self.nBtnFire = gui.get_node( "btnFire" )	
+	self.nBtnSrv = gui.get_node( "btnSrv" )	
+
+	self.cooldown = socket.gettime()
 	
 	nexus:readytoplay( function() 
 		local heroGid = nexus:makeGid( "hero" )
@@ -31,18 +34,42 @@ end
 
 function on_input( self, action_id, action )
 	-- single touch
-	if guiIsClicked( self.nBtn, action_id, action ) or action_id == ACTION_KEY_PRESSED then 
-		msg.post( self.heroId, ACTION_BUTTON_CLICKED, action )
+	if guiIsClicked( self.nBtnFire, action_id, action ) or action_id == ACTION_KEY_PRESSED then 
+		if socket.gettime() > self.cooldown then 
+			self.cooldown = socket.gettime() + .1
+			msg.post( self.heroId, ACTION_BUTTON_CLICKED, action )
+		end
 		
+	elseif guiIsClicked( self.nBtnSrv, action_id, action ) then 
+		if socket.gettime() > self.cooldown then 
+			self.cooldown = socket.gettime() + .5
+			
+			if self.srvstopped then 
+				self.srvstopped = false
+				nexus.cmdsrv.tcpsrv.start()
+				gui.set_text( self.nBtnSrv , "Halt Srv" )
+		
+			else
+				self.srvstopped = true
+				nexus.cmdsrv.tcpsrv.stop()
+				gui.set_text( self.nBtnSrv , "Restart Srv" )
+				
+			end
+		end
+
 	elseif action_id == ACTION_TOUCH then 
+		self.cooldown = socket.gettime() + .1
 		msg.post( self.heroId, ACTION_TOUCH, action )
 	end
-
+	
 	-- multi touch
 	if action_id == ACTION_MULTI_TOUCH then 
 		for i, touch in ipairs( action.touch ) do
-			if guiIsClicked( self.nBtn, ACTION_TOUCH, touch ) then 
-				msg.post( self.heroId, ACTION_BUTTON_CLICKED, touch )
+			if guiIsClicked( self.nBtnFire, ACTION_TOUCH, touch ) then 
+				if socket.gettime() > self.cooldown then 
+					self.cooldown = socket.gettime() + .1
+					msg.post( self.heroId, ACTION_BUTTON_CLICKED, touch )
+				end
 			else
 				msg.post( self.heroId, ACTION_TOUCH, touch )
 			end
@@ -50,6 +77,7 @@ function on_input( self, action_id, action )
 	end
 	
 	return true
+
 end
 
 

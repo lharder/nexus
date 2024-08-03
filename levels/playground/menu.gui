@@ -1,4 +1,8 @@
 script: "/levels/playground/menu.gui_script"
+fonts {
+  name: "always_on_top"
+  font: "/builtins/fonts/debug/always_on_top.font"
+}
 textures {
   name: "playground"
   texture: "/levels/playground/playground.atlas"
@@ -10,9 +14,24 @@ nodes {
   }
   type: TYPE_BOX
   texture: "playground/button"
-  id: "btn"
+  id: "btnFire"
   inherit_alpha: true
   size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    x: 1073.0
+    y: 594.0
+  }
+  size {
+    x: 100.0
+    y: 60.0
+  }
+  type: TYPE_TEXT
+  text: "Stop Srv"
+  font: "always_on_top"
+  id: "btnSrv"
+  inherit_alpha: true
 }
 material: "/builtins/materials/gui.material"
 adjust_reference: ADJUST_REFERENCE_PARENT

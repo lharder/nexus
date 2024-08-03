@@ -82,7 +82,7 @@ newReconnector = function( beacon, ip, port )
 				-- replace myself with a "real" tcpclient again
 				pprint( "Reconnect to " .. rec.ipPort .. " successful!" )
 				rec.beacon.nexus.contacts[ rec.ipPort ].tcpclient = rec.tcpclient
-				pprint( "Replaced myself with new TcpClient! Reconnector out ;o)" )
+				pprint( "Replaced myself with my new TcpClient! Reconnector out ;o)" )
 			end
 		end
 	end
