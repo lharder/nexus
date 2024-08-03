@@ -35,19 +35,16 @@ end
 function on_input( self, action_id, action )
 	-- single touch
 	if guiIsClicked( self.nBtnFire, action_id, action ) or action_id == ACTION_KEY_PRESSED then 
-		if socket.gettime() > self.cooldown then 
-			self.cooldown = socket.gettime() + .1
-			msg.post( self.heroId, ACTION_BUTTON_CLICKED, action )
-		end
+		msg.post( self.heroId, ACTION_BUTTON_CLICKED, action )
 		
 	elseif guiIsClicked( self.nBtnSrv, action_id, action ) then 
 		if socket.gettime() > self.cooldown then 
-			self.cooldown = socket.gettime() + .5
+			self.cooldown = socket.gettime() + .9
 			
 			if self.srvstopped then 
 				self.srvstopped = false
 				nexus.cmdsrv.tcpsrv.start()
-				gui.set_text( self.nBtnSrv , "Halt Srv" )
+				gui.set_text( self.nBtnSrv , "Stop Srv" )
 		
 			else
 				self.srvstopped = true
@@ -58,7 +55,6 @@ function on_input( self, action_id, action )
 		end
 
 	elseif action_id == ACTION_TOUCH then 
-		self.cooldown = socket.gettime() + .1
 		msg.post( self.heroId, ACTION_TOUCH, action )
 	end
 	
@@ -66,10 +62,7 @@ function on_input( self, action_id, action )
 	if action_id == ACTION_MULTI_TOUCH then 
 		for i, touch in ipairs( action.touch ) do
 			if guiIsClicked( self.nBtnFire, ACTION_TOUCH, touch ) then 
-				if socket.gettime() > self.cooldown then 
-					self.cooldown = socket.gettime() + .1
-					msg.post( self.heroId, ACTION_BUTTON_CLICKED, touch )
-				end
+				msg.post( self.heroId, ACTION_BUTTON_CLICKED, touch )
 			else
 				msg.post( self.heroId, ACTION_TOUCH, touch )
 			end
