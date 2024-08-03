@@ -1,5 +1,5 @@
 local PORTS = require( "nexus.ports" )
-local tcpCnt = require( "defnet.tcp_client" )
+local TcpClient = require( "defnet.tcp_client" )
 local Contact = require( "nexus.contact" )
 local Commands = require( "nexus.commands" )
 local Localhost = require( "nexus.localhost" )
@@ -8,6 +8,87 @@ local ips
 
 local nop = function() 
 end 
+
+-- advance declaration, impl comes later....
+local newReconnector
+	
+--------------------------------------
+local function newTcpClient( self, ip, port )
+	local ipPort = ( "%s:%s" ):format( ip, port )
+	
+	-- On disconnect of client (e.g. remote server is shutdown):
+	-- My client(!) gets disconnected from the remote host. That
+	-- is a sign that the remote server(!) is down. Use callback
+	-- to inform that the remote player is no longer available.
+	local onClientDisconnect = function()
+		local contact = self.nexus.contacts[ ipPort ]
+		pprint( "No longer available: " .. contact.profile.callsign .. " (" .. ipPort .. ")" )
+
+		-- beacon is active: if peer disconnects, delete it
+		-- and keep searching over all ips (including this one
+		-- in case the peer restarts / reconnects.
+		if self.isSearching then 
+			-- inform interested scripts via callback
+			self:onPlayerDisconnect( contact )
+
+			-- cleanup, no longer available
+			contact.tcpclient.destroy()
+			self.nexus.contacts[ ipPort ] = nil
+
+		else
+			-- Not searching and matching anymore, now playing.
+			-- When disconnected, do not destroy client, but try to 
+			-- reestablish the connection to proceed as soon as peer is 
+			-- available again. Assume it is the same and has the same
+			-- state, e.g. because it was interrupted by a tel call.
+			self.nexus.contacts[ ipPort ].tcpclient = newReconnector( self, ip, port )
+		end
+	end
+
+	return pcall( TcpClient.create, ip, port, nop, onClientDisconnect, self.options )
+end
+
+
+-- Reconnector --------------------------------------------
+-- Temporary drop-in to replace a disconnected TcpClient:
+-- tries to reconnect on update() until new connection 
+-- can be established. Implements all methods of a regular
+-- TcpClient and replaces itself automatically when successful.
+newReconnector = function( beacon, ip, port )
+	local rec 		= {}
+	rec.beacon 		= beacon
+	rec.ip 			= ip
+	rec.port 		= port
+	rec.ipPort 		= ( "%s:%s" ):format( ip, port )
+	rec.nextconnect = socket.gettime()
+
+	rec.send = function() 
+		-- pprint( "No sending to disconnected " .. rec.ipPort )
+	end
+	
+	rec.destroy = function()
+		-- destroy myself
+		rec.beacon.nexus.contacts[ rec.ipPort ].tcpclient = nil
+	end
+
+	rec.update = function()
+		if socket.gettime() > rec.nextconnect then 
+			rec.nextconnect = socket.gettime() + 1
+			-- pprint( "Try to reconnect to " .. rec.ipPort .. "....." )
+
+			_, rec.tcpclient = newTcpClient( rec.beacon, rec.ip, rec.port )
+			local success = ( type( rec.tcpclient ) == "table" )
+			if success then 
+				-- replace myself with a "real" tcpclient again
+				pprint( "Reconnect to " .. rec.ipPort .. " successful!" )
+				rec.beacon.nexus.contacts[ rec.ipPort ].tcpclient = rec.tcpclient
+				pprint( "Replaced myself with new TcpClient! Reconnector out ;o)" )
+			end
+		end
+	end
+
+	return rec
+end
 
 
 -- Beacon ----------------------------------------------
@@ -45,7 +126,7 @@ function Beacon:search( callsign, onClientConnect, onClientDisconnect )
 	}
 
 	-- no logging desired
-	tcpCnt.log = function() end
+	TcpClient.log = function() end
 end
 
 
@@ -83,40 +164,8 @@ function Beacon:update( dt )
 		if self.nexus.contacts[ ipPort ] == nil then 
 			
 			-- create a connection to this contact
-			local success = false
-			local ok, tcpclient = pcall( tcpCnt.create, ip, port, nop, 
-			-- On disconnect of client (e.g. remote server is shutdown):
-			-- My client(!) gets disconnected from the remote host. That
-			-- is a sign that the remote server(!) is down. Use callback
-			-- to inform that the remote player is no longer available.
-				function() 
-					local contact = self.nexus.contacts[ ipPort ]
-					pprint( "No longer available: " .. contact.profile.callsign .. " (" .. ipPort .. ")" )
-
-					-- beacon is active: if peer disconnects, delete it
-					-- and keep searching over all ips (including this one
-					-- in case the peer restarts / reconnects.
-					if self.isSearching then 
-						-- inform interested scripts via callback
-						self:onPlayerDisconnect( contact )
-
-						-- cleanup, no longer available
-						contact.tcpclient.destroy()
-						self.nexus.contacts[ ipPort ] = nil
-
-					else
-						-- Not searching and matching anymore, now playing.
-						-- When disconnected, do not destroy client, but try to 
-						-- reestablish the connection to proceed as soon as peer is 
-						-- available again. Assume it is the same and has the same
-						-- state, e.g. because it was interrupted by a tel call.
-						
-					end
-				end, 
-				self.options 
-			)
-			
-			success = ( type( tcpclient ) == "table" )
+			local ok, tcpclient = newTcpClient( self, ip, port )
+			local success = ( type( tcpclient ) == "table" )
 			if success then 
 				pprint( ( "Tcp contact discovered at %s:%s. May be a game client." ):format( ip, port ) ) 
 
