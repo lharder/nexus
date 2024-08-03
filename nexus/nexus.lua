@@ -25,6 +25,7 @@ function Nexus.create( gamename, gameversion )
 	this.gamename 		= gamename
 	this.gameversion	= gameversion
 	this.contacts		= {}
+	this.events			= {}
 	this.beacon 		= Beacon.create( this )
 	this.matcher		= Matcher.create( this )
 	this.puppeteer		= Puppeteer.create( this )
@@ -286,6 +287,7 @@ function Nexus:send( cmd, contact )
 	contact.tcpclient.send( cmd:serialize() .. "\n" )
 end
 
+
 function Nexus:broadcast( cmd, contacts )
 	if cmd == nil then return end
 	if contacts == nil then contacts = self:others() end
@@ -300,6 +302,58 @@ function Nexus:broadcast( cmd, contacts )
 		-- end
 	end
 end
+
+
+function Nexus:isPlaying()
+	return self.puppeteer.isPlaying
+end
+
+function Nexus:isSearching()
+	return self.beacon.isSearching
+end
+
+function Nexus:isProposing()
+	return self.matcher.isProposing
+end
+
+
+-- Create a global custom event that can be triggered
+-- on all clients alike: every client provides a callback
+-- that gets executed when any one of the clients triggers
+-- the event with the given name. Multiple listeners per 
+-- client are possible.
+function Nexus:addEventListener( evtname, callback )
+	if callback == nil or evtname == nil then return end
+	
+	if self.events[ evtname ] == nil then self.events[ evtname ] = {} end
+	table.insert( self.events[ evtname ], callback )
+end
+
+
+-- Trigger the custom event with the given name on all clients.
+-- Clients need to register a callback in advance, so that their
+-- callback function can be called locally.
+function Nexus:triggerEvent( evtname, params )
+	local cmd = Commands.newTriggerEvent( evtname )
+
+	-- add optional params to the event command
+	if params and type( params ) == "table" then 
+		for key, value in pairs( params ) do 
+			cmd:put( key, value )
+		end	
+	end
+
+	local contacts
+	if self.puppeteer.isPlaying then 
+		-- we are in the game, send only to the players
+		contacts = self.puppeteer.players
+	else
+		-- still hailing and negotiating, send to all contacts
+		contacts = self:filter() 
+	end
+	self.nexus:send( cmd, contacts )
+end
+
 
 -- my own contact object
 function Nexus:me()

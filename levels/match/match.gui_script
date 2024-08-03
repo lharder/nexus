@@ -106,18 +106,28 @@ function on_message( self, message_id, message, sender )
 		if message ~= nil then 
 			nexus:startsearch( message.callsign, 
 				-- on player connected
-				function( contact )  
+				function( contact ) 
+					-- ignore new discoveries if in a game already
 					pprint( "Hey, found a gamer: " .. contact.profile.callsign )
-					display( self, nexus:filter() )
+					if not nexus:isPlaying() then 
+						display( self, nexus:filter() )
+					end
 				end,
+				
 				-- on player disconnected
 				function( contact )  
 					pprint( "Lost a gamer: " .. contact.profile.callsign )
-					
-					clearCheckboxes( self.form )
-					local contacts = nexus:filter()
-					contacts[ contact:id() ] = nil
-					display( self, contacts )
+					if nexus:isPlaying() then 
+						-- while playing
+						pprint( "-- Must pause game! --------------" )
+						
+					else
+						-- while searching and proposing
+						clearCheckboxes( self.form )
+						local contacts = nexus:filter()
+						contacts[ contact:id() ] = nil
+						display( self, contacts )
+					end
 				end			
 			)
 

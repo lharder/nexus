@@ -20,7 +20,7 @@ local function newTcpClient( self, ip, port )
 	-- My client(!) gets disconnected from the remote host. That
 	-- is a sign that the remote server(!) is down. Use callback
 	-- to inform that the remote player is no longer available.
-	local onClientDisconnect = function()
+	local onDisconnect = function()
 		local contact = self.nexus.contacts[ ipPort ]
 		pprint( "No longer available: " .. contact.profile.callsign .. " (" .. ipPort .. ")" )
 
@@ -31,21 +31,28 @@ local function newTcpClient( self, ip, port )
 			-- inform interested scripts via callback
 			self:onPlayerDisconnect( contact )
 
-			-- cleanup, no longer available
+			-- cleanup, contact is no longer available.
+			-- Thus get ready to connect again!
 			contact.tcpclient.destroy()
 			self.nexus.contacts[ ipPort ] = nil
 
 		else
-			-- Not searching and matching anymore, now playing.
+			-- Not searching and matching anymore, now we are playing!
 			-- When disconnected, do not destroy client, but try to 
 			-- reestablish the connection to proceed as soon as peer is 
 			-- available again. Assume it is the same and has the same
 			-- state, e.g. because it was interrupted by a tel call.
-			self.nexus.contacts[ ipPort ].tcpclient = newReconnector( self, ip, port )
+			-- When a coplayer is disconnected, all others should pause
+			-- immediately to keep common state: up to the game via callback.
+			local contact = self.nexus.contacts[ ipPort ]
+			contact.tcpclient = newReconnector( self, ip, port )
+
+			-- inform via callback to allow e.g. for pausing the game
+			self:onPlayerDisconnect( contact )
 		end
 	end
 
-	return pcall( TcpClient.create, ip, port, nop, onClientDisconnect, self.options )
+	return pcall( TcpClient.create, ip, port, nop, onDisconnect, self.options )
 end
 
 
@@ -83,6 +90,10 @@ newReconnector = function( beacon, ip, port )
 				pprint( "Reconnect to " .. rec.ipPort .. " successful!" )
 				rec.beacon.nexus.contacts[ rec.ipPort ].tcpclient = rec.tcpclient
 				pprint( "Replaced myself with my new TcpClient! Reconnector out ;o)" )
+
+				-- callback and inform about successfully reestablishing connection
+				local contact = rec.beacon.nexus.contacts[ rec.ipPort ]
+				rec.beacon:onPlayerConnect( contact )
 			end
 		end
 	end
@@ -226,8 +237,8 @@ function Beacon:stop()
 	self.isSearching = false
 
 	-- do not use callbacks after stopping
-	self.onClientConnect = nil
-	self.onClientDisconnect = nil
+	-- self.onClientConnect = nil
+	-- self.onClientDisconnect = nil
 end
 
 

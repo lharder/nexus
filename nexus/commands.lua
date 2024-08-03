@@ -6,6 +6,7 @@ Commands.ANNOUNCE 		= 999
 Commands.PROPOSE		= 998
 Commands.READYTOPLAY	= 997
 Commands.STARTTOPLAY	= 996
+Commands.TRIGGEREVENT	= 995
 
 Commands.CREATE_DRONE 	= 1
 Commands.DELETE 		= 2
@@ -104,6 +105,15 @@ function Commands.newMessage( gid, params )
 	local this = Command.create( Commands.CUSTOM_MESSAGE )
 	this.attrs = params or {} 
 	this:put( "gid", gid )
+
+	return this
+end
+
+
+-- Trigger event -----------------------
+function Commands.newTriggerEvent( evtname ) 
+	local this = Command.create( Commands.TRIGGEREVENT )
+	this:put( "evtname", evtname )
 
 	return this
 end
