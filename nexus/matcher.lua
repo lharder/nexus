@@ -137,6 +137,8 @@ end
 
 
 function Matcher:readytoplay( callback )
+	-- readytoplay makes sense only when game
+	-- setup has been agreed on = game is defined.
 	local game = self.nexus:me().game
 	if game == nil then return false end 
 	
