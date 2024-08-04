@@ -93,7 +93,7 @@ function on_message( self, message_id, message, sender )
 	elseif message_id == MSG_COLLISION then 
 		local shotCreatorId = go.get( msg.url( nil, message.other_id, "script" ), "creatorId" )
 		if shotCreatorId ~= go.get_id() then 
-			pprint( "hit " .. self.gid )
+			pprint( "Hit " .. self.gid )
 
 			local lethality = go.get( msg.url( nil, message.other_id, "script" ), "lethality" )
 			self.health = self.health - lethality
