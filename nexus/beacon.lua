@@ -234,10 +234,6 @@ end
 
 function Beacon:stop()
 	self.isSearching = false
-
-	-- do not use callbacks after stopping
-	-- self.onClientConnect = nil
-	-- self.onClientDisconnect = nil
 end
 
 
