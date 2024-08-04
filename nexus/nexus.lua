@@ -201,6 +201,7 @@ function Nexus.create( gamename, gameversion )
 	this.cmdsrv:addCmdHandler( Commands.DELETE, function( cmdattrs ) 
 		local id = this.puppeteer:getId( cmdattrs.gid )
 		if id == nil then return end 
+		if not go.exists( id ) then return end
 		go.animate( id, "position", go.PLAYBACK_ONCE_FORWARD, cmdattrs.pos, go.EASING_LINEAR, .1, 0, function() 
 			-- delete only locally, do not broadcast (again)
 			-- make sure the worker's delete position is reached before being deleted

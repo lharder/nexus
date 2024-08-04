@@ -1,0 +1,10 @@
+image: "/assets/images/explo.png"
+tile_width: 90
+tile_height: 90
+animations {
+  id: "white"
+  start_tile: 1
+  end_tile: 9
+  fps: 24
+}
+extrude_borders: 2

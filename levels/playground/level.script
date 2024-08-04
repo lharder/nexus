@@ -20,7 +20,8 @@ function init( self )
 			callsign = nexus:me().profile.callsign,
 			gid = heroGid,
 			turnrate = 3,
-			speed = 300
+			speed = 300,
+			health = 100
 		})
 
 		pprint( ">>>>>>>>>>   PLAYING   <<<<<<<<<<" )

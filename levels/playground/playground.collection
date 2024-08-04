@@ -47,5 +47,11 @@ embedded_instances {
   "  data: \"prototype: \\\"/levels/playground/shot/shot.go\\\"\\n"
   "\"\n"
   "}\n"
+  "embedded_components {\n"
+  "  id: \"explo\"\n"
+  "  type: \"factory\"\n"
+  "  data: \"prototype: \\\"/levels/playground/shot/explo.go\\\"\\n"
+  "\"\n"
+  "}\n"
   ""
 }

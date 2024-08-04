@@ -1,6 +1,20 @@
 local Events = require( "events.events" )
 local nexus = require( "main.gameserver" )
 
+go.property( "lethality", 10 )
+go.property( "creatorId", msg.url() )
+
+
+
+local function explode( self )
+	self.exploding = true
+	local pos = go.get_position()
+	pos.z = .6
+	factory.create( "/factories#explo", pos + self.dir * 30 )
+	go.delete()
+end
+
+
 
 -- method ------------------------
 function init( self )
@@ -26,4 +40,16 @@ function update( self, dt )
 	self.range = self.range - vmath.length( self.delta )
 	if self.range < 0 then nexus:delete( self.gid ) end
 end
+
+
+
+function on_message( self, message_id, message, sender )
+	if message_id == hash( "collision_response" ) 
+	and message.other_id ~= self.creatorId
+	and not self.exploding then
+		explode( self )
+	end
+end
+
+
 

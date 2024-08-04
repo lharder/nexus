@@ -1,11 +1,17 @@
 local Events = require( "events.events" )
 local nexus = require( "main.gameserver" )
 
+local MSG_COLLISION = hash( "collision_response" ) 
+
 
 function init( self, dt )
 	Events.FACTORY_CREATED:trigger( self, function( self, attrs ) 
 		self.callsign = attrs.callsign
 		label.set_text( "#caption", attrs.callsign )
+
+		self.gid 		= attrs.gid
+		self.callsign 	= attrs.callsign
+		self.health 	= attrs.health or 100
 	end )
 end
 
@@ -16,5 +22,16 @@ function on_message( self, message_id, message, sender )
 			label.set_text( "#caption", message.txt )
 			timer.delay( 3, false, function() label.set_text( "#caption", self.callsign ) end )
 		end
+
+	elseif message_id == MSG_COLLISION then 
+		local shotCreatorId = go.get( msg.url( nil, message.other_id, "script" ), "creatorId" )
+		if shotCreatorId ~= go.get_id() then 
+			pprint( "hit " .. self.gid )
+			
+			local lethality = go.get( msg.url( nil, message.other_id, "script" ), "lethality" )
+			self.health = self.health - lethality
+			if self.health < 0 then nexus:delete( self.gid ) end
+		end
+		
 	end
 end
