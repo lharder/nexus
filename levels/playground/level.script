@@ -10,6 +10,11 @@ function init( self )
 		-- avoid syncing every shot: self-contained, simple logic on all hosts
 		nexus:setSyncProvider( nil, "/factories#shot" )
 		
+		nexus:addEventListener( "pause", function( params ) 
+			pprint( "+++ Global event: Triggered pause! +++" ) 
+			pprint( params )
+		end )
+		
 		local heroGid = nexus:makeGid( "hero" )
 		self.hero = nexus:newEntity( heroGid, heromain, herodrone, pos, nil, {
 			callsign = nexus:me().profile.callsign,

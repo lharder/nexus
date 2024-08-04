@@ -44,7 +44,6 @@ local function newTcpClient( self, ip, port )
 			-- state, e.g. because it was interrupted by a tel call.
 			-- When a coplayer is disconnected, all others should pause
 			-- immediately to keep common state: up to the game via callback.
-			local contact = self.nexus.contacts[ ipPort ]
 			contact.tcpclient = newReconnector( self, ip, port )
 
 			-- inform via callback to allow e.g. for pausing the game

@@ -1,6 +1,6 @@
 local PORTS = require( "nexus.ports" )
 local Localhost = require( "nexus.localhost" )
--- local b64 = require( "nexus.b64" )
+local Events = require( "events.events" )
 local CmdServer = require( "nexus.cmdserver" )
 local Commands = require( "nexus.commands" )
 local Beacon = require( "nexus.beacon" )
@@ -207,6 +207,14 @@ function Nexus.create( gamename, gameversion )
 			this.puppeteer:delete( cmdattrs.gid, false )
 		end )
 	end )
+
+
+	-- trigger global event on all local clients
+	this.cmdsrv:addCmdHandler( Commands.TRIGGEREVENT, function( cmdattrs ) 
+		local evt = Events:get( cmdattrs.evtname )
+		if evt then evt:trigger( cmdattrs ) end
+	end )
+	
 	
 	return this
 end
@@ -284,7 +292,7 @@ end
 
 function Nexus:send( cmd, contact )
 	if cmd == nil or contact == nil then return false end
-	contact.tcpclient.send( cmd:serialize() .. "\n" )
+	contact.tcpclient.send( cmd:serialize() .. "\n" ) 
 end
 
 
@@ -325,8 +333,8 @@ end
 function Nexus:addEventListener( evtname, callback )
 	if callback == nil or evtname == nil then return end
 	
-	if self.events[ evtname ] == nil then self.events[ evtname ] = {} end
-	table.insert( self.events[ evtname ], callback )
+	local evt = Events.create( evtname )
+	evt:subscribe( callback )
 end
 
 
@@ -351,7 +359,7 @@ function Nexus:triggerEvent( evtname, params )
 		-- still hailing and negotiating, send to all contacts
 		contacts = self:filter() 
 	end
-	self.nexus:send( cmd, contacts )
+	self:broadcast( cmd, contacts )
 end
 
 

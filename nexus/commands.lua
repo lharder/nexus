@@ -100,20 +100,20 @@ function Commands.newUpdate( gid, params )
 end
 
 
--- Custom -----------------------------
-function Commands.newMessage( gid, params ) 
-	local this = Command.create( Commands.CUSTOM_MESSAGE )
-	this.attrs = params or {} 
-	this:put( "gid", gid )
+-- Trigger event -----------------------
+function Commands.newTriggerEvent( evtname ) 
+	local this = Command.create( Commands.TRIGGEREVENT )
+	this:put( "evtname", evtname )
 
 	return this
 end
 
 
--- Trigger event -----------------------
-function Commands.newTriggerEvent( evtname ) 
-	local this = Command.create( Commands.TRIGGEREVENT )
-	this:put( "evtname", evtname )
+-- Custom -----------------------------
+function Commands.newMessage( gid, params ) 
+	local this = Command.create( Commands.CUSTOM_MESSAGE )
+	this.attrs = params or {} 
+	this:put( "gid", gid )
 
 	return this
 end

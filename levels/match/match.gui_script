@@ -118,8 +118,10 @@ function on_message( self, message_id, message, sender )
 				function( contact )  
 					pprint( "Lost a gamer: " .. contact.profile.callsign )
 					if nexus:isPlaying() then 
-						-- while playing
-						pprint( "-- Must pause game! --------------" )
+						pprint( "Must pause game! Trigger global event!" )
+						nexus:triggerEvent( "pause", { 
+							causedby = contact.profile 
+						})
 						
 					else
 						-- while searching and proposing
