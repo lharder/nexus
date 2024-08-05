@@ -1,0 +1,105 @@
+script: "/levels/playground/pause/pause.gui_script"
+fonts {
+  name: "always_on_top"
+  font: "/builtins/fonts/debug/always_on_top.font"
+}
+nodes {
+  position {
+    x: 550.0
+    y: 350.0
+  }
+  scale {
+    x: 1.5
+    y: 1.5
+  }
+  size {
+    x: 520.0
+    y: 200.0
+  }
+  color {
+    x: 0.0
+    y: 0.502
+    z: 0.502
+  }
+  type: TYPE_BOX
+  id: "dialog"
+  inherit_alpha: true
+  alpha: 0.7
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  position {
+    y: 70.0
+  }
+  scale {
+    x: 2.0
+    y: 2.0
+  }
+  size {
+    x: 400.0
+    y: 200.0
+  }
+  color {
+    x: 0.0
+  }
+  type: TYPE_TEXT
+  text: "Game paused"
+  font: "always_on_top"
+  id: "dialogCaption"
+  outline {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  shadow {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+  parent: "dialog"
+}
+nodes {
+  size {
+    x: 450.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "%s is currently not reachable via the network. \n"
+  "Trying to reconnect, please wait a moment or abort\n"
+  "if %s is not going to join the game again..."
+  font: "always_on_top"
+  id: "dialogTxt"
+  parent: "dialog"
+}
+nodes {
+  position {
+    y: -70.0
+  }
+  size {
+    x: 150.0
+    y: 40.0
+  }
+  color {
+    x: 0.4
+    y: 0.6
+    z: 0.6
+  }
+  type: TYPE_BOX
+  id: "btnAbort"
+  parent: "dialog"
+  size_mode: SIZE_MODE_AUTO
+}
+nodes {
+  size {
+    x: 200.0
+    y: 100.0
+  }
+  type: TYPE_TEXT
+  text: "Abort game"
+  font: "always_on_top"
+  id: "btnAbortCaption"
+  parent: "btnAbort"
+  inherit_alpha: true
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT

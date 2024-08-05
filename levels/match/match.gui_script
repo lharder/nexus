@@ -109,7 +109,13 @@ function on_message( self, message_id, message, sender )
 				function( contact ) 
 					-- ignore new discoveries if in a game already
 					pprint( "Hey, found a gamer: " .. contact.profile.callsign )
-					if not nexus:isPlaying() then 
+					if nexus:isPlaying() then 
+						-- should check if pause is active, etc..... 
+						-- here is demo only ;o)
+						nexus:triggerEvent( "unpause", { 
+							causedby = contact.profile 
+						})
+					else
 						display( self, nexus:filter() )
 					end
 				end,
@@ -118,6 +124,7 @@ function on_message( self, message_id, message, sender )
 				function( contact )  
 					pprint( "Lost a gamer: " .. contact.profile.callsign )
 					if nexus:isPlaying() then 
+						-- while playing
 						pprint( "Must pause game! Trigger global event!" )
 						nexus:triggerEvent( "pause", { 
 							causedby = contact.profile 

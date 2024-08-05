@@ -1,5 +1,9 @@
 local nexus = require( "main.gameserver" )
 
+local MSG_PAUSE = hash( "pause" )
+local MSG_UNPAUSE = hash( "unpause" )
+
+
 
 function init( self )
 	nexus:readytoplay( function() 
@@ -13,6 +17,15 @@ function init( self )
 		nexus:addEventListener( "pause", function( params ) 
 			pprint( "+++ Global event: Triggered pause! +++" ) 
 			pprint( params )
+
+			msg.post( "#pause", MSG_PAUSE, { callsign = params.causedby.callsign })
+		end )
+
+		nexus:addEventListener( "unpause", function( params ) 
+			pprint( "+++ Global event: Stop pause and proceed! +++" ) 
+			pprint( params )
+
+			msg.post( "#pause", MSG_UNPAUSE, { callsign = params.causedby.callsign })
 		end )
 		
 		local heroGid = nexus:makeGid( "hero" )

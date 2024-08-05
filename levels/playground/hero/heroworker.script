@@ -1,5 +1,4 @@
 local Events = require( "events.events" )
-local Commands = require( "nexus.commands" )
 local nexus = require( "main.gameserver" )
 
 local MSG_TOUCH = hash( "touch" )
