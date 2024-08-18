@@ -1,6 +1,8 @@
 local defgui = require( "defgui.defgui" )
 local callsigns = require( "main.callsigns" )
 
+-- initialize already to avoid race condition 
+-- later when it is actually needed...
 local Nexus = require( "nexus.nexus" )
 
 
@@ -38,11 +40,6 @@ end
 
 function on_input( self, action_id, action )
 	if self.form then self.form:input( self, action_id, action ) end 
-end
-
-
-function update( self, dt )
-	if self.nexus then self.nexus:update() end
 end
 
 

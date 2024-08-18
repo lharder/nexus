@@ -38,6 +38,7 @@ local function display( self, contacts )
 			
 			checkbox:check( true )
 			checkbox.profile = contact.profile
+			checkbox.ipPort = ipPort
 
 			-- calculate new position
 			x = x + 240
@@ -55,7 +56,7 @@ local function getCheckedProfiles( self )
 	for id, field in pairs( self.form.fields ) do
 		-- only checkboxes have this method...
 		if field.isChecked and field:isChecked() then
-			profiles[ field.profile.id ] = field.profile
+			profiles[ field.ipPort ] = field.profile
 		end
 	end
 	return profiles
@@ -81,21 +82,6 @@ function init( self )
 			self.fields[ id ] = nil
 		end
 	end
-
-	self.form:addLabel( "hint", 50, 380, 800, 60, function() 
-		if self.ipfield == nil then 
-			self.ipfield = self.form:addTextField( "ip", 50, 350, 330, 36, nil )
-			self.ipfield:setText( "192.168.178.24" )
-			
-			self.search = self.form:addButton( "search", 390, 350, 120, 36, function() 
-				nexus.beacon:addContactIP( self.ipfield.value )
-				gui.hide_keyboard()
-			end, "Search" )
-		end
-		gui.show_keyboard( gui.KEYBOARD_TYPE_DEFAULT, false )
-	end, "> Looking for friends not showing up here?" )
-
-	
 end
 
 

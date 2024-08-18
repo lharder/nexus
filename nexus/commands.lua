@@ -2,7 +2,6 @@ local Command = require( "nexus.command" )
 
 
 local Commands = {}
-Commands.ANNOUNCE 		= 999
 Commands.PROPOSE		= 998
 Commands.READYTOPLAY	= 997
 Commands.STARTTOPLAY	= 996
@@ -12,26 +11,6 @@ Commands.CREATE_DRONE 	= 1
 Commands.DELETE 		= 2
 Commands.UPDATE         = 3
 Commands.CUSTOM_MESSAGE	= 4
-
--- Announce profile -----------------------------
--- the profile of the player with callsign and ip:port under which
--- that host listens for communication, e.g. 192.168.178.24:8888,
--- as its distinctive profile id. On the receiving "onData()" end, 
--- only the ip and outgoing client port number are available.
-function Commands.newAnnounceProfile( callsign, gamename, gameversion, ip, port ) 
-	assert( callsign, "Announce command must have a callsign!" )
-	assert( ip, "Announce command must have an ip address!" )
-	assert( port, "Announce command must have a port number!" )
-	
-	local this = Command.create( Commands.ANNOUNCE )
-
-	this:put( "id", ( "%s:%s" ):format( ip, port ) )
-	this:put( "callsign", callsign )
-	this:put( "gamename", gamename )
-	this:put( "gameversion", gameversion )
-		
-	return this 
-end
 
 -- Propose match constellation ----------
 function Commands.newProposal( profiles, senderIp, senderPort ) 

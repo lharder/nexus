@@ -15,7 +15,6 @@ function Contact.create( ip, port, tcpclient )
 	this.port 		= port
 	this.tcpclient 	= tcpclient
 	this.profile 	= {}
-	this.created	= socket.gettime()
 
 	return this
 end

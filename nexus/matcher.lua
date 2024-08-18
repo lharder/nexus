@@ -9,7 +9,7 @@ local function determineGamemaster( contacts, fixedIp )
 	for i, contact in pairs( contacts ) do
 		if contact.ip == fixedIp then 
 			-- select the host with a given ip
-			return host 
+			return contact 
 		else
 			-- no fixed ip is provided, use arbitrary algorithm:
 			-- the contact with highest last octet of ip becomes server

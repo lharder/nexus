@@ -26,7 +26,8 @@ function Nexus.create( gamename, gameversion )
 	this.gameversion	= gameversion
 	this.contacts		= {}
 	this.events			= {}
-	this.beacon 		= Beacon.create( this )
+	
+	this.beacon 		= Beacon.create( this, "http://nexus.spaceboom.de/cgi-bin/v1/", "nexus", "forelock-society-despise-bleach" )
 	this.matcher		= Matcher.create( this )
 	this.puppeteer		= Puppeteer.create( this )
 
@@ -64,29 +65,6 @@ function Nexus.create( gamename, gameversion )
 
 	-- Request handlers logic -----------------------
 	-------------------------------------------------
-	-- New profile announced: a tcp contact must provide the name 
-	-- and version of the game it wants to play. If it does not, then 
-	-- it is not a valid game client.    
-	this.cmdsrv:addCmdHandler( Commands.ANNOUNCE, function( cmdattrs ) 
-		-- pprint( "Announce message received."  )
-		if cmdattrs.gamename == this.gamename then 
-			-- internal information, not needed for player profile
-			cmdattrs.gamename = nil
-			cmdattrs.gameversion = nil
-			
-			-- Accept this client: it wants to play our game!
-			local contact = this.contacts[ cmdattrs.id ]
-			if contact ~= nil then 
-				-- set or update player's profile in case of changes
-				contact.profile = cmdattrs
-				
-				-- Call handler only the first time player is discovered!
-				if contact.accepted == nil then this.beacon:onPlayerConnect( contact ) end
-				contact.accepted = socket.gettime()
-			end
-		end
-	end )
-
 	-- new incoming proposal --------------------------
 	-- When one player has setup the combination of players for a game,
 	-- he starts broadcasting that setup.l So do all others. When all 
@@ -215,8 +193,7 @@ function Nexus.create( gamename, gameversion )
 		local evt = Events:get( cmdattrs.evtname )
 		if evt then evt:trigger( cmdattrs ) end
 	end )
-	
-	
+
 	return this
 end
 

@@ -1,21 +1,18 @@
-local PORTS = require( "nexus.ports" )
+local HttpClient = require( "nexus.httpclient" )
 local TcpClient = require( "defnet.tcp_client" )
 local Contact = require( "nexus.contact" )
-local Commands = require( "nexus.commands" )
-local Localhost = require( "nexus.localhost" )
 
-local ips
 
 local nop = function() 
 end 
 
 -- advance declaration, impl comes later....
 local newReconnector
-	
+
 --------------------------------------
 local function newTcpClient( self, ip, port )
 	local ipPort = ( "%s:%s" ):format( ip, port )
-	
+
 	-- On disconnect of client (e.g. remote server is shutdown):
 	-- My client(!) gets disconnected from the remote host. That
 	-- is a sign that the remote server(!) is down. Use callback
@@ -60,9 +57,9 @@ end
 -- tries to reconnect on update() until new connection 
 -- can be established. Implements all methods of a regular
 -- TcpClient and replaces itself automatically when successful.
-newReconnector = function( beacon, ip, port )
+newReconnector = function( broker, ip, port )
 	local rec 		= {}
-	rec.beacon 		= beacon
+	rec.broker 		= broker
 	rec.ip 			= ip
 	rec.port 		= port
 	rec.ipPort 		= ( "%s:%s" ):format( ip, port )
@@ -71,10 +68,10 @@ newReconnector = function( beacon, ip, port )
 	rec.send = function() 
 		-- pprint( "No sending to disconnected " .. rec.ipPort )
 	end
-	
+
 	rec.destroy = function()
 		-- destroy myself
-		rec.beacon.nexus.contacts[ rec.ipPort ].tcpclient = nil
+		rec.broker.nexus.contacts[ rec.ipPort ].tcpclient = nil
 	end
 
 	rec.update = function()
@@ -82,17 +79,17 @@ newReconnector = function( beacon, ip, port )
 			rec.nextconnect = socket.gettime() + 1
 			-- pprint( "Try to reconnect to " .. rec.ipPort .. "....." )
 
-			_, rec.tcpclient = newTcpClient( rec.beacon, rec.ip, rec.port )
+			_, rec.tcpclient = newTcpClient( rec.broker, rec.ip, rec.port )
 			local success = ( type( rec.tcpclient ) == "table" )
 			if success then 
 				-- replace myself with a "real" tcpclient again
 				pprint( "Reconnect to " .. rec.ipPort .. " successful!" )
-				rec.beacon.nexus.contacts[ rec.ipPort ].tcpclient = rec.tcpclient
+				rec.broker.nexus.contacts[ rec.ipPort ].tcpclient = rec.tcpclient
 				pprint( "Replaced myself with my new TcpClient! Reconnector out ;o)" )
 
 				-- callback and inform about successfully reestablishing connection
-				local contact = rec.beacon.nexus.contacts[ rec.ipPort ]
-				rec.beacon:onPlayerConnect( contact )
+				local contact = rec.broker.nexus.contacts[ rec.ipPort ]
+				rec.broker:onPlayerConnect( contact )
 			end
 		end
 	end
@@ -101,119 +98,108 @@ newReconnector = function( beacon, ip, port )
 end
 
 
--- Beacon ----------------------------------------------
-local Beacon = {}
-Beacon.__index = Beacon
 
-function Beacon.create( nexus )
-	local this = {}
-	setmetatable( this, Beacon )
-
-	this.nexus 				= nexus
-	this.isSearching 		= false
+local function sendIntro( self, callback )
+	local me = self.nexus:me() 
+	if me == nil then 
+		me = Contact.create( 
+			self.nexus.cmdsrv.ip, 
+			self.nexus.cmdsrv.port, 
+			{}
+		)
+	end
 	
+	local player = { 
+		gamename 	= self.nexus.gamename,
+		gameversion = self.nexus.gameversion,
+		callsign	= self.callsign,
+		contact 	= me
+	}
+
+	player.contact:put( "callsign", self.callsign )
+	self.http:put( "beacon/intro", player, callback ) 
+end
+
+
+-- Broker ------------------
+local Broker = {}
+Broker.__index = Broker
+
+
+function Broker.create( nexus, host, login, pwd )
+	local this = {}
+	setmetatable( this, Broker )
+
+	this.nexus 			= nexus
+	this.isSearching 	= false
+	this.http 			= HttpClient.create( host, login, pwd )
+	
+	this.options = { 
+		binary = true,  
+		connection_timeout = .3
+	}
+
 	return this
 end
 
 
-function Beacon:search( callsign, onClientConnect, onClientDisconnect )
+function Broker:search( callsign, onClientConnect, onClientDisconnect )
 	self.callsign 			= callsign
 	self.onClientConnect	= onClientConnect
 	self.onClientDisconnect	= onClientDisconnect
+	self.isSearching 		= true
+	self.interval			= socket.gettime() + 2
 	
 	pprint( "I am " .. callsign )
-
-	-- search out there
-	ips = Localhost.getLocalPeerIPs()
-	-- ips = { "192.168.178.23", "192.168.178.24" }
-	self.ipIndex = 1
-	self.portIndex = 1
-	self.isSearching = true
-
-	self.options = { 
-		binary = true,  
-		connection_timeout = .005 
-	}
-
-	-- no logging desired
-	TcpClient.log = function() end
+	sendIntro( self, function( httpclient, id, resp )
+		pprint( "Response status " .. resp.status .. ". " .. resp.response )
+	end )
 end
 
 
-function Beacon:addContactIP( ip )
-	assert( ip, "You must provide an ip address to contact!" )
-	
-	if table.contains( ips, ip ) then return end
-	table.insert( ips, ip ) 
-
-	-- make sure that next connect attempt is the given ip
-	self.ipIndex = #ips
-end
-
-
-function Beacon:update( dt )
+function Broker:update( dt )
 	if self.isSearching then 
-		-- address next possible game peer out there
-		local ip = ips[ self.ipIndex ]
-		local port = PORTS[ self.portIndex ]
-		local ipPort = ( "%s:%s" ):format( ip, port )
-
-		-- My profile info to be sent to other clients
-		-- may change at any time, gets sent every few seconds
-		local cmd = Commands.newAnnounceProfile( 
-			self.callsign, 
-			self.nexus.gamename,
-			self.nexus.gameversion,
-			self.nexus.cmdsrv.ip,
-			self.nexus.cmdsrv.port 
-		) 
-		cmd:put( "team", "Alpha Niner" )
-
-		-- announce my own presence to every peer:
-		-- create a tcpclient only once, reuse it afterwards and keep sending
-		if self.nexus.contacts[ ipPort ] == nil then 
+		if socket.gettime() > self.interval then 
+			self.interval = socket.gettime() + 2
 			
-			-- create a connection to this contact
-			local ok, tcpclient = newTcpClient( self, ip, port )
-			local success = ( type( tcpclient ) == "table" )
-			if success then 
-				pprint( ( "Tcp contact discovered at %s:%s. May be a game client." ):format( ip, port ) ) 
+			sendIntro( self, function( httpclient, id, resp )
+				if resp.status > 299 then 
+					pprint( "Response status " .. resp.status .. ". " .. resp.response )
+	
+				else
+					local contacts = json.decode(  resp.response )
+					pprint( ( "Received %d contacts in our network" ):format( #contacts ) )
+					
+					for i, con in ipairs( contacts ) do 
+						-- profile comes back as string, must be deserialized extra
+						con.profile = json.decode( con.profile )
+						
+						local ipPort = ( "%s:%s" ):format( con.ip, con.port )
+						pprint( con.profile.callsign .. ": " .. ipPort )
+						if self.nexus.contacts[ ipPort ] == nil then 
 
-				-- remember all technical communication information for this contact
-				local contact = Contact.create( ip, port, tcpclient )
-				self.nexus.contacts[ ipPort ] = contact 
-				
-				-- Announce my own presence with game related profile information.
-				-- Upon receiving this command the remote host adds the profile
-				-- to its contact info: so far only my ip / port are known there.
-				-- My server(!) ip and port are distinctive, not incoming client port.
-				-- Beware: variables "ip" and "port" here are those of the remote host!
-				self.nexus:send( cmd, contact )
-				-- pprint( ( "Sending message: %s,  %s" ):format( cmd.type, cmd.attrs ) ) 
-			end
-		else
-			-- keep announcing profile for belated game peers
-			self.nexus:send( cmd, self.nexus.contacts[ ipPort ] )
-		end
+							local _, tcpclient = newTcpClient( self, con.ip, con.port )
+							local success = ( type( tcpclient ) == "table" )
+							if success then 
+								pprint( ( "Game client '%s' discovered at %s:%s." ):format( 
+									con.profile.callsign, 
+									con.ip, 
+									con.port ) 
+								) 
 
-		self.ipIndex = self.ipIndex + 1
-		if self.ipIndex > #ips then 
-			self.ipIndex = 1
-			if self.portIndex < #PORTS then 
-				self.portIndex = self.portIndex + 1
-			else
-				self.portIndex = 1
-			end
+								-- remember all technical communication information for this contact
+								local contact = Contact.create( con.ip, con.port, tcpclient )
+								contact.profile = con.profile
+								self.nexus.contacts[ ipPort ] = contact 
 
-			-- one search cycle completed. If no other clients found, increase timeout
-			-- in steps. Network may be slow, so increase and start next search cycle.
-			if table.length( self.nexus.contacts ) < 2 then 
-				self.options.connection_timeout = .001 + self.options.connection_timeout
-				if self.options.connection_timeout > .15 then 
-					self.options.connection_timeout = .15 
+								-- inform custom script
+								self:onPlayerConnect( contact )
+								
+							end
+						end
+					end
 				end
-				-- pprint( self.options.connection_timeout )
-			end
+			end )
 		end
 	end
 end
@@ -221,21 +207,22 @@ end
 
 -- Inform via callback that a player (i.e. tcp client with proper
 -- announcement) has been found
-function Beacon:onPlayerConnect( contact )
+function Broker:onPlayerConnect( contact )
 	if self.onClientConnect then self.onClientConnect( contact ) end
 end
 
 -- Inform via callback that a player (i.e. tcp client with proper
 -- announcement) has been disconnected and is no longer available
-function Beacon:onPlayerDisconnect( contact )
+function Broker:onPlayerDisconnect( contact )
 	if self.onClientDisconnect then self.onClientDisconnect( contact ) end
 end
 
 
-function Beacon:stop()
+function Broker:stop()
 	self.isSearching = false
 end
 
 
-return Beacon
+
+return Broker
 

@@ -49,6 +49,13 @@ callsigns[ 45 ] = "Trident"
 callsigns[ 46 ] = "Ikarus"
 callsigns[ 47 ] = "Temerity"
 callsigns[ 48 ] = "Serenity"
+callsigns[ 49 ] = "Vooliver"
+callsigns[ 50 ] = "Apollon"
+callsigns[ 51 ] = "Athena"
+callsigns[ 52 ] = "Ares"
+callsigns[ 53 ] = "Medusa"
+callsigns[ 54 ] = "Dauntless"
+
 
 function callsigns.get()
 	math.randomseed( socket.gettime() )

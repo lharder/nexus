@@ -16,7 +16,6 @@ gameserver:setSyncProvider( SyncProvider.create(
 	end )
 )
 
-
 return gameserver
 
 
