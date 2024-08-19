@@ -19,16 +19,27 @@ function init( self )
 	self.label = self.form:addLabel( "caption", 50, 500, 180, 40, nil, "Callsign" )
 
 	local callsign = callsigns.get()
-	self.txtfield = self.form:addTextField( "callsign", 200, 508, 400, 40, 
-		function() callsign = self.txtfield.value end, 
+	self.callsignfield = self.form:addTextField( "callsign", 200, 508, 400, 40, 
+		function() callsign = self.callsignfield.value end, 
 		callsign
 	)
 
-	self.ok = self.form:addButton( "Ok", 50, 450, 96, 48, function() 
+	self.teamlabel = self.form:addLabel( "teamlabel", 50, 450, 180, 40, nil, "Team (optional)" )
+
+	local teamname = ""
+	self.teamfield = self.form:addTextField( "teamname", 200, 458, 400, 40, 
+		function() teamname = self.teamfield.value end, 
+		teamname
+	)
+
+	self.ok = self.form:addButton( "Ok", 50, 400, 96, 48, function() 
 		pprint( "I am " .. callsign )
 		
 		local messages = {}
-		messages[ "match:/gui" ] = { callsign = callsign }
+		messages[ "match:/gui" ] = { 
+			callsign 	= callsign,
+			params		= { team = teamname }
+		}
 		
 		msg.post( "main:/screenmaster", "load", {
 			level = "match",

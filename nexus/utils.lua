@@ -19,7 +19,7 @@ end
 function table.deepcopy( t, keylist )
 	local clone = {}
 	for k, v in pairs( t ) do 
-		if( keylist == nil ) or contains( keylist, k ) then 
+		if( keylist == nil ) or table.contains( keylist, k ) then 
 			if type( v ) == "table" then 
 				clone[ k ] = table.deepcopy( v, keylist )
 			else

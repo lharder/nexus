@@ -21,9 +21,8 @@ local function newTcpClient( self, ip, port )
 		local contact = self.nexus.contacts[ ipPort ]
 		pprint( "No longer available: " .. contact.profile.callsign .. " (" .. ipPort .. ")" )
 
-		-- beacon is active: if peer disconnects, delete it
-		-- and keep searching over all ips (including this one
-		-- in case the peer restarts / reconnects.
+		-- beacon is active: if peer disconnects, 
+		-- delete it to allow for reconnect
 		if self.isSearching then 
 			-- inform interested scripts via callback
 			self:onPlayerDisconnect( contact )
@@ -57,9 +56,9 @@ end
 -- tries to reconnect on update() until new connection 
 -- can be established. Implements all methods of a regular
 -- TcpClient and replaces itself automatically when successful.
-newReconnector = function( broker, ip, port )
+newReconnector = function( beacon, ip, port )
 	local rec 		= {}
-	rec.broker 		= broker
+	rec.beacon 		= beacon
 	rec.ip 			= ip
 	rec.port 		= port
 	rec.ipPort 		= ( "%s:%s" ):format( ip, port )
@@ -71,7 +70,7 @@ newReconnector = function( broker, ip, port )
 
 	rec.destroy = function()
 		-- destroy myself
-		rec.broker.nexus.contacts[ rec.ipPort ].tcpclient = nil
+		rec.beacon.nexus.contacts[ rec.ipPort ].tcpclient = nil
 	end
 
 	rec.update = function()
@@ -79,17 +78,17 @@ newReconnector = function( broker, ip, port )
 			rec.nextconnect = socket.gettime() + 1
 			-- pprint( "Try to reconnect to " .. rec.ipPort .. "....." )
 
-			_, rec.tcpclient = newTcpClient( rec.broker, rec.ip, rec.port )
+			_, rec.tcpclient = newTcpClient( rec.beacon, rec.ip, rec.port )
 			local success = ( type( rec.tcpclient ) == "table" )
 			if success then 
 				-- replace myself with a "real" tcpclient again
 				pprint( "Reconnect to " .. rec.ipPort .. " successful!" )
-				rec.broker.nexus.contacts[ rec.ipPort ].tcpclient = rec.tcpclient
+				rec.beacon.nexus.contacts[ rec.ipPort ].tcpclient = rec.tcpclient
 				pprint( "Replaced myself with my new TcpClient! Reconnector out ;o)" )
 
 				-- callback and inform about successfully reestablishing connection
-				local contact = rec.broker.nexus.contacts[ rec.ipPort ]
-				rec.broker:onPlayerConnect( contact )
+				local contact = rec.beacon.nexus.contacts[ rec.ipPort ]
+				rec.beacon:onPlayerConnect( contact )
 			end
 		end
 	end
@@ -98,37 +97,52 @@ newReconnector = function( broker, ip, port )
 end
 
 
-
+-- Send my player data to a remote server and receive all my peers' data.
+-- That way, a problematic p2p search in the local network is not needed.
+-- params can contain optional custom name/value pairs with game data.
+-- matchkey is an optional arbitrary name to be entered by all players
+-- who want to play a match together. It overrides the default behavior: 
+-- beacon server will return all players from the same (router) ip address.
+-- In large networks, however, that may not work - then use a matchkey.
 local function sendIntro( self, callback )
-	local me = self.nexus:me() 
-	if me == nil then 
-		me = Contact.create( 
-			self.nexus.cmdsrv.ip, 
-			self.nexus.cmdsrv.port, 
-			{}
-		)
+	local contact = self.nexus:me()
+	
+	if contact == nil then 
+		-- create "me" contact
+		local ip = self.nexus.cmdsrv.ip
+		local port = self.nexus.cmdsrv.port
+		local mocktcpclient = {}		
+		contact = Contact.create( ip, port, mocktcpclient )
+
+		-- add required param
+		contact:put( "callsign", self.callsign )
+
+		-- add optional custom parameters 
+		if self.params then 
+			for k, v in pairs( self.params ) do contact:put( k, v ) end
+		end
 	end
 	
 	local player = { 
 		gamename 	= self.nexus.gamename,
 		gameversion = self.nexus.gameversion,
+		matchkey	= self.matchkey,
 		callsign	= self.callsign,
-		contact 	= me
+		contact 	= contact
 	}
 
-	player.contact:put( "callsign", self.callsign )
-	self.http:put( "beacon/intro", player, callback ) 
+	self.http:put( "beacon/player", player, callback ) 
 end
 
 
--- Broker ------------------
-local Broker = {}
-Broker.__index = Broker
+-- Beacon ------------------
+local Beacon = {}
+Beacon.__index = Beacon
 
 
-function Broker.create( nexus, host, login, pwd )
+function Beacon.create( nexus, host, login, pwd )
 	local this = {}
-	setmetatable( this, Broker )
+	setmetatable( this, Beacon )
 
 	this.nexus 			= nexus
 	this.isSearching 	= false
@@ -136,17 +150,19 @@ function Broker.create( nexus, host, login, pwd )
 	
 	this.options = { 
 		binary = true,  
-		connection_timeout = .3
+		connection_timeout = 1.0
 	}
 
 	return this
 end
 
 
-function Broker:search( callsign, onClientConnect, onClientDisconnect )
+function Beacon:search( callsign, params, onClientConnect, onClientDisconnect, matchkey )
 	self.callsign 			= callsign
+	self.params 			= params
 	self.onClientConnect	= onClientConnect
 	self.onClientDisconnect	= onClientDisconnect
+	self.matchkey 			= matchkey
 	self.isSearching 		= true
 	self.interval			= socket.gettime() + 2
 	
@@ -157,10 +173,10 @@ function Broker:search( callsign, onClientConnect, onClientDisconnect )
 end
 
 
-function Broker:update( dt )
+function Beacon:update( dt )
 	if self.isSearching then 
 		if socket.gettime() > self.interval then 
-			self.interval = socket.gettime() + 2
+			self.interval = socket.gettime() + 3
 			
 			sendIntro( self, function( httpclient, id, resp )
 				if resp.status > 299 then 
@@ -176,8 +192,8 @@ function Broker:update( dt )
 						
 						local ipPort = ( "%s:%s" ):format( con.ip, con.port )
 						pprint( con.profile.callsign .. ": " .. ipPort )
+						
 						if self.nexus.contacts[ ipPort ] == nil then 
-
 							local _, tcpclient = newTcpClient( self, con.ip, con.port )
 							local success = ( type( tcpclient ) == "table" )
 							if success then 
@@ -193,8 +209,7 @@ function Broker:update( dt )
 								self.nexus.contacts[ ipPort ] = contact 
 
 								-- inform custom script
-								self:onPlayerConnect( contact )
-								
+								self:onPlayerConnect( contact )			
 							end
 						end
 					end
@@ -207,22 +222,22 @@ end
 
 -- Inform via callback that a player (i.e. tcp client with proper
 -- announcement) has been found
-function Broker:onPlayerConnect( contact )
+function Beacon:onPlayerConnect( contact )
 	if self.onClientConnect then self.onClientConnect( contact ) end
 end
 
 -- Inform via callback that a player (i.e. tcp client with proper
 -- announcement) has been disconnected and is no longer available
-function Broker:onPlayerDisconnect( contact )
+function Beacon:onPlayerDisconnect( contact )
 	if self.onClientDisconnect then self.onClientDisconnect( contact ) end
 end
 
 
-function Broker:stop()
+function Beacon:stop()
 	self.isSearching = false
 end
 
 
 
-return Broker
+return Beacon
 

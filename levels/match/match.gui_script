@@ -63,6 +63,46 @@ local function getCheckedProfiles( self )
 end
 
 
+local function startsearch( self, callsign, params, matchkey )
+	nexus:startsearch( callsign, params,
+		-- on player connected
+		function( contact ) 
+			-- ignore new discoveries if in a game already
+			pprint( "Hey, found a gamer: " .. contact.profile.callsign )
+			if nexus:isPlaying() then 
+				-- should check if pause is active, etc..... 
+				-- here is demo only ;o)
+				nexus:triggerEvent( "unpause", { 
+					causedby = contact.profile 
+				})
+			else
+				display( self, nexus:filter() )
+			end
+		end,
+
+		-- on player disconnected
+		function( contact )  
+			pprint( "Lost a gamer: " .. contact.profile.callsign )
+			if nexus:isPlaying() then 
+				-- while playing
+				pprint( "Must pause game! Trigger global event!" )
+				nexus:triggerEvent( "pause", { 
+					causedby = contact.profile 
+				})
+			else
+				-- while searching and proposing
+				clearCheckboxes( self.form )
+				local contacts = nexus:filter()
+				contacts[ contact:id() ] = nil
+				display( self, contacts )
+			end
+		end,
+					
+	matchkey )
+end
+
+
+
 -- methods -----------------------
 function init( self )
 	msg.post( ".", "acquire_input_focus" )
@@ -82,6 +122,22 @@ function init( self )
 			self.fields[ id ] = nil
 		end
 	end
+
+
+	self.form:addLabel( "hint", 50, 380, 800, 60, function() 
+		if self.matchkeyfield == nil then 
+			self.matchkeyfield = self.form:addTextField( "matchkey", 50, 350, 330, 36, nil )
+			self.matchkeyfield:setText( "choose a name" )
+
+			self.matchkeyOk = self.form:addButton( "matchkeyOk", 390, 350, 120, 36, function() 
+				local profile = nexus:me().profile
+				startsearch( self, profile.callsign, profile, self.matchkeyfield.value )
+				gui.hide_keyboard()
+			end, "Join match" )
+		end
+		gui.show_keyboard( gui.KEYBOARD_TYPE_DEFAULT, false )
+	end, "> Looking for friends not showing up here?" )
+	
 end
 
 
@@ -90,51 +146,13 @@ function on_message( self, message_id, message, sender )
 		-- receive the player's callsign from the previous screen
 		-- use it to start broadcasting and searching for peers
 		if message ~= nil then 
-			nexus:startsearch( message.callsign, 
-				-- on player connected
-				function( contact ) 
-					-- ignore new discoveries if in a game already
-					pprint( "Hey, found a gamer: " .. contact.profile.callsign )
-					if nexus:isPlaying() then 
-						-- should check if pause is active, etc..... 
-						-- here is demo only ;o)
-						nexus:triggerEvent( "unpause", { 
-							causedby = contact.profile 
-						})
-					else
-						display( self, nexus:filter() )
-					end
-				end,
-				
-				-- on player disconnected
-				function( contact )  
-					pprint( "Lost a gamer: " .. contact.profile.callsign )
-					if nexus:isPlaying() then 
-						-- while playing
-						pprint( "Must pause game! Trigger global event!" )
-						nexus:triggerEvent( "pause", { 
-							causedby = contact.profile 
-						})
-						
-					else
-						-- while searching and proposing
-						clearCheckboxes( self.form )
-						local contacts = nexus:filter()
-						contacts[ contact:id() ] = nil
-						display( self, contacts )
-					end
-				end			
-			)
-
+			startsearch( self, message.callsign, message.params )
+			
 			self.form:addLabel( "callsign", 50, 550, 500, 40, nil, message.callsign .. ", select your co-players:" )
 			self.form:addButton( "play", 750, 550, 200, 48, function() 
 				pprint( "Clicked start game button...!" ) 
-				local profiles = getCheckedProfiles( self )
 				
-				pprint( "-- Profiles selected -----------" )
-				-- pprint( profiles )
-				-- pprint( "--------------------------------" )
-
+				local profiles = getCheckedProfiles( self )
 				nexus:startpropose( profiles, function() 
 					pprint( "Going to load playground, stop search, stop proposal." )
 					

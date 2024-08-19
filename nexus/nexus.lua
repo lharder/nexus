@@ -56,18 +56,20 @@ function Nexus.create( gamename, gameversion )
 
 		function( ip, port, client )
 			pprint( ( "Tcp client %s:%s disconnected!" ):format( ip, port ) )
+			pprint("Why?")
 		end,
 
 		PORTS[ 2 ] 
 	)
 
 	this.cmdsrv.ip = Localhost.getIP()
+	
 
 	-- Request handlers logic -----------------------
 	-------------------------------------------------
 	-- new incoming proposal --------------------------
 	-- When one player has setup the combination of players for a game,
-	-- he starts broadcasting that setup.l So do all others. When all 
+	-- he starts broadcasting that setup. So do all others. When all 
 	-- members of a proposal agree on exactly that setup, a match is found.
 	this.cmdsrv:addCmdHandler( Commands.PROPOSE, function( cmdattrs ) 
 		-- local ipPort = ( "%s:%s" ):format( this.cmdsrv.ip, this.cmdsrv.port )
@@ -89,7 +91,6 @@ function Nexus.create( gamename, gameversion )
 		if game and game.isGamemaster == true then 
 			if game.profiles[ cmdattrs.id ] ~= nil then 
 				game.profiles[ cmdattrs.id ].isReadyToPlay = true
-				-- pprint( game.profiles[ cmdattrs.id ] )
 			end
 		
 			-- have all other players sent their ready report to me?
@@ -199,8 +200,8 @@ end
 
 
 -- Beacon search ---------------
-function Nexus:startsearch( callsign, onClientConnect, onClientDisconnect )
-	self.beacon:search( callsign, onClientConnect, onClientDisconnect )
+function Nexus:startsearch( callsign, params, onClientConnect, onClientDisconnect, matchkey )
+	self.beacon:search( callsign, params, onClientConnect, onClientDisconnect, matchkey )
 end
 
 function Nexus:stopsearch( callsign )
@@ -342,6 +343,7 @@ end
 
 
 -- my own contact object
+-- only usable AFTER negotiating a match
 function Nexus:me()
 	return self.contacts[ ( "%s:%s" ):format( self.cmdsrv.ip, self.cmdsrv.port ) ]
 end
