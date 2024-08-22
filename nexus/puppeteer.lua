@@ -166,8 +166,12 @@ function Puppeteer:update( dt )
 			for ip, worker in pairs( self.workers ) do 
 				if worker.syncprovider then 
 					for ipPort, contact in pairs( self.coplayers ) do
-						local cmd = Commands.newUpdate( worker.gid, worker:getParams() ) 
-						self.nexus:broadcast( cmd, self.coplayers )
+						-- only send data if there are new params (not nil)
+						self.params = worker:getParams()
+						if self.params then  
+							local cmd = Commands.newUpdate( worker.gid, self.params ) 
+							self.nexus:broadcast( cmd, self.coplayers )
+						end
 					end
 				end
 			end
