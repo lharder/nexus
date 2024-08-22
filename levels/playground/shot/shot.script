@@ -4,6 +4,7 @@ local nexus = require( "main.gameserver" )
 go.property( "lethality", 10 )
 go.property( "creatorId", msg.url() )
 
+local MSG_COLLISION = hash( "collision_response" )
 
 
 local function explode( self )
@@ -44,10 +45,10 @@ end
 
 
 function on_message( self, message_id, message, sender )
-	if message_id == hash( "collision_response" ) and 
-	message.other_id ~= self.creatorId and 
-	not self.exploding then
-		explode( self )
+	if( message_id == MSG_COLLISION ) and 
+	  ( message.other_id ~= self.creatorId ) and 
+	  ( not self.exploding ) then 
+		explode( self ) 
 	end
 end
 
