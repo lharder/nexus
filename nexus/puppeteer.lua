@@ -104,6 +104,7 @@ end
 -- return the global gid to a local id
 function Puppeteer:getGid( id )
 	local entity = self.workers[ id ] or self.drones[ id ]
+	if entity == nil then return end
 	return entity.gid
 end
 
