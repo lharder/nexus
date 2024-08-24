@@ -1,7 +1,7 @@
 local factorycreate = require( "factorycreate.factorycreate" )
 local Commands = require( "nexus.commands" )
 
-local SEC_PER_SYNC = 0.1
+local SEC_PER_SYNC = 0.125
 
 
 -- Allows for different syncproviders for gameobject types.

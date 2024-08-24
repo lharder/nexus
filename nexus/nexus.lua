@@ -56,7 +56,6 @@ function Nexus.create( gamename, gameversion )
 
 		function( ip, port, client )
 			pprint( ( "Tcp client %s:%s disconnected!" ):format( ip, port ) )
-			pprint("Why?")
 		end,
 
 		PORTS[ 2 ] 
