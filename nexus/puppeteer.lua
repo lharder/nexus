@@ -54,7 +54,7 @@ function Drone.create( cmdattrs )
 	this.params = {}
 
 	this:setSyncProvider( cmdattrs.factName )
-	
+
 	return this
 end
 
@@ -72,7 +72,7 @@ function Worker.create( gid, factName, pos, rot, attrs, scale )
 	this.params = {}
 
 	this:setSyncProvider( factName )
-	
+
 	return this
 end
 
@@ -97,20 +97,21 @@ function Puppeteer.create( nexus )
 	this.coplayers 		= {}					-- all player contacts in this match except me
 	this.players		= {}					-- all player contacts in this match
 	this.isPlaying 		= false
-	
+
 	return this
 end
 
 -- return the global gid to a local id
 function Puppeteer:getGid( id )
 	local entity = self.workers[ id ] or self.drones[ id ]
-	if entity == nil then return end
+	if entity == nil then return nil end
 	return entity.gid
 end
 
 
 -- return the host local id for a global gid
 function Puppeteer:getId( gid )
+	if gid == nil then return nil end
 	return self.workerIds[ gid ] or self.droneIds[ gid ]
 end
 
@@ -123,22 +124,22 @@ function Puppeteer:newEntity( gid, workerFactName, droneFactName, pos, rot, attr
 	local worker = Worker.create( gid, workerFactName, pos, rot, attrs, scale )
 	self.workers[ worker.id ] = worker
 	self.workerIds[ gid ] = worker.id
-	
+
 	return worker.id
 end
 
 
 function Puppeteer:delete( gid, doBroadcast )
 	assert( gid, "Object to delete must have a gid!" )
-	
+
 	local id = self:getId( gid )
-	if id == nil then pprint( "Delete id is nil: " .. gid ) return end
+	if id == nil then go.delete() return end
 
 	if doBroadcast == true then 
 		local cmd = Commands.newDelete( gid, go.get_position( id ) )
 		self.nexus:broadcast( cmd )
 	end
-	
+
 	if self.workers[ id ] 		then self.workers[ id ] = nil 		end
 	if self.workerIds[ gid ] 	then self.workerIds[ gid ] = nil 	end
 	if self.drones[ id ] 		then self.drones[ id ] = nil 		end
@@ -163,7 +164,8 @@ function Puppeteer:update( dt )
 	if self.isPlaying then 
 		if socket.gettime() >= self.nextSyncTime then 
 			self.nextSyncTime = socket.gettime() + SEC_PER_SYNC
-			
+
+			-- pprint( table.length( self.workers ) ..  " / " .. table.length( self.drones ) )
 			for ip, worker in pairs( self.workers ) do 
 				if worker.syncprovider then 
 					for ipPort, contact in pairs( self.coplayers ) do
@@ -176,7 +178,7 @@ function Puppeteer:update( dt )
 					end
 				end
 			end
-			
+
 		end
 	end
 end
@@ -204,10 +206,10 @@ function Puppeteer:start()
 		contact.proposal = nil
 		if contact.game and contact.game.proposal then contact.game.proposal = nil end
 	end		
-	
+
 	self.coplayers = self.nexus:coplayers()
 	self.players = self.nexus:players()
-	
+
 	self.isPlaying = true
 end
 
