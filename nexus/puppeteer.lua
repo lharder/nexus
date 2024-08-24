@@ -136,7 +136,10 @@ function Puppeteer:delete( gid, doBroadcast )
 	if id == nil then go.delete() return end
 
 	if doBroadcast == true then 
-		local cmd = Commands.newDelete( gid, go.get_position( id ) )
+		local pos = nil			-- transmit final position
+		if go.exists( id ) then pos = go.get_position( id ) end
+
+		local cmd = Commands.newDelete( gid, pos )
 		self.nexus:broadcast( cmd )
 	end
 
