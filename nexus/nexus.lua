@@ -153,9 +153,17 @@ function Nexus.create( gamename, gameversion )
 	-- entities. Every player sends his workers' data at a fixed interval 
 	-- to all other hosts and receives their data in turn to update 
 	-- its own drones mirroring their behavior.
+	--[[
 	this.cmdsrv:addCmdHandler( Commands.UPDATE, function( cmdattrs ) 
 		local id = this.puppeteer.droneIds[ cmdattrs.gid ]
 		if id then this.puppeteer.drones[ id ]:setParams( cmdattrs ) end
+	end )
+	--]]
+	this.cmdsrv:addCmdHandler( Commands.UPDATE, function( cmdattrs ) 
+		for i, update in ipairs( cmdattrs ) do
+			local id = this.puppeteer.droneIds[ update.gid ]
+			if id then this.puppeteer.drones[ id ]:setParams( update.params ) end
+		end
 	end )
 	
 	-- Send a custom message from a remote game host to an entity that is 

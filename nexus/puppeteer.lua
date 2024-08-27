@@ -169,18 +169,23 @@ function Puppeteer:update( dt )
 			self.nextSyncTime = socket.gettime() + SEC_PER_SYNC
 
 			-- pprint( table.length( self.workers ) ..  " / " .. table.length( self.drones ) )
+			local updates = {}
 			for ip, worker in pairs( self.workers ) do 
 				if worker.syncprovider then 
 					for ipPort, contact in pairs( self.coplayers ) do
 						-- only send data if there are new params (not nil)
 						self.params = worker:getParams()
 						if self.params then  
-							local cmd = Commands.newUpdate( worker.gid, self.params ) 
-							self.nexus:broadcast( cmd, self.coplayers )
+							table.insert( updates, { 
+								gid 	= worker.gid, 
+								params 	= self.params 
+							})
 						end
 					end
 				end
 			end
+			local cmd = Commands.newUpdate( updates ) 
+			self.nexus:broadcast( cmd, self.coplayers )
 
 		end
 	end

@@ -70,10 +70,10 @@ end
 
 
 -- Update -----------------------------
-function Commands.newUpdate( gid, params ) 
+-- takes a list of { gid = ..., params = { key = value, ... } }
+function Commands.newUpdate( paramslist ) 
 	local this = Command.create( Commands.UPDATE )
-	this.attrs = params or {} 
-	this:put( "gid", gid )
+	this.attrs = paramslist or {} 
 
 	return this
 end
