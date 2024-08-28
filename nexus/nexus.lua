@@ -9,8 +9,6 @@ local Puppeteer = require( "nexus.puppeteer" )
 local SyncProvider = require( "nexus.syncprovider" )
 
 
-local MAX_INT_32 = 2^32
-
 -- Nexus ----------------------------------------------
 local Nexus = {}
 Nexus.__index = Nexus
@@ -26,6 +24,7 @@ function Nexus.create( gamename, gameversion )
 	this.gameversion	= gameversion
 	this.contacts		= {}
 	this.events			= {}
+	this.sequence		= 0
 	
 	this.beacon 		= Beacon.create( this, "http://nexus.spaceboom.de/cgi-bin/v1/", "nexus", "forelock-society-despise-bleach" )
 	this.matcher		= Matcher.create( this )
@@ -153,12 +152,6 @@ function Nexus.create( gamename, gameversion )
 	-- entities. Every player sends his workers' data at a fixed interval 
 	-- to all other hosts and receives their data in turn to update 
 	-- its own drones mirroring their behavior.
-	--[[
-	this.cmdsrv:addCmdHandler( Commands.UPDATE, function( cmdattrs ) 
-		local id = this.puppeteer.droneIds[ cmdattrs.gid ]
-		if id then this.puppeteer.drones[ id ]:setParams( cmdattrs ) end
-	end )
-	--]]
 	this.cmdsrv:addCmdHandler( Commands.UPDATE, function( cmdattrs ) 
 		for i, update in ipairs( cmdattrs ) do
 			local id = this.puppeteer.droneIds[ update.gid ]
@@ -358,7 +351,10 @@ end
 
 -- make unique global id for puppeteer gameobjects
 function Nexus:makeGid( key )
-	if key == nil then key = "" .. socket.gettime() .. math.random( 0, MAX_INT_32 ) end
+	if key == nil then 
+		key = "" .. self.sequence .. "-" .. math.random( 0, 999999 ) 
+		self.sequence = self.sequence + .01
+	end
 	return self:me().profile.callsign .. "-" .. key 
 end
 
