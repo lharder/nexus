@@ -135,7 +135,7 @@ function Puppeteer:delete( gid, doBroadcast )
 
 	local id = self:getId( gid )
 	if id == nil then 
-		pprint( "No local object for " .. gid )
+		-- pprint( "No local object for " .. gid )
 		return 
 	end
 
