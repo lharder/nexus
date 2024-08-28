@@ -1,6 +1,6 @@
 local PORTS = require( "nexus.ports" )
 local Localhost = require( "nexus.localhost" )
-local Events = require( "nexus.events" )
+local Events = require( "events.events" )
 local CmdServer = require( "nexus.cmdserver" )
 local Commands = require( "nexus.commands" )
 local Beacon = require( "nexus.beacon" )

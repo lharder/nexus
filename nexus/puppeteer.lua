@@ -125,7 +125,7 @@ function Puppeteer:newEntity( gid, workerFactName, droneFactName, pos, rot, attr
 	self.workers[ worker.id ] = worker
 	self.workerIds[ gid ] = worker.id
 
-	-- pprint( "Created " .. worker.id .. " (" .. gid .. ")" )
+	pprint( "Created " .. worker.id .. " (" .. gid .. ")" )
 	return worker.id
 end
 
@@ -153,7 +153,7 @@ function Puppeteer:delete( gid, doBroadcast )
 	if self.droneIds[ gid ] 	then self.droneIds[ gid ] = nil 	end
 
 	go.delete( id )
-	-- pprint( "Deleted " .. id .. " (" .. gid .. ")" )
+	pprint( "Deleted " .. id .. " (" .. gid .. ")" )
 end
 
 

@@ -1,4 +1,4 @@
-local Events = require( "nexus.events" )
+local Factoryevent = require( "nexus.factoryevent" )
 local nexus = require( "main.gameserver" )
 
 local MSG_TOUCH = hash( "touch" )
@@ -43,7 +43,7 @@ end
 
 -- methods -----------------------
 function init( self, dt )
-	Events.FACTORY_CREATED:trigger( self, function( self, attrs ) 
+	Factoryevent:trigger( self, function( self, attrs ) 
 		label.set_text( "#caption", attrs.callsign )
 
 		self.gid 		= attrs.gid

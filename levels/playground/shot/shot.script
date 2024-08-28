@@ -1,4 +1,4 @@
-local Events = require( "nexus.events" )
+local Factoryevent = require( "nexus.factoryevent" )
 local nexus = require( "main.gameserver" )
 
 go.property( "lethality", 10 )
@@ -19,7 +19,7 @@ end
 
 -- method ------------------------
 function init( self )
-	Events.FACTORY_CREATED:trigger( self, function( self, attrs ) 
+	Factoryevent:trigger( self, function( self, attrs ) 
 		self.gid 		= attrs.gid
 		self.dir 		= attrs.dir
 		self.speed		= attrs.weapon.speed

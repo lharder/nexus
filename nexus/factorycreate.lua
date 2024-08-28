@@ -1,16 +1,14 @@
-local Events = require( "nexus.events" )
-
-Events.FACTORY_CREATED = Events.create( "factorycreated" )
+local Factoryevent = require( "nexus.factoryevent" )
 
 
 local function factorycreate( facturl, pos, rot, attrs, scale )
-	local evHandler = Events.FACTORY_CREATED:subscribe( function( self, fnInit ) 
+	local evHandler = Factoryevent:subscribe( function( self, fnInit ) 
 		fnInit( self, attrs )
 	end )
 
 	local id = factory.create( facturl, pos, rot, nil, scale )
 
-	Events.FACTORY_CREATED:unsubscribe( evHandler )
+	Factoryevent:unsubscribe( evHandler )
 
 	return id
 end
