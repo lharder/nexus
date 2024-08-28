@@ -1,4 +1,4 @@
-local factorycreate = require( "factorycreate.factorycreate" )
+local factorycreate = require( "nexus.factorycreate" )
 local Commands = require( "nexus.commands" )
 
 local SEC_PER_SYNC = 0.125
@@ -125,6 +125,7 @@ function Puppeteer:newEntity( gid, workerFactName, droneFactName, pos, rot, attr
 	self.workers[ worker.id ] = worker
 	self.workerIds[ gid ] = worker.id
 
+	-- pprint( "Created " .. worker.id .. " (" .. gid .. ")" )
 	return worker.id
 end
 
@@ -133,7 +134,10 @@ function Puppeteer:delete( gid, doBroadcast )
 	assert( gid, "Object to delete must have a gid!" )
 
 	local id = self:getId( gid )
-	if id == nil then go.delete() return end
+	if id == nil then 
+		pprint( "No local object for " .. gid )
+		return 
+	end
 
 	if doBroadcast == true then 
 		local pos = nil			-- transmit final position
@@ -149,6 +153,7 @@ function Puppeteer:delete( gid, doBroadcast )
 	if self.droneIds[ gid ] 	then self.droneIds[ gid ] = nil 	end
 
 	go.delete( id )
+	-- pprint( "Deleted " .. id .. " (" .. gid .. ")" )
 end
 
 

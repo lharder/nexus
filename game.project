@@ -3,9 +3,6 @@ title = nexus
 dependencies#0 = https://github.com/lharder/defgui/archive/master.zip
 dependencies#1 = https://github.com/britzl/defold-input/archive/master.zip
 dependencies#2 = https://github.com/britzl/defold-luasocket/archive/master.zip
-dependencies#3 = https://github.com/DanEngelbrecht/LuaScriptInstance/archive/refs/heads/master.zip
-dependencies#4 = https://github.com/lharder/events/archive/master.zip
-dependencies#5 = https://github.com/lharder/factorycreate/archive/master.zip
 
 [bootstrap]
 main_collection = /main/main.collectionc

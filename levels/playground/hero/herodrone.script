@@ -1,4 +1,4 @@
-local Events = require( "events.events" )
+local Events = require( "nexus.events" )
 local nexus = require( "main.gameserver" )
 
 local MSG_COLLISION = hash( "collision_response" ) 
