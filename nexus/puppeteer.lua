@@ -1,4 +1,4 @@
-local factorycreate = require( "nexus.factorycreate" )
+local factorycreate = require( "factorycreate.factorycreate" )
 local Commands = require( "nexus.commands" )
 
 local SEC_PER_SYNC = 0.125
